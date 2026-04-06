@@ -1545,7 +1545,7 @@ Net, profesyonel, uygulanabilir ol.`;
         'Content-Type':'application/json',
         'Authorization':'Bearer '+grokKey
       },
-      body:JSON.stringify({model:'grok-3-fast',max_tokens:1600,messages:[{role:'user',content:prompt}]})
+      body:JSON.stringify({model:'grok-2',max_tokens:1600,messages:[{role:'user',content:prompt}]})
     });
     if(!res.ok){ const err=await res.json().catch(()=>({})); throw new Error(err.error?.message||'Grok Hatası '+res.status); }
     const data=await res.json();

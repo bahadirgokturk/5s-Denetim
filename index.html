@@ -1,0 +1,1953 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>5S Denetim Sistemi — Saueressig Türkiye</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#f0f2f5; --surface:#fff; --surface2:#e8ecf0; --border:#d8dde4; --border2:#c0c8d2;
+  --text:#1a1a2e; --text2:#4a5568; --text3:#8a96a8;
+  --accent:#0d2240; --accent2:#163354; --accent-light:#e6edf5;
+  --brand:#E63312; --brand-dark:#c42a0e; --brand-light:#fce8e6;
+  --red:#E63312; --red-light:#fce8e6; --amber:#d4820a; --amber-light:#fff3e0;
+  --green:#2e7d4f; --green-light:#e6f4ec; --blue:#0d2240; --blue-light:#e6edf5;
+  --shadow:0 1px 3px rgba(0,0,0,0.08); --shadow-md:0 4px 12px rgba(0,0,0,0.12);
+  --r:10px; --rs:6px; --font:'DM Sans',sans-serif; --mono:'Space Mono',monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:100vh;}
+.app{display:flex;min-height:100vh;}
+/* SIDEBAR */
+.sidebar{width:250px;min-height:100vh;background:var(--accent);position:fixed;left:0;top:0;bottom:0;display:flex;flex-direction:column;overflow-y:auto;z-index:100;}
+.main{margin-left:250px;flex:1;}
+.sb-logo{padding:22px 20px 14px;border-bottom:1px solid rgba(255,255,255,0.1);}
+.sb-bar{width:30px;height:3px;background:var(--brand);border-radius:2px;margin-bottom:9px;}
+.sb-company{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,0.4);margin-bottom:3px;}
+.sb-title{font-size:15px;font-weight:600;color:#fff;}
+.sb-sub{font-size:11px;color:rgba(255,255,255,0.45);margin-top:1px;}
+.sb-nav{padding:10px 0;flex:1;}
+.sb-section{font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:rgba(255,255,255,0.28);padding:8px 18px 3px;font-weight:500;}
+.nav-btn{display:flex;align-items:center;gap:9px;padding:9px 18px;cursor:pointer;color:rgba(255,255,255,0.55);font-size:13px;font-weight:400;transition:all .15s;border:none;background:none;width:100%;text-align:left;}
+.nav-btn:hover{background:rgba(255,255,255,0.07);color:rgba(255,255,255,0.9);}
+.nav-btn.active{background:rgba(255,255,255,0.12);color:#fff;font-weight:500;}
+.nav-icon{width:17px;text-align:center;font-size:13px;}
+.nav-badge{margin-left:auto;background:rgba(255,255,255,0.18);color:rgba(255,255,255,0.9);font-size:10px;padding:1px 7px;border-radius:20px;font-family:var(--mono);}
+.sb-foot{padding:14px 18px;border-top:1px solid rgba(255,255,255,0.1);font-size:10px;color:rgba(255,255,255,0.28);}
+/* TOPBAR */
+.topbar{background:var(--surface);border-bottom:1px solid var(--border);padding:0 26px;height:58px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:90;}
+.topbar-title{font-size:15px;font-weight:600;}
+.topbar-right{display:flex;align-items:center;gap:10px;}
+.topbar-date{font-size:11px;color:var(--text3);font-family:var(--mono);}
+/* BUTTONS */
+.btn{padding:8px 15px;border-radius:var(--rs);font-size:13px;font-weight:500;cursor:pointer;font-family:var(--font);border:1px solid transparent;transition:all .15s;display:inline-flex;align-items:center;gap:5px;}
+.btn-primary{background:var(--brand);color:#fff;border-color:var(--brand);}
+.btn-primary:hover{background:var(--brand-dark);}
+.btn-outline{background:transparent;color:var(--text2);border-color:var(--border2);}
+.btn-outline:hover{background:var(--surface2);}
+.btn-sm{padding:5px 11px;font-size:12px;}
+.btn-accent{background:var(--accent);color:#fff;border-color:var(--accent);}
+.btn-accent:hover{background:var(--accent2);}
+/* PAGES */
+.page{display:none;padding:26px;}
+.page.active{display:block;animation:fadeIn .2s ease;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
+/* CARDS */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:18px;box-shadow:var(--shadow);}
+/* METRICS */
+.metrics-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:22px;}
+.metric{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:14px 16px;}
+.metric-label{font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.8px;font-weight:500;margin-bottom:5px;}
+.metric-val{font-size:24px;font-weight:600;font-family:var(--mono);line-height:1;}
+.metric-sub{font-size:11px;color:var(--text3);margin-top:3px;}
+.metric.green{border-left:3px solid var(--green);}
+.metric.amber{border-left:3px solid var(--amber);}
+.metric.red{border-left:3px solid var(--red);}
+.metric.blue{border-left:3px solid var(--blue);}
+/* SECTION HEADER */
+.sec-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
+.sec-title{font-size:15px;font-weight:600;}
+/* TABLES */
+.tbl-wrap{overflow-x:auto;border-radius:var(--r);border:1px solid var(--border);}
+table{width:100%;border-collapse:collapse;font-size:13px;}
+th{background:var(--surface2);padding:9px 13px;text-align:left;font-size:10px;text-transform:uppercase;letter-spacing:.8px;font-weight:600;color:var(--text2);border-bottom:1px solid var(--border);white-space:nowrap;}
+td{padding:10px 13px;border-bottom:1px solid var(--border);vertical-align:middle;}
+tr:last-child td{border-bottom:none;}
+tr:hover td{background:var(--surface2);}
+/* BADGES */
+.badge{display:inline-flex;align-items:center;padding:2px 9px;border-radius:20px;font-size:11px;font-weight:500;white-space:nowrap;}
+.badge-green{background:var(--green-light);color:var(--green);}
+.badge-amber{background:var(--amber-light);color:var(--amber);}
+.badge-red{background:var(--red-light);color:var(--red);}
+.badge-blue{background:var(--blue-light);color:var(--blue);}
+.badge-gray{background:var(--surface2);color:var(--text2);}
+/* SCORE BAR */
+.sbar-wrap{display:flex;align-items:center;gap:7px;}
+.sbar{flex:1;height:6px;background:var(--surface2);border-radius:99px;overflow:hidden;min-width:70px;}
+.sbar-fill{height:100%;border-radius:99px;transition:width .4s;}
+.sbar-fill.hi{background:var(--green);}
+.sbar-fill.md{background:var(--amber);}
+.sbar-fill.lo{background:var(--red);}
+.sbar-val{font-size:12px;font-weight:600;font-family:var(--mono);min-width:30px;text-align:right;}
+/* AUDIT FORM */
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.fg{display:flex;flex-direction:column;gap:4px;}
+.fg.full{grid-column:1/-1;}
+label{font-size:11px;font-weight:500;color:var(--text2);}
+input,select,textarea{padding:8px 11px;border:1px solid var(--border);border-radius:var(--rs);font-family:var(--font);font-size:13px;color:var(--text);background:var(--surface);outline:none;transition:border-color .15s;}
+input:focus,select:focus,textarea:focus{border-color:var(--brand);box-shadow:0 0 0 3px rgba(230,51,18,.1);}
+textarea{resize:vertical;min-height:70px;}
+/* PILLAR SECTIONS */
+.pillar-sec{border:1px solid var(--border);border-radius:var(--r);overflow:hidden;margin-bottom:13px;}
+.pillar-hdr{padding:13px 16px;display:flex;align-items:center;gap:11px;cursor:pointer;user-select:none;transition:background .15s;background:var(--surface);}
+.pillar-hdr:hover{background:var(--surface2);}
+.pillar-icon{width:34px;height:34px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;flex-shrink:0;}
+.pillar-info{flex:1;}
+.pillar-name{font-size:13px;font-weight:600;}
+.pillar-desc{font-size:11px;color:var(--text3);margin-top:1px;}
+.pillar-preview{font-family:var(--mono);font-size:12px;font-weight:700;margin-right:6px;}
+.pillar-weight{font-size:10px;color:var(--text3);margin-right:4px;}
+.pillar-toggle{font-size:10px;color:var(--text3);transition:transform .2s;}
+.pillar-toggle.open{transform:rotate(180deg);}
+.pillar-body{padding:0 16px 16px;background:var(--surface);border-top:1px solid var(--border);display:none;}
+.pillar-body.open{display:block;}
+/* QUESTION ITEMS */
+.q-item{padding:13px 0;border-bottom:1px solid var(--border);}
+.q-item:last-child{border-bottom:none;}
+.q-text{font-size:13px;line-height:1.5;margin-bottom:10px;display:flex;align-items:flex-start;gap:6px;}
+.q-num{font-weight:600;flex-shrink:0;}
+.q-badges{display:flex;gap:4px;flex-wrap:wrap;align-items:center;}
+.w-badge-crit{font-size:9px;background:#fce8e6;color:#c0392b;padding:2px 6px;border-radius:8px;font-weight:600;flex-shrink:0;}
+.w-badge-imp{font-size:9px;background:#fff3e0;color:#d4820a;padding:2px 6px;border-radius:8px;font-weight:600;flex-shrink:0;}
+/* ANSWER TYPES */
+.ans-wrap{margin-bottom:8px;}
+/* Yes/No */
+.yn-btns{display:flex;gap:8px;}
+.yn-btn{padding:7px 20px;border-radius:var(--rs);border:1.5px solid var(--border2);font-size:13px;font-weight:500;cursor:pointer;font-family:var(--font);background:var(--surface);color:var(--text2);transition:all .12s;}
+.yn-btn:hover{border-color:var(--brand);}
+.yn-btn.sel-yes{background:var(--green-light);border-color:var(--green);color:var(--green);}
+.yn-btn.sel-no{background:var(--red-light);border-color:var(--red);color:var(--red);}
+/* Count/Numeric */
+.count-wrap{display:flex;align-items:center;gap:8px;}
+.count-btn{width:30px;height:30px;border-radius:50%;border:1.5px solid var(--border2);background:var(--surface);cursor:pointer;font-size:16px;font-weight:600;color:var(--text2);display:flex;align-items:center;justify-content:center;transition:all .12s;}
+.count-btn:hover{border-color:var(--brand);color:var(--brand);}
+.count-val{font-size:18px;font-weight:700;font-family:var(--mono);min-width:36px;text-align:center;}
+.count-label{font-size:11px;color:var(--text3);}
+/* Score 0-4 */
+.score-opts{display:flex;gap:7px;flex-wrap:wrap;}
+.score-btn{padding:6px 13px;border-radius:var(--rs);border:1.5px solid var(--border2);font-size:12px;font-weight:500;cursor:pointer;font-family:var(--mono);background:var(--surface);color:var(--text2);transition:all .12s;}
+.score-btn:hover{border-color:var(--brand);}
+.score-btn.s0{background:var(--red-light);border-color:var(--red);color:var(--red);}
+.score-btn.s1{background:#fef3e2;border-color:#b8860b;color:#8a6200;}
+.score-btn.s2{background:var(--amber-light);border-color:var(--amber);color:var(--amber);}
+.score-btn.s3{background:#eef5e8;border-color:#5a9e2a;color:#3a7018;}
+.score-btn.s4{background:var(--green-light);border-color:var(--green);color:var(--green);}
+/* Multi choice */
+.mc-opts{display:flex;gap:7px;flex-wrap:wrap;}
+.mc-btn{padding:6px 13px;border-radius:var(--rs);border:1.5px solid var(--border2);font-size:12px;cursor:pointer;font-family:var(--font);background:var(--surface);color:var(--text2);transition:all .12s;}
+.mc-btn:hover{border-color:var(--brand);}
+.mc-btn.sel{background:var(--accent-light);border-color:var(--accent);color:var(--accent);font-weight:500;}
+/* PHOTO UPLOAD */
+.photo-zone{margin-top:8px;border:1.5px dashed var(--border2);border-radius:var(--rs);padding:10px 14px;background:var(--surface2);cursor:pointer;transition:all .15s;}
+.photo-zone:hover{border-color:var(--brand);background:var(--brand-light);}
+.photo-zone-label{font-size:11px;color:var(--text3);display:flex;align-items:center;gap:6px;}
+.photo-zone-label span{font-size:14px;}
+.photo-required{border-color:var(--red);background:var(--red-light);}
+.photo-required .photo-zone-label{color:var(--red);}
+.photo-previews{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px;}
+.photo-thumb{position:relative;width:64px;height:64px;border-radius:6px;overflow:hidden;border:1px solid var(--border);}
+.photo-thumb img{width:100%;height:100%;object-fit:cover;}
+.photo-del{position:absolute;top:2px;right:2px;width:16px;height:16px;border-radius:50%;background:rgba(0,0,0,.6);color:#fff;font-size:10px;display:flex;align-items:center;justify-content:center;cursor:pointer;border:none;}
+.q-note{margin-top:7px;}
+.q-note input{font-size:12px;padding:6px 9px;width:100%;max-width:480px;}
+/* SUMMARY */
+.summary-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:18px;}
+.sum-pillar{text-align:center;padding:14px 6px;border:1px solid var(--border);border-radius:var(--r);background:var(--surface);}
+.sum-pillar .sp-id{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--text3);margin-bottom:3px;}
+.sum-pillar .sp-pct{font-size:20px;font-weight:700;font-family:var(--mono);}
+.sum-pillar .sp-wt{font-size:10px;color:var(--text3);}
+/* CIRCULAR SCORE */
+.circle-score-wrap{display:flex;flex-direction:column;align-items:center;justify-content:center;}
+.circle-score{position:relative;width:110px;height:110px;}
+.circle-score svg{transform:rotate(-90deg);}
+.circle-score .cs-text{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+.cs-num{font-size:22px;font-weight:700;font-family:var(--mono);line-height:1;}
+.cs-label{font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;margin-top:1px;}
+/* PILLAR BARS (dashboard) */
+.pillar-bars-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;}
+.pb-card{text-align:center;padding:12px 8px;background:var(--surface);border:1px solid var(--border);border-radius:var(--r);}
+.pb-icon{width:42px;height:42px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-size:10px;font-weight:700;margin:0 auto 7px;}
+.pb-pct{font-size:17px;font-weight:700;font-family:var(--mono);}
+.pb-name{font-size:10px;color:var(--text3);margin-top:2px;}
+.pb-wt{font-size:9px;color:var(--text3);}
+/* AREA CARDS */
+.area-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:12px;}
+.area-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:15px;cursor:pointer;transition:all .15s;}
+.area-card:hover{border-color:var(--brand);box-shadow:var(--shadow-md);}
+.area-card.add{border-style:dashed;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;color:var(--text3);min-height:100px;}
+.area-card.add:hover{border-color:var(--brand);color:var(--brand);background:var(--brand-light);}
+/* MODALS */
+.modal-ov{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:200;align-items:center;justify-content:center;pointer-events:none;}
+.modal-ov.open{display:flex;pointer-events:auto;}
+.modal{background:var(--surface);border-radius:14px;padding:26px;max-width:510px;width:92%;box-shadow:0 20px 60px rgba(0,0,0,.2);}
+.modal-xl{max-width:740px;max-height:92vh;overflow-y:auto;}
+.modal-title{font-size:16px;font-weight:600;margin-bottom:3px;}
+.modal-sub{font-size:12px;color:var(--text3);margin-bottom:18px;}
+.modal-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:18px;}
+/* TOAST */
+#toast{position:fixed;bottom:22px;right:22px;z-index:999;background:var(--accent);color:#fff;padding:11px 18px;border-radius:var(--r);font-size:13px;box-shadow:var(--shadow-md);transform:translateY(70px);opacity:0;transition:all .25s;pointer-events:none;}
+#toast.show{transform:translateY(0);opacity:1;}
+/* AI REPORT */
+.ai-section-title{font-size:13px;font-weight:600;color:var(--accent);margin:16px 0 7px;padding-bottom:5px;border-bottom:2px solid var(--brand);}
+.ai-bullet{display:flex;gap:7px;margin:3px 0;font-size:12.5px;}
+.ai-bullet .dot{color:var(--brand);flex-shrink:0;margin-top:2px;}
+.ai-para{font-size:12.5px;color:var(--text2);margin:4px 0;line-height:1.6;}
+.report-photo{width:100%;max-width:160px;height:100px;object-fit:cover;border-radius:6px;border:1px solid var(--border);}
+.report-photos-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:6px;}
+.divider{height:1px;background:var(--border);margin:16px 0;}
+@media print{.sidebar,.topbar{display:none!important;}.main{margin-left:0!important;}.page{padding:0!important;}}
+
+/* ===== TABLET ===== */
+@media(max-width:768px){
+  .sidebar{width:220px;}
+  .main{margin-left:220px;}
+  .form-grid{grid-template-columns:1fr;}
+  .summary-grid{grid-template-columns:repeat(3,1fr);}
+}
+.hamburger{display:none;}
+.bottom-nav{display:none;}
+.sb-overlay{display:none;}
+@media(max-width:640px){
+  .hamburger{display:flex;flex-direction:column;gap:5px;padding:8px;border:none;background:none;cursor:pointer;}
+  .hamburger span{width:22px;height:2px;background:var(--text);border-radius:2px;display:block;}
+  .main{margin-left:0!important;padding-bottom:68px;}
+  .topbar{padding:0 12px;height:50px;}
+  .topbar-date{display:none;}
+  .topbar-right .btn{padding:6px 10px;font-size:12px;}
+  .page{padding:12px;}
+  .card{padding:12px;}
+  .metrics-grid{grid-template-columns:repeat(2,1fr);gap:8px;}
+  .form-grid{grid-template-columns:1fr;}
+  .summary-grid{grid-template-columns:repeat(3,1fr);}
+  .pillar-bars-grid{grid-template-columns:repeat(3,1fr);}
+  .area-grid{grid-template-columns:repeat(2,1fr);}
+  .dash-two-col{display:block!important;}
+  .dash-two-col>div{margin-bottom:12px;}
+  .tbl-wrap{overflow-x:auto;}
+  table{min-width:540px;}
+  th,td{padding:7px 9px;font-size:11px;}
+  .modal{width:96%;padding:14px;}
+  .modal-xl{max-height:90vh;overflow-y:auto;}
+  input,select,textarea{font-size:16px!important;}
+  .yn-btn{padding:12px 20px;font-size:14px;}
+  .score-btn{padding:10px 14px;font-size:13px;}
+  .mc-btn{padding:10px 12px;font-size:12px;}
+  .count-btn{width:44px;height:44px;font-size:22px;}
+  #qr-grid{grid-template-columns:repeat(2,1fr)!important;}
+  .bottom-nav{
+    display:flex!important;
+    position:fixed;bottom:0;left:0;right:0;height:58px;
+    background:var(--surface);border-top:1px solid var(--border);
+    z-index:500;
+  }
+  .bnav-item{flex:1;position:relative;}
+  .bnav-btn{
+    width:100%;height:58px;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;
+    border:none;background:none;cursor:pointer;
+    color:var(--text3);font-size:9px;font-family:var(--font);
+  }
+  .bnav-btn.active{color:var(--brand);}
+  .bnav-icon{font-size:20px;line-height:1;}
+  .bnav-badge{position:absolute;top:6px;right:6px;background:var(--red);color:#fff;font-size:9px;padding:1px 4px;border-radius:10px;}
+}
+
+</style>
+</head>
+<body>
+<div class="app">
+<aside class="sidebar">
+  <div class="sb-logo">
+    <div class="sb-bar"></div>
+    <div class="sb-company">Saueressig Türkiye</div>
+    <div class="sb-title">5S Denetim</div>
+    <div class="sb-sub">OPEX Yönetim Sistemi</div>
+  </div>
+  <nav class="sb-nav">
+    <div class="sb-section">Genel Bakış</div>
+    <button class="nav-btn active" onclick="navigate('dashboard')"><span class="nav-icon">◈</span>Dashboard</button>
+    <div class="sb-section">Denetim</div>
+    <button class="nav-btn" onclick="navigate('new-audit')"><span class="nav-icon">＋</span>Yeni Denetim</button>
+    <button class="nav-btn" onclick="navigate('history')"><span class="nav-icon">⊙</span>Denetim Geçmişi<span class="nav-badge" id="hist-badge">0</span></button>
+    <div class="sb-section">Yönetim</div>
+    <button class="nav-btn" onclick="navigate('areas')"><span class="nav-icon">⊞</span>Bölge Yönetimi</button>
+    <button class="nav-btn" onclick="navigate('actions')"><span class="nav-icon">✓</span>Aksiyonlar<span class="nav-badge" id="action-badge">0</span></button>
+    <button class="nav-btn" onclick="navigate('leaderboard')"><span class="nav-icon">🏆</span>Sıralama</button>
+    <button class="nav-btn" onclick="navigate('qr')"><span class="nav-icon">⬛</span>QR Kodlar</button>
+    <button class="nav-btn" onclick="navigate('reports')"><span class="nav-icon">▤</span>Raporlar</button>
+  </nav>
+  <div class="sb-foot">v3.0 · OPEX Dept.</div>
+</aside>
+
+<main class="main">
+<div class="topbar">
+  <div style="display:flex;align-items:center;gap:10px;">
+    <button class="hamburger" onclick="toggleSidebar()" aria-label="Menü">
+      <span></span><span></span><span></span>
+    </button>
+    <div class="topbar-title" id="topbar-title">Dashboard</div>
+  </div>
+  <div class="topbar-right">
+    <span class="topbar-date" id="topbar-date"></span>
+    <button class="btn btn-primary btn-sm" onclick="navigate('new-audit')">+ Yeni Denetim</button>
+  </div>
+</div>
+
+<!-- DASHBOARD -->
+<div class="page active" id="page-dashboard">
+  <div class="metrics-grid">
+    <div class="metric green"><div class="metric-label">Toplam Denetim</div><div class="metric-val" id="m-total">0</div><div class="metric-sub">tüm zamanlar</div></div>
+    <div class="metric blue"><div class="metric-label">Bu Ay</div><div class="metric-val" id="m-month">0</div><div class="metric-sub">denetim</div></div>
+    <div class="metric amber"><div class="metric-label">Ort. Skor</div><div class="metric-val" id="m-avg">—</div><div class="metric-sub">/ 100 puan</div></div>
+    <div class="metric red"><div class="metric-label">Açık Aksiyon</div><div class="metric-val" id="m-actions">0</div><div class="metric-sub">bekleyen</div></div>
+  </div>
+  <div class="dash-two-col" style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;">
+    <div class="card">
+      <div class="sec-hdr"><div><div style="font-size:14px;font-weight:600;">Son Denetimler</div><div style="font-size:11px;color:var(--text3);">En yeni 5 kayıt</div></div><button class="btn btn-outline btn-sm" onclick="navigate('history')">Tümü</button></div>
+      <div id="recent-list"><div style="text-align:center;padding:28px;color:var(--text3);font-size:13px;">Henüz denetim yok</div></div>
+    </div>
+    <div class="card">
+      <div class="sec-hdr"><div><div style="font-size:14px;font-weight:600;">5S Uyum Skoru</div><div style="font-size:11px;color:var(--text3);">Zone bazında durum</div></div></div>
+      <div id="compliance-widget"></div>
+    </div>
+  </div>
+  <div class="dash-two-col" style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;">
+    <div class="card">
+      <div class="sec-hdr"><div><div style="font-size:14px;font-weight:600;">🏆 Takım Sıralaması</div><div style="font-size:11px;color:var(--text3);">Ort. skora göre</div></div><button class="btn btn-outline btn-sm" onclick="navigate('leaderboard')">Tümü</button></div>
+      <div id="leaderboard-preview"></div>
+    </div>
+    <div class="card">
+      <div class="sec-hdr"><div><div style="font-size:14px;font-weight:600;">⚡ Aksiyon Durumu</div><div style="font-size:11px;color:var(--text3);">Önceliğe göre</div></div><button class="btn btn-outline btn-sm" onclick="navigate('actions')">Yönet</button></div>
+      <div id="action-dashboard-widget"></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="sec-hdr"><div style="font-size:14px;font-weight:600;">Pillar Performansı</div></div>
+    <div class="pillar-bars-grid" id="pillar-bars"></div>
+  </div>
+</div>
+
+<!-- NEW AUDIT -->
+<div class="page" id="page-new-audit">
+  <div style="max-width:880px;">
+    <div class="card" style="margin-bottom:14px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+        <div style="font-size:16px;font-weight:600;color:var(--accent);">5S Denetim Formu</div>
+        <button class="btn btn-outline btn-sm" onclick="navigate('history')">📋 Kayıtlı Formlar</button>
+      </div>
+
+      <!-- Form Kodu -->
+      <div class="fg" style="margin-bottom:16px;">
+        <label>Form Kodu</label>
+        <input type="text" id="audit-form-code" placeholder="Form kodunu yazınız..">
+      </div>
+
+      <!-- Lokasyon + Departman -->
+      <div class="form-grid" style="margin-bottom:16px;">
+        <div class="fg">
+          <label>Lokasyon</label>
+          <select id="audit-location">
+            <option value="">Lokasyon seçiniz.</option>
+            <option value="Fabrika-1">Fabrika 1</option>
+            <option value="Fabrika-2">Fabrika 2</option>
+            <option value="Depo-A">Depo A</option>
+            <option value="Depo-B">Depo B</option>
+            <option value="Ofis">Ofis Katı</option>
+          </select>
+        </div>
+        <div class="fg">
+          <label>Departman</label>
+          <select id="audit-dept">
+            <option value="">Departman seçiniz.</option>
+            <option value="Üretim">Üretim</option>
+            <option value="Lojistik">Lojistik</option>
+            <option value="Kalite">Kalite</option>
+            <option value="Bakım">Bakım &amp; Onarım</option>
+            <option value="Yönetim">Yönetim</option>
+            <option value="OPEX">OPEX</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Denetlenen Takım + Takım Lideri -->
+      <div class="form-grid" style="margin-bottom:16px;">
+        <div class="fg">
+          <label>Denetlenen Takım</label>
+          <select id="audit-area">
+            <option value="">Takım seçiniz.</option>
+          </select>
+        </div>
+        <div class="fg">
+          <label>Takım Lideri</label>
+          <input type="text" id="audit-team-leader" placeholder="Takım liderini yazınız.">
+        </div>
+      </div>
+
+      <!-- Denetimi Yapan + Denetim Tarihi -->
+      <div class="form-grid" style="margin-bottom:16px;">
+        <div class="fg">
+          <label>Denetimi Yapan</label>
+          <div id="auditor-display" style="font-size:13px;color:var(--text2);padding:6px 0;">Henüz bir denetleyici yok.</div>
+          <input type="hidden" id="audit-auditor" value="">
+          <button class="btn btn-outline btn-sm" style="margin-top:6px;" onclick="openAuditorModal()">+ Denetçi Seç</button>
+        </div>
+        <div class="fg">
+          <label>Denetim Tarihi</label>
+          <input type="date" id="audit-date">
+        </div>
+      </div>
+
+      <!-- Vardiya + Genel Notlar -->
+      <div class="form-grid" style="margin-bottom:8px;">
+        <div class="fg">
+          <label>Vardiya</label>
+          <select id="audit-shift">
+            <option value="Sabah">Sabah (06-14)</option>
+            <option value="Öğle">Öğle (14-22)</option>
+            <option value="Gece">Gece (22-06)</option>
+          </select>
+        </div>
+        <div class="fg">
+          <label>Genel Notlar</label>
+          <textarea id="audit-notes" placeholder="Genel gözlemler..." style="min-height:50px;"></textarea>
+        </div>
+      </div>
+    </div>
+    <div id="pillars-container"></div>
+    <div class="card" style="margin-top:14px;" id="score-card">
+      <div style="font-size:14px;font-weight:600;margin-bottom:14px;">Denetim Özeti</div>
+      <div class="summary-grid" id="score-summary"></div>
+      <div class="divider"></div>
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
+        <div>
+          <div style="font-size:12px;color:var(--text2);">Ağırlıklı Toplam Puan</div>
+          <div style="font-size:30px;font-weight:700;font-family:var(--mono);" id="total-score-display">0 / 100</div>
+        </div>
+        <div id="score-badge-display"></div>
+      </div>
+    </div>
+    <div style="display:flex;gap:9px;margin-top:14px;flex-wrap:wrap;">
+      <button class="btn btn-primary" onclick="submitAudit()">✓ Denetimi Kaydet</button>
+      <button class="btn btn-sm" style="border:1px solid var(--brand);color:var(--brand);background:var(--brand-light);" onclick="submitAndReport()">✦ Kaydet + AI Rapor</button>
+      <button class="btn btn-outline" onclick="resetAudit()">↺ Sıfırla</button>
+    </div>
+  </div>
+</div>
+
+<!-- HISTORY -->
+<div class="page" id="page-history">
+  <div class="card">
+    <div class="sec-hdr">
+      <div><div style="font-size:14px;font-weight:600;">Tüm Denetimler</div><div style="font-size:11px;color:var(--text3);" id="hist-count-lbl">0 kayıt</div></div>
+      <div style="display:flex;gap:8px;"><input type="text" id="hist-search" placeholder="Ara..." style="width:200px;font-size:12px;padding:5px 9px;" oninput="renderHistory()"><button class="btn btn-outline btn-sm" onclick="exportCSV()">↓ CSV</button></div>
+    </div>
+    <div class="tbl-wrap">
+      <table><thead><tr><th>#</th><th>Tarih</th><th>Bölge</th><th>Denetçi</th><th>Vardiya</th><th>Skor</th><th>Durum</th><th>İşlem</th></tr></thead>
+      <tbody id="hist-tbody"><tr><td colspan="8" style="text-align:center;color:var(--text3);padding:28px;">Kayıt yok</td></tr></tbody></table>
+    </div>
+  </div>
+</div>
+
+<!-- AREAS -->
+<div class="page" id="page-areas">
+  <div class="sec-hdr" style="margin-bottom:14px;"><div style="font-size:15px;font-weight:600;">Bölge Yönetimi</div></div>
+  <div class="area-grid" id="area-grid"></div>
+</div>
+
+<!-- ACTIONS -->
+<div class="page" id="page-actions">
+  <div class="metrics-grid" style="margin-bottom:16px;">
+    <div class="metric red"><div class="metric-label">Kritik</div><div class="metric-val" id="act-kritik">0</div><div class="metric-sub">aksiyon</div></div>
+    <div class="metric amber"><div class="metric-label">Yüksek</div><div class="metric-val" id="act-yuksek">0</div><div class="metric-sub">aksiyon</div></div>
+    <div class="metric blue"><div class="metric-label">Orta</div><div class="metric-val" id="act-orta">0</div><div class="metric-sub">aksiyon</div></div>
+    <div class="metric green"><div class="metric-label">Tamamlanan</div><div class="metric-val" id="act-done">0</div><div class="metric-sub">aksiyon</div></div>
+  </div>
+  <div class="card">
+    <div class="sec-hdr">
+      <div><div style="font-size:14px;font-weight:600;">Aksiyon Yönetimi</div></div>
+      <div style="display:flex;gap:8px;align-items:center;">
+        <select id="act-filter" onchange="renderActions()" style="font-size:12px;padding:5px 9px;">
+          <option value="all">Tümü</option>
+          <option value="Açık">Açık</option>
+          <option value="Devam Ediyor">Devam Ediyor</option>
+          <option value="Tamamlandı">Tamamlandı</option>
+          <option value="Kritik">Kritik</option>
+          <option value="Yüksek">Yüksek</option>
+        </select>
+        <button class="btn btn-primary btn-sm" onclick="openModal('modal-action-add')">+ Aksiyon Ekle</button>
+      </div>
+    </div>
+    <div class="tbl-wrap">
+      <table><thead><tr><th>#</th><th>Başlık</th><th>Bölge</th><th>Sorumlu</th><th>Öncelik</th><th>Son Tarih</th><th>Durum</th><th>İşlem</th></tr></thead>
+      <tbody id="actions-tbody"><tr><td colspan="8" style="text-align:center;color:var(--text3);padding:28px;">Aksiyon yok</td></tr></tbody></table>
+    </div>
+  </div>
+</div>
+
+<!-- REPORTS -->
+<div class="page" id="page-reports">
+  <div class="metrics-grid" style="margin-bottom:20px;">
+    <div class="metric blue"><div class="metric-label">En İyi Bölge</div><div class="metric-val" style="font-size:16px;" id="r-best">—</div><div class="metric-sub" id="r-best-s"></div></div>
+    <div class="metric red"><div class="metric-label">İyileştirme Gereken</div><div class="metric-val" style="font-size:16px;" id="r-worst">—</div><div class="metric-sub" id="r-worst-s"></div></div>
+    <div class="metric green"><div class="metric-label">Trend</div><div class="metric-val" id="r-trend">—</div><div class="metric-sub">son değişim</div></div>
+    <div class="metric amber"><div class="metric-label">Aksiyon %</div><div class="metric-val" id="r-comp">0%</div><div class="metric-sub">tamamlanma</div></div>
+  </div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+    <div class="card"><div style="font-size:14px;font-weight:600;margin-bottom:12px;">Skor Trendi</div><div style="position:relative;height:210px;"><canvas id="trendChart"></canvas></div></div>
+    <div class="card"><div style="font-size:14px;font-weight:600;margin-bottom:12px;">Pillar Karşılaştırması</div><div style="position:relative;height:210px;"><canvas id="pillarChart"></canvas></div></div>
+  </div>
+</div>
+<!-- LEADERBOARD -->
+<div class="page" id="page-leaderboard">
+  <div class="card" style="margin-bottom:16px;">
+    <div class="sec-hdr" style="margin-bottom:18px;">
+      <div><div style="font-size:15px;font-weight:600;">🏆 Takım Sıralaması</div><div style="font-size:11px;color:var(--text3);">Ortalama 5S skoruna göre</div></div>
+      <div style="display:flex;gap:8px;">
+        <select id="lb-filter" onchange="renderLeaderboard()" style="font-size:12px;padding:5px 9px;">
+          <option value="all">Tüm Zamanlar</option>
+          <option value="month">Bu Ay</option>
+          <option value="week">Bu Hafta</option>
+        </select>
+      </div>
+    </div>
+    <div id="leaderboard-list"></div>
+  </div>
+</div>
+
+<!-- QR KODLAR -->
+<div class="page" id="page-qr">
+  <div class="sec-hdr" style="margin-bottom:16px;">
+    <div style="font-size:15px;font-weight:600;">⬛ QR Kodlar</div>
+    <button class="btn btn-primary btn-sm" onclick="printAllQR()">🖨️ Tümünü Yazdır</button>
+  </div>
+  <div style="font-size:12px;color:var(--text2);margin-bottom:18px;padding:10px 14px;background:var(--accent-light);border-radius:var(--rs);">
+    💡 Her bölgeye QR kodu yapıştırın. Telefon kamerasıyla okutunca o bölgenin denetim formu direkt açılır.
+  </div>
+  <div id="qr-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:16px;"></div>
+</div>
+
+</main>
+</div>
+
+<!-- Mobile sidebar overlay -->
+<div class="sb-overlay" id="sb-overlay" onclick="toggleSidebar()"></div>
+
+<!-- Mobile bottom navigation -->
+<nav class="bottom-nav">
+  <div class="bnav-item">
+    <button class="bnav-btn active" id="bnav-dashboard" onclick="navigate('dashboard')">
+      <span class="bnav-icon">◈</span>Ana Sayfa
+    </button>
+  </div>
+  <div class="bnav-item">
+    <button class="bnav-btn" id="bnav-new-audit" onclick="navigate('new-audit')">
+      <span class="bnav-icon" style="width:34px;height:34px;background:var(--brand);border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-size:18px;">＋</span>
+      Denetim
+    </button>
+  </div>
+  <div class="bnav-item" style="position:relative;">
+    <button class="bnav-btn" id="bnav-actions" onclick="navigate('actions')">
+      <span class="bnav-icon">✓</span>Aksiyonlar
+    </button>
+    <span class="bnav-badge" id="bnav-action-count" style="display:none;"></span>
+  </div>
+  <div class="bnav-item">
+    <button class="bnav-btn" id="bnav-history" onclick="navigate('history')">
+      <span class="bnav-icon">⊙</span>Geçmiş
+    </button>
+  </div>
+  <div class="bnav-item">
+    <button class="bnav-btn" id="bnav-leaderboard" onclick="navigate('leaderboard')">
+      <span class="bnav-icon">🏆</span>Sıralama
+    </button>
+  </div>
+</nav>
+
+<!-- MODALS -->
+<div class="modal-ov" id="modal-area-add">
+  <div class="modal">
+    <div class="modal-title">Yeni Bölge Ekle</div>
+    <div class="modal-sub">Denetim alanı tanımlayın</div>
+    <div class="fg" style="margin-bottom:10px;"><label>Bölge Adı *</label><input type="text" id="new-area-name" placeholder="Örn: Üretim Hattı A"></div>
+    <div class="fg" style="margin-bottom:10px;"><label>Departman</label><input type="text" id="new-area-dept" placeholder="Örn: Üretim"></div>
+    <div class="fg"><label>Açıklama</label><input type="text" id="new-area-desc" placeholder="Kısa açıklama..."></div>
+    <div class="modal-actions"><button class="btn btn-outline" onclick="closeModal('modal-area-add')">İptal</button><button class="btn btn-primary" onclick="addArea()">Kaydet</button></div>
+  </div>
+</div>
+
+<div class="modal-ov" id="modal-action-add">
+  <div class="modal">
+    <div class="modal-title">Yeni Aksiyon</div>
+    <div class="modal-sub">Denetim bulgusu aksiyonu</div>
+    <div class="fg" style="margin-bottom:10px;"><label>Başlık *</label><input type="text" id="na-title" placeholder="Aksiyon başlığı"></div>
+    <div class="form-grid" style="margin-bottom:10px;">
+      <div class="fg"><label>Bölge</label><select id="na-area"></select></div>
+      <div class="fg"><label>Sorumlu</label><input type="text" id="na-owner" placeholder="Ad Soyad"></div>
+    </div>
+    <div class="form-grid" style="margin-bottom:10px;">
+      <div class="fg"><label>Öncelik</label><select id="na-prio"><option value="Düşük">Düşük</option><option value="Orta" selected>Orta</option><option value="Yüksek">Yüksek</option><option value="Kritik">Kritik</option></select></div>
+      <div class="fg"><label>Son Tarih</label><input type="date" id="na-due"></div>
+    </div>
+    <div class="fg"><label>Açıklama</label><textarea id="na-desc" style="min-height:55px;"></textarea></div>
+    <div class="modal-actions"><button class="btn btn-outline" onclick="closeModal('modal-action-add')">İptal</button><button class="btn btn-primary" onclick="addAction()">Kaydet</button></div>
+  </div>
+</div>
+
+<div class="modal-ov" id="modal-detail">
+  <div class="modal modal-xl">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:3px;">
+      <div class="modal-title" id="det-title">Denetim Detayı</div>
+      <button class="btn btn-outline btn-sm" onclick="closeModal('modal-detail')">✕</button>
+    </div>
+    <div class="modal-sub" id="det-sub"></div>
+    <div id="det-content"></div>
+    <div class="modal-actions">
+      <button class="btn btn-accent btn-sm" id="det-ai-btn" onclick="">✦ AI Rapor Oluştur</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-ov" id="modal-ai">
+  <div class="modal modal-xl">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:3px;">
+      <div class="modal-title" id="ai-title">AI Denetim Raporu</div>
+      <div style="display:flex;gap:7px;"><button class="btn btn-primary btn-sm" id="pdf-btn" style="display:none;" onclick="exportPDF()">⬇ PDF İndir</button><button class="btn btn-outline btn-sm" onclick="closeModal('modal-ai')">✕</button></div>
+    </div>
+    <div class="modal-sub" id="ai-sub"></div>
+    <div id="ai-loading" style="display:none;text-align:center;padding:36px;">
+      <div style="font-size:22px;margin-bottom:10px;animation:spin 1s linear infinite;display:inline-block;">⟳</div>
+      <div style="font-size:13px;color:var(--text2);" id="ai-load-txt">Analiz yapılıyor...</div>
+      <div style="margin-top:10px;height:4px;background:var(--surface2);border-radius:4px;overflow:hidden;"><div id="ai-prog" style="height:100%;background:var(--brand);width:0%;transition:width .3s;border-radius:4px;"></div></div>
+    </div>
+    <div id="ai-content" style="display:none;"></div>
+  </div>
+</div>
+
+<!-- EDIT AUDIT MODAL -->
+<div class="modal-ov" id="modal-edit-audit">
+  <div class="modal modal-xl">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+      <div>
+        <div class="modal-title">Denetimi Düzenle</div>
+        <div class="modal-sub" style="margin-bottom:0;">Kayıtlı denetim bilgilerini güncelleyin</div>
+      </div>
+      <button class="btn btn-outline btn-sm" onclick="closeModal('modal-edit-audit')">✕</button>
+    </div>
+    <div class="form-grid" style="margin-bottom:12px;">
+      <div class="fg"><label>Bölge / Alan</label>
+        <select id="edit-area"></select>
+      </div>
+      <div class="fg"><label>Denetçi</label>
+        <input type="text" id="edit-auditor" placeholder="Ad Soyad">
+      </div>
+      <div class="fg"><label>Tarih</label>
+        <input type="date" id="edit-date">
+      </div>
+      <div class="fg"><label>Vardiya</label>
+        <select id="edit-shift">
+          <option value="Sabah">Sabah (06-14)</option>
+          <option value="Öğle">Öğle (14-22)</option>
+          <option value="Gece">Gece (22-06)</option>
+        </select>
+      </div>
+      <div class="fg"><label>Lokasyon</label>
+        <select id="edit-location">
+          <option value="">—</option>
+          <option value="Fabrika-1">Fabrika 1</option>
+          <option value="Fabrika-2">Fabrika 2</option>
+          <option value="Depo-A">Depo A</option>
+          <option value="Depo-B">Depo B</option>
+          <option value="Ofis">Ofis Katı</option>
+        </select>
+      </div>
+      <div class="fg"><label>Departman</label>
+        <select id="edit-dept">
+          <option value="">—</option>
+          <option value="Üretim">Üretim</option>
+          <option value="Lojistik">Lojistik</option>
+          <option value="Kalite">Kalite</option>
+          <option value="Bakım">Bakım &amp; Onarım</option>
+          <option value="Yönetim">Yönetim</option>
+          <option value="OPEX">OPEX</option>
+        </select>
+      </div>
+      <div class="fg"><label>Takım Lideri</label>
+        <input type="text" id="edit-team-leader" placeholder="Takım lideri">
+      </div>
+      <div class="fg"><label>Form Kodu</label>
+        <input type="text" id="edit-form-code" placeholder="5S-2026-001">
+      </div>
+    </div>
+    <div class="fg" style="margin-bottom:14px;"><label>Genel Notlar</label>
+      <textarea id="edit-notes" style="min-height:55px;"></textarea>
+    </div>
+    <input type="hidden" id="edit-audit-id">
+    <div class="modal-actions">
+      <button class="btn btn-outline" onclick="closeModal('modal-edit-audit')">İptal</button>
+      <button class="btn btn-primary" onclick="saveEditAudit()">✓ Kaydet</button>
+    </div>
+  </div>
+</div>
+
+<!-- AUDITOR SELECT MODAL -->
+<div class="modal-ov" id="modal-auditor">
+  <div class="modal">
+    <div class="modal-title">Denetçi Seç</div>
+    <div class="modal-sub">Mevcut denetçilerden seçin veya yeni ekleyin</div>
+    <div id="auditor-list" style="margin-bottom:12px;max-height:220px;overflow-y:auto;"></div>
+    <div style="border-top:1px solid var(--border);padding-top:12px;">
+      <div style="font-size:12px;font-weight:500;color:var(--text2);margin-bottom:8px;">Yeni Denetçi Ekle</div>
+      <div style="display:flex;gap:8px;">
+        <input type="text" id="new-auditor-name" placeholder="Ad Soyad (örn: Bahadır Göktürk)" style="flex:1;">
+        <button class="btn btn-primary btn-sm" onclick="addNewAuditor()">Ekle</button>
+      </div>
+    </div>
+    <div class="modal-actions"><button class="btn btn-outline" onclick="closeModal('modal-auditor')">Kapat</button></div>
+  </div>
+</div>
+
+<!-- ÖNCE / SONRA KARŞILAŞTIRMA MODAL -->
+<div class="modal-ov" id="modal-before-after">
+  <div class="modal modal-xl">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+      <div>
+        <div class="modal-title">📸 Önce / Sonra Karşılaştırma</div>
+        <div class="modal-sub" id="ba-sub" style="margin-bottom:0;"></div>
+      </div>
+      <button class="btn btn-outline btn-sm" onclick="closeModal('modal-before-after')">✕</button>
+    </div>
+    <div id="ba-content"></div>
+  </div>
+</div>
+
+<div id="toast"></div>
+<style>@keyframes spin{to{transform:rotate(360deg)}}</style>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script>
+// ======= PILLAR WEIGHTS =======
+const PW = { S1:15, S2:20, S3:15, S4:20, S5:30 };
+
+// ======= QUESTIONS (şirket soruları, tipli) =======
+// types: 'yn' = evet/hayır, 'count' = sayısal (kaç adet), 'score' = 0-4, 'mc' = çoktan seçmeli
+// photo: true = düşük/hayır cevabında fotoğraf gerekli
+// w: ağırlık katsayısı (1, 1.5, 2)
+const PILLARS = [
+  {
+    id:'S1', name:'Seiri (Ayıklama)', desc:'Gereksiz malzemeleri tespit et ve uzaklaştır', color:'#c0392b',
+    questions:[
+      { text:'Makine üzerinde/çevresinde/çekmecelerde proses dışı gereksiz malzeme var mı?', type:'count', countLabel:'adet', w:2, photo:true },
+      { text:'Zeminde duran malzeme var mı? (Aparat, takım çantası, el aletleri vb.)', type:'count', countLabel:'adet', w:2, photo:true },
+      { text:'Tanımlı alanlarında bulunmayan aparat, ekipman, ölçü aleti, malzeme veya evrak var mı?', type:'count', countLabel:'adet', w:1.5, photo:true },
+      { text:'Kullanılıp dağınık bırakılmış kablo, kova, hortum veya boru var mı?', type:'count', countLabel:'adet', w:1.5, photo:true },
+      { text:'Üretimdeki tüm seyyar ekipmanlar kullanılmıyorsa yerine koyulmuş, kullanılıyorsa tanımlı alanda mı?', type:'yn', w:1, photo:true }
+    ]
+  },
+  {
+    id:'S2', name:'Seiton (Düzenleme)', desc:'Her şeyin yerini belirle ve görünür kıl', color:'#2980b9',
+    questions:[
+      { text:'Yürüme yolları, makine çalışma alanları ve silindir bekleme alanları açıkça tanımlanmış mı? Belirlenen alanlara uyuluyor mu?', type:'yn', w:2, photo:true },
+      { text:'Makine dip ve duvar diplerinde alanı tanımlanmamış/etiketlenmemiş ekipman var mı?', type:'count', countLabel:'adet', w:1.5, photo:true },
+      { text:'Makine üstü, tezgah, çekmece ve raflarda tanımlanmamış/etiketlenmemiş ekipman veya malzeme var mı?', type:'count', countLabel:'adet', w:1.5, photo:true },
+      { text:'Yangın söndürücü erişilebilir mi? Tüp numarası, görseli ve alan tanımlaması yapılmış mı?', type:'mc', options:['Erişilebilir ve tam', 'Erişilebilir ama eksik', 'Erişilemiyor', 'Bölgede yok'], w:2, photo:true },
+      { text:'Malzeme/ekipmanlar ihtiyaca göre stoklandırılmış mı? (Aşırı stok varsa Hayır)', type:'yn', w:1, photo:false }
+    ]
+  },
+  {
+    id:'S3', name:'Seiso (Temizlik)', desc:'Çalışma alanını temiz ve sağlıklı tut', color:'#27ae60',
+    questions:[
+      { text:'Makine çevresi/altları, tezgahlar, raflar, geçiş yolları ve duvar kenarları temiz mi? (Toz, yağ, boya kalıntısı vb.)', type:'score', w:2, photo:true },
+      { text:'Makine parçaları, aparatlar ve kullanılan malzemeler düzenli olarak temizleniyor mu? (Pas, boya lekesi, kaynak çapağı vb.)', type:'score', w:2, photo:true },
+      { text:'Ortam koşulları sağlıklı ve ergonomik çalışmaya uygun mu? (Gürültü, ışıklandırma, havalandırma, vinç kullanımı vb.)', type:'mc', options:['Tamamen uygun', 'Kısmen uygun', 'Yetersiz', 'Uygun değil'], w:1.5, photo:true },
+      { text:'Temizlik malzemeleri istasyonu var mı? Tüm malzemeler tam ve yerli yerinde mi?', type:'yn', w:1, photo:true },
+      { text:'Silindir arabalarında silindire zarar verebilecek uygunsuzluklar önlenmiş mi? (Yıpranmış keçe, vida, talaş vb.)', type:'yn', w:1.5, photo:true }
+    ]
+  },
+  {
+    id:'S4', name:'Seiketsu (Standartlaştırma)', desc:'Standartları belgele ve görünür kıl', color:'#8e44ad',
+    questions:[
+      { text:'Standart Operasyon Formu (SOF) tüm operatörler tarafından biliniyor mu?', type:'mc', options:['Tümü biliyor','Çoğu biliyor','Az kişi biliyor','Kimse bilmiyor'], w:2, photo:false },
+      { text:'Etiketleme ve işaretlemeler firma standartlarına uygun mu?', type:'yn', w:2, photo:true },
+      { text:"SOF'lar, otonom bakım formları ve diğer dökümanlar güncel ve aktif olarak kullanılıyor mu?", type:'yn', w:1.5, photo:false },
+      { text:'ISG, 5S ve iyileştirme önerileri veriliyor mu?', type:'yn', w:1, photo:false },
+      { text:'İlk 3S\'te geriye gidiş durumu nedir?', type:'mc', options:['Çok İyi (0 geri gidiş)','İyi (1-2)','Orta (3-4)','Kötü (5-6)','Çok Kötü (>6)'], w:1.5, photo:false }
+    ]
+  },
+  {
+    id:'S5', name:'Shitsuke (Eğitim-Disiplin)', desc:'Disiplini koru ve sürekli iyileştir', color:'#d35400',
+    questions:[
+      { text:'Takım lideri her vardiya 5S kapsamında kontrol sağlıyor mu?', type:'yn', w:2, photo:false },
+      { text:'Kişisel koruyucu ekipmanlar eksiksiz bulunuyor ve kullanılıyor mu? Göz duşu malzemeleri var mı?', type:'yn', w:2, photo:true },
+      { text:'Bir önceki denetimden bu yana uygunsuzluklar 5S planına aktarılmış ve aksiyonlar alınmış mı?', type:'yn', w:2, photo:false },
+      { text:'Takım üyeleri 5S\'in ne olduğunu biliyor mu?', type:'mc', options:['Tümü biliyor','Çoğu biliyor','Az kişi biliyor','Kimse bilmiyor'], w:1.5, photo:false },
+      { text:'Takım panosunda tüm veriler güncel mi? Aktif olarak takip ediliyor mu?', type:'yn', w:1.5, photo:true }
+    ]
+  }
+];
+
+// ======= ANSWER → NORMALIZED SCORE (0-4 arası) =======
+// count: 0 adet=4, 1-2=3, 3-4=2, 5-6=1, >6=0
+function countToScore(n){ return n===0?4:n<=2?3:n<=4?2:n<=6?1:0; }
+// yn: evet=4, hayır=0
+function ynToScore(v){ return v==='evet'?4:v==='hayır'?0:null; }
+// mc: index'e göre (0=en iyi, son=en kötü)
+function mcToScore(idx, optCount){ return idx===null||idx===undefined?null: Math.round(4*(1-idx/(optCount-1))); }
+// score: direkt 0-4
+
+function getAnswerScore(q, ans){
+  if(ans===null||ans===undefined) return null;
+  if(q.type==='yn') return ynToScore(ans);
+  if(q.type==='count') return countToScore(typeof ans==='number'?ans:parseInt(ans)||0);
+  if(q.type==='score') return typeof ans==='number'?ans:null;
+  if(q.type==='mc') return mcToScore(ans, q.options.length);
+  return null;
+}
+
+// ======= WEIGHTED SCORING =======
+function calcPillar(pi, answers){
+  const p = PILLARS[pi];
+  let wSum=0, wTot=0;
+  p.questions.forEach((q,qi)=>{
+    const s = getAnswerScore(q, (answers||[])[qi]);
+    if(s!==null){ wSum+=s*q.w; wTot+=4*q.w; }
+  });
+  if(wTot===0) return { pct:0, contribution:0 };
+  const pct = (wSum/wTot)*100;
+  return { pct: Math.round(pct*10)/10, contribution: Math.round((pct/100)*PW[p.id]*10)/10 };
+}
+function calcTotal(allAnswers){
+  return Math.round(PILLARS.reduce((t,p,pi)=>t+calcPillar(pi,allAnswers[pi]||[]).contribution,0));
+}
+
+// ======= STATE =======
+let S = {
+  audits:[], areas:[
+    {id:'a1',name:'Üretim Hattı A',dept:'Üretim',desc:'Hat A montaj bölgesi'},
+    {id:'a2',name:'Üretim Hattı B',dept:'Üretim',desc:'Hat B montaj bölgesi'},
+    {id:'a3',name:'Üretim Hattı C',dept:'Üretim',desc:'Hat C montaj bölgesi'},
+    {id:'a4',name:'Depo / Ambar',dept:'Lojistik',desc:'Ana depo alanı'},
+    {id:'a5',name:'Ofis Alanı',dept:'Yönetim',desc:'Ofis katı'},
+    {id:'a6',name:'Boyahane',dept:'Üretim',desc:'Boya ve kaplama bölgesi'},
+    {id:'a7',name:'Kalite Kontrol',dept:'Kalite',desc:'QC muayene alanı'}
+  ],
+  auditors:['Bahadır Göktürk','Mehmet Yılmaz','Ayşe Kaya','Hasan Demir'],
+  actions:[], answers:{}, photos:{}, notes:{}
+};
+function loadS(){ try{ const d=localStorage.getItem('5s-v2'); if(d) Object.assign(S,JSON.parse(d)); }catch(e){} }
+function saveS(){ localStorage.setItem('5s-v2',JSON.stringify(S)); }
+
+// ======= MOBILE NAV =======
+var _sidebarOpen = false;
+function toggleSidebar(){
+  _sidebarOpen = !_sidebarOpen;
+  var sb = document.querySelector('.sidebar');
+  var ov = document.getElementById('sb-overlay');
+  if(_sidebarOpen){
+    sb.style.cssText = 'position:fixed;left:0;top:0;bottom:0;width:260px;z-index:9999;background:var(--accent);display:flex;flex-direction:column;overflow-y:auto;';
+    ov.style.cssText = 'display:block;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:9998;';
+  } else {
+    closeSidebar();
+  }
+}
+function closeSidebar(){
+  _sidebarOpen = false;
+  var sb = document.querySelector('.sidebar');
+  var ov = document.getElementById('sb-overlay');
+  if(window.innerWidth <= 640){
+    sb.style.cssText = 'position:fixed;left:-260px;top:0;bottom:0;width:260px;z-index:9999;background:var(--accent);display:flex;flex-direction:column;overflow-y:auto;transition:left .2s ease;';
+  } else {
+    sb.style.cssText = '';
+  }
+  ov.style.cssText = 'display:none;';
+}
+function setActiveBottomNav(page){
+  document.querySelectorAll('.bnav-btn').forEach(function(b){ b.classList.remove('active'); });
+  var btn = document.getElementById('bnav-'+page);
+  if(btn) btn.classList.add('active');
+}
+function initMobile(){
+  if(window.innerWidth <= 640){
+    var sb = document.querySelector('.sidebar');
+    sb.style.cssText = 'position:fixed;left:-260px;top:0;bottom:0;width:260px;z-index:9999;background:var(--accent);display:flex;flex-direction:column;overflow-y:auto;';
+    document.getElementById('sb-overlay').style.cssText = 'display:none;';
+  }
+}
+
+// ======= NAVIGATION =======
+const TITLES={'dashboard':'Dashboard','new-audit':'Yeni Denetim','history':'Denetim Geçmişi','areas':'Bölge Yönetimi','actions':'Aksiyonlar','reports':'Raporlar','leaderboard':'🏆 Takım Sıralaması','qr':'⬛ QR Kodlar'};
+function navigate(p){
+  document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(x=>x.classList.remove('active'));
+  document.getElementById('page-'+p).classList.add('active');
+  document.querySelectorAll('.nav-btn').forEach(x=>{ if(x.getAttribute('onclick')?.includes("'"+p+"'")) x.classList.add('active'); });
+  document.getElementById('topbar-title').textContent=TITLES[p]||'';
+  setActiveBottomNav(p);
+  closeSidebar();
+  if(p==='dashboard') renderDashboard();
+  if(p==='history') renderHistory();
+  if(p==='areas') renderAreas();
+  if(p==='actions') renderActions();
+  if(p==='reports') renderReports();
+  if(p==='new-audit') initForm();
+  if(p==='leaderboard') renderLeaderboard();
+  if(p==='qr') renderQRPage();
+}
+
+// ======= AUDIT FORM =======
+function initForm(){
+  const sel=document.getElementById('audit-area');
+  sel.innerHTML='<option value="">Takım seçiniz.</option>';
+  S.areas.forEach(a=>{ sel.innerHTML+=`<option value="${a.id}">${a.name} (${a.dept})</option>`; });
+  document.getElementById('audit-date').value=new Date().toISOString().split('T')[0];
+  // Pre-fill with sample data
+  document.getElementById('audit-form-code').value='5S-2026-' + String(S.audits.length+1).padStart(3,'0');
+  document.getElementById('audit-location').value='Fabrika-1';
+  document.getElementById('audit-dept').value='Üretim';
+  document.getElementById('audit-area').value='a1';
+  document.getElementById('audit-team-leader').value='Ahmet Çelik';
+  // Set default auditor
+  const defaultAuditor='Bahadır Göktürk';
+  document.getElementById('audit-auditor').value=defaultAuditor;
+  document.getElementById('auditor-display').textContent=defaultAuditor;
+  document.getElementById('auditor-display').style.fontWeight='500';
+  document.getElementById('auditor-display').style.color='var(--accent)';
+  S.answers={}; S.photos={}; S.notes={};
+  const c=document.getElementById('pillars-container'); c.innerHTML='';
+  PILLARS.forEach((p,pi)=>{
+    S.answers[pi]=[]; S.photos[pi]={}; S.notes[pi]=[];
+    p.questions.forEach((_,qi)=>{ S.answers[pi][qi]=null; S.notes[pi][qi]=''; S.photos[pi][qi]=[]; });
+    const div=document.createElement('div'); div.className='pillar-sec';
+    div.innerHTML=`
+      <div class="pillar-hdr" onclick="togglePillar(${pi})">
+        <div class="pillar-icon p${pi+1}" style="background:${p.color}">${p.id}</div>
+        <div class="pillar-info"><div class="pillar-name">${p.name}</div><div class="pillar-desc">${p.desc}</div></div>
+        <span class="pillar-weight">%${PW[p.id]}</span>
+        <span class="pillar-preview" id="pp-${pi}" style="color:var(--text3)">—</span>
+        <span class="pillar-toggle" id="pt-${pi}">▼</span>
+      </div>
+      <div class="pillar-body" id="pb-${pi}">
+        ${p.questions.map((q,qi)=>buildQuestion(pi,qi,q)).join('')}
+      </div>`;
+    c.appendChild(div);
+  });
+  updateSummary();
+  // Demo için örnek cevaplar doldur
+  setTimeout(()=>_fillSampleAnswers(), 50);
+}
+
+function _fillSampleAnswers(){
+  // S1 - sayısal sorular (0-2 arası küçük sorun var)
+  [[0,1],[1,0],[2,1],[3,2]].forEach(([qi,val])=>{
+    S.answers[0][qi]=val;
+    const cv=document.getElementById('cv-0-'+qi); if(cv) cv.textContent=val;
+    const ci=document.getElementById('ci-0-'+qi); if(ci) ci.value=val;
+    updatePhotoRequired(0,qi,val>0);
+  });
+  setYN(0,4,'evet');
+  // S2
+  setYN(1,0,'evet');
+  [[1,1],[2,0]].forEach(([qi,val])=>{
+    S.answers[1][qi]=val;
+    const cv=document.getElementById('cv-1-'+qi); if(cv) cv.textContent=val;
+    const ci=document.getElementById('ci-1-'+qi); if(ci) ci.value=val;
+    updatePhotoRequired(1,qi,val>0);
+  });
+  setMC(1,3,0); setYN(1,4,'evet');
+  // S3
+  setScore(2,0,3); setScore(2,1,3); setMC(2,2,0); setYN(2,3,'evet'); setYN(2,4,'evet');
+  // S4
+  setMC(3,0,1); setYN(3,1,'evet'); setYN(3,2,'evet'); setYN(3,3,'evet'); setMC(3,4,1);
+  // S5
+  setYN(4,0,'evet'); setYN(4,1,'evet'); setYN(4,2,'hayır'); setMC(4,3,1); setYN(4,4,'evet');
+  updateSummary();
+}
+function openAuditorModal(){
+  const list=document.getElementById('auditor-list');
+  list.innerHTML=S.auditors.map((a,i)=>`
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:9px 12px;border:1px solid var(--border);border-radius:var(--rs);margin-bottom:6px;cursor:pointer;transition:all .12s;" 
+      onmouseover="this.style.background='var(--accent-light)'" onmouseout="this.style.background=''"
+      onclick="selectAuditor('${a}')">
+      <div style="display:flex;align-items:center;gap:9px;">
+        <div style="width:28px;height:28px;border-radius:50%;background:var(--accent);color:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;">${a.split(' ').map(n=>n[0]).join('').substring(0,2)}</div>
+        <span style="font-size:13px;">${a}</span>
+      </div>
+      <span style="font-size:11px;color:var(--brand);">Seç →</span>
+    </div>`).join('');
+  openModal('modal-auditor');
+}
+function selectAuditor(name){
+  document.getElementById('audit-auditor').value=name;
+  document.getElementById('auditor-display').textContent=name;
+  document.getElementById('auditor-display').style.fontWeight='500';
+  document.getElementById('auditor-display').style.color='var(--accent)';
+  closeModal('modal-auditor');
+}
+function addNewAuditor(){
+  const inp=document.getElementById('new-auditor-name');
+  const name=inp.value.trim();
+  if(!name){showToast('⚠ Denetçi adı girin!');return;}
+  if(!S.auditors.includes(name)) S.auditors.push(name);
+  selectAuditor(name);
+  inp.value='';
+}
+
+function buildQuestion(pi,qi,q){
+  const wBadge = q.w===2?'<span class="w-badge-crit">KRİTİK ×2</span>':q.w===1.5?'<span class="w-badge-imp">ÖNEMLİ ×1.5</span>':'';
+  let ansHtml='';
+  if(q.type==='yn'){
+    ansHtml=`<div class="yn-btns">
+      <button class="yn-btn" id="yn-e-${pi}-${qi}" onclick="setYN(${pi},${qi},'evet')">✓ Evet</button>
+      <button class="yn-btn" id="yn-h-${pi}-${qi}" onclick="setYN(${pi},${qi},'hayır')">✗ Hayır</button>
+    </div>`;
+  } else if(q.type==='count'){
+    ansHtml=`<div class="count-wrap">
+      <button class="count-btn" onclick="changeCount(${pi},${qi},-1)">−</button>
+      <span class="count-val" id="cv-${pi}-${qi}">0</span>
+      <button class="count-btn" onclick="changeCount(${pi},${qi},1)">+</button>
+      <span class="count-label">${q.countLabel||'adet'}</span>
+      <input type="number" min="0" id="ci-${pi}-${qi}" value="0" style="width:60px;font-size:13px;padding:5px 8px;margin-left:4px;" oninput="setCount(${pi},${qi},+this.value)">
+    </div>`;
+  } else if(q.type==='score'){
+    const lbls=['Yok','Zayıf','Orta','İyi','Mükemmel'];
+    ansHtml=`<div class="score-opts">${[0,1,2,3,4].map(s=>`<button class="score-btn" id="sb-${pi}-${qi}-${s}" onclick="setScore(${pi},${qi},${s})" title="${s} — ${lbls[s]}">${s}</button>`).join('')}</div>`;
+  } else if(q.type==='mc'){
+    ansHtml=`<div class="mc-opts">${q.options.map((o,oi)=>`<button class="mc-btn" id="mc-${pi}-${qi}-${oi}" onclick="setMC(${pi},${qi},${oi})">${o}</button>`).join('')}</div>`;
+  }
+  const photoHtml=`
+    <div class="photo-zone" id="pz-${pi}-${qi}" onclick="triggerPhoto(${pi},${qi})">
+      <div class="photo-zone-label"><span>📷</span><span id="pz-lbl-${pi}-${qi}">Fotoğraf ekle (opsiyonel)</span></div>
+    </div>
+    <div class="photo-previews" id="pp-prev-${pi}-${qi}"></div>
+    <input type="file" id="pf-${pi}-${qi}" accept="image/*" multiple style="display:none;" onchange="handlePhotos(${pi},${qi},this)">`;
+  return `<div class="q-item" id="qi-${pi}-${qi}">
+    <div class="q-text"><span class="q-num">${qi+1}.</span><span>${q.text}</span>${wBadge}</div>
+    <div class="ans-wrap">${ansHtml}</div>
+    ${photoHtml}
+    <div class="q-note"><input type="text" placeholder="Not ekle..." onchange="S.notes[${pi}][${qi}]=this.value" style="width:100%;max-width:460px;"></div>
+  </div>`;
+}
+
+function togglePillar(pi){
+  const b=document.getElementById('pb-'+pi), t=document.getElementById('pt-'+pi);
+  const open=b.classList.toggle('open'); t.classList.toggle('open',open);
+}
+
+// --- ANSWER SETTERS ---
+function setYN(pi,qi,v){
+  S.answers[pi][qi]=v;
+  document.getElementById('yn-e-'+pi+'-'+qi).className='yn-btn'+(v==='evet'?' sel-yes':'');
+  document.getElementById('yn-h-'+pi+'-'+qi).className='yn-btn'+(v==='hayır'?' sel-no':'');
+  updatePhotoRequired(pi,qi,v==='hayır');
+  updateSummary();
+}
+function changeCount(pi,qi,d){
+  const cur=typeof S.answers[pi][qi]==='number'?S.answers[pi][qi]:0;
+  const n=Math.max(0,cur+d); S.answers[pi][qi]=n;
+  document.getElementById('cv-'+pi+'-'+qi).textContent=n;
+  document.getElementById('ci-'+pi+'-'+qi).value=n;
+  updatePhotoRequired(pi,qi,n>0);
+  updateSummary();
+}
+function setCount(pi,qi,v){
+  const n=Math.max(0,isNaN(v)?0:Math.round(v)); S.answers[pi][qi]=n;
+  document.getElementById('cv-'+pi+'-'+qi).textContent=n;
+  updatePhotoRequired(pi,qi,n>0);
+  updateSummary();
+}
+function setScore(pi,qi,v){
+  S.answers[pi][qi]=v;
+  for(let s=0;s<=4;s++) document.getElementById('sb-'+pi+'-'+qi+'-'+s).className='score-btn'+(s===v?' s'+s:'');
+  updatePhotoRequired(pi,qi,v<=1);
+  updateSummary();
+}
+function setMC(pi,qi,idx){
+  S.answers[pi][qi]=idx;
+  const p=PILLARS[pi]; const optCount=p.questions[qi].options.length;
+  for(let i=0;i<optCount;i++) document.getElementById('mc-'+pi+'-'+qi+'-'+i).className='mc-btn'+(i===idx?' sel':'');
+  const isBad=(idx>=optCount-2);
+  updatePhotoRequired(pi,qi,isBad && PILLARS[pi].questions[qi].photo);
+  updateSummary();
+}
+
+// --- PHOTO HANDLING ---
+function updatePhotoRequired(pi,qi,required){
+  const q=PILLARS[pi].questions[qi];
+  if(!q.photo) return;
+  const zone=document.getElementById('pz-'+pi+'-'+qi);
+  const lbl=document.getElementById('pz-lbl-'+pi+'-'+qi);
+  if(required){
+    zone.classList.add('photo-required');
+    lbl.textContent='📸 Fotoğraf gerekli! (Uygunsuzluğu belgeleyin)';
+  } else {
+    zone.classList.remove('photo-required');
+    lbl.textContent='Fotoğraf ekle (opsiyonel)';
+  }
+}
+function triggerPhoto(pi,qi){ document.getElementById('pf-'+pi+'-'+qi).click(); }
+function handlePhotos(pi,qi,input){
+  const files=Array.from(input.files);
+  files.forEach(f=>{
+    const reader=new FileReader();
+    reader.onload=e=>{
+      const dataUrl=e.target.result;
+      S.photos[pi][qi]=[...(S.photos[pi][qi]||[]),dataUrl];
+      renderPhotoPreview(pi,qi);
+    };
+    reader.readAsDataURL(f);
+  });
+}
+function renderPhotoPreview(pi,qi){
+  const el=document.getElementById('pp-prev-'+pi+'-'+qi);
+  const photos=S.photos[pi][qi]||[];
+  el.innerHTML=photos.map((src,i)=>`<div class="photo-thumb"><img src="${src}"><button class="photo-del" onclick="removePhoto(${pi},${qi},${i})">✕</button></div>`).join('');
+}
+function removePhoto(pi,qi,i){ S.photos[pi][qi].splice(i,1); renderPhotoPreview(pi,qi); }
+
+// --- SCORE SUMMARY ---
+function updateSummary(){
+  const sumDiv=document.getElementById('score-summary');
+  sumDiv.innerHTML=PILLARS.map((p,pi)=>{
+    const {pct,contribution}=calcPillar(pi,S.answers[pi]||[]);
+    const pp=document.getElementById('pp-'+pi);
+    if(pp){ pp.textContent=Math.round(contribution*10)/10+'/'+PW[p.id]; pp.style.color=pct>=75?'var(--green)':pct>=50?'var(--amber)':'var(--red)'; }
+    return `<div class="sum-pillar">
+      <div class="sp-id">${p.id}</div>
+      <div class="sp-pct" style="color:${pct>=75?'var(--green)':pct>=50?'var(--amber)':'var(--red)'}">${Math.round(pct)}<span style="font-size:10px;font-weight:400">%</span></div>
+      <div class="sp-wt">Ağırlık %${PW[p.id]}</div>
+    </div>`;
+  }).join('');
+  const total=calcTotal(S.answers);
+  document.getElementById('total-score-display').textContent=total+' / 100';
+  const g=total>=85?['Mükemmel','badge-green']:total>=70?['İyi','badge-blue']:total>=50?['Orta','badge-amber']:['Geliştirilmeli','badge-red'];
+  document.getElementById('score-badge-display').innerHTML=`<span class="badge ${g[1]}" style="font-size:13px;padding:5px 15px;">${g[0]}</span>`;
+}
+
+// --- SUBMIT ---
+function submitAudit(){
+  const area=document.getElementById('audit-area').value;
+  const auditor=document.getElementById('audit-auditor').value.trim();
+  if(!area){showToast('⚠ Takım seçin!');return;}
+  if(!auditor){showToast('⚠ Denetçi seçin!');return;}
+  const areaObj=S.areas.find(a=>a.id===area);
+  const pillars={};
+  PILLARS.forEach((p,pi)=>{
+    const {pct,contribution}=calcPillar(pi,S.answers[pi]||[]);
+    pillars[p.id]={pct,contribution,max:PW[p.id],answers:[...S.answers[pi]],notes:[...S.notes[pi]],photos:{...S.photos[pi]}};
+  });
+  const audit={
+    id:Date.now(),
+    formCode:document.getElementById('audit-form-code').value||'',
+    area:areaObj?.name||area, areaId:area,
+    location:document.getElementById('audit-location').value||'',
+    dept:document.getElementById('audit-dept').value||'',
+    teamLeader:document.getElementById('audit-team-leader').value||'',
+    auditor, date:document.getElementById('audit-date').value||new Date().toISOString().split('T')[0],
+    shift:document.getElementById('audit-shift').value,
+    notes:document.getElementById('audit-notes').value,
+    totalScore:calcTotal(S.answers), pillars,
+    createdAt:new Date().toISOString()
+  };
+  S.audits.unshift(audit); saveS(); updateBadges(); showToast('✓ Denetim kaydedildi!');
+  return audit;
+}
+function submitAndReport(){
+  const a=submitAudit(); if(a) setTimeout(()=>generateAIReport(a.id),300);
+}
+function resetAudit(){ if(confirm('Formu sıfırla?')) initForm(); }
+
+// ======= DASHBOARD =======
+function renderDashboard(){
+  const now=new Date();
+  const monthAudits=S.audits.filter(a=>{ const d=new Date(a.date); return d.getMonth()===now.getMonth()&&d.getFullYear()===now.getFullYear(); });
+  const avg=S.audits.length>0?Math.round(S.audits.reduce((s,a)=>s+a.totalScore,0)/S.audits.length):null;
+  const open=S.actions.filter(a=>a.status!=='Tamamlandı').length;
+  document.getElementById('m-total').textContent=S.audits.length;
+  document.getElementById('m-month').textContent=monthAudits.length;
+  document.getElementById('m-avg').textContent=avg!==null?avg:'—';
+  document.getElementById('m-actions').textContent=open;
+
+  // Recent list
+  const rl=document.getElementById('recent-list');
+  if(!S.audits.length){ rl.innerHTML='<div style="text-align:center;padding:26px;color:var(--text3);font-size:13px;">Denetim yok</div>'; }
+  else {
+    rl.innerHTML=S.audits.slice(0,5).map(a=>`
+      <div style="display:flex;align-items:center;gap:12px;padding:11px 0;border-bottom:1px solid var(--border);cursor:pointer;" onclick="showDetail('${a.id}')" onmouseover="this.style.background='var(--surface2)'" onmouseout="this.style.background=''">
+        <div style="width:36px;height:36px;border-radius:7px;background:${scoreColor(a.totalScore)};display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#fff;flex-shrink:0;">${a.totalScore}</div>
+        <div style="flex:1;"><div style="font-size:13px;font-weight:500;">${a.area}</div><div style="font-size:11px;color:var(--text3);">${a.date} · ${a.auditor}</div></div>
+        <span class="badge ${scoreBadge(a.totalScore)}">${scoreLabel(a.totalScore)}</span>
+      </div>`).join('');
+  }
+
+  // Compliance widget — circular + bars (like reference image)
+  renderComplianceWidget();
+  renderLeaderboardPreview();
+  renderActionDashboardWidget();
+
+  // Pillar bars
+  const pb=document.getElementById('pillar-bars');
+  if(!S.audits.length){ pb.innerHTML='<div style="text-align:center;color:var(--text3);font-size:12px;padding:18px;grid-column:1/-1;">Veri yok</div>'; }
+  else {
+    pb.innerHTML=PILLARS.map((p,pi)=>{
+      const avg=Math.round(S.audits.reduce((s,a)=>s+(a.pillars[p.id]?.pct||0),0)/S.audits.length);
+      const cls=avg>=75?'hi':avg>=50?'md':'lo';
+      return `<div class="pb-card">
+        <div class="pb-icon" style="background:${p.color}">${p.id}</div>
+        <div class="pb-pct" style="color:${avg>=75?'var(--green)':avg>=50?'var(--amber)':'var(--red)'}">${avg}%</div>
+        <div class="pb-name">${p.name.split(' ')[0]}</div>
+        <div class="pb-wt">Ağırlık %${PW[p.id]}</div>
+        <div class="sbar" style="margin-top:6px;"><div class="sbar-fill ${cls}" style="width:${avg}%"></div></div>
+      </div>`;
+    }).join('');
+  }
+}
+
+function renderComplianceWidget(){
+  const cw=document.getElementById('compliance-widget');
+  if(!S.audits.length){
+    cw.innerHTML='<div style="text-align:center;padding:24px;color:var(--text3);font-size:13px;">Veri yok</div>';
+    return;
+  }
+  const latest=S.audits[0];
+  const score=latest.totalScore;
+  const r=44, cx=55, cy=55, circ=2*Math.PI*r;
+  const dash=circ*(score/100), gap=circ-dash;
+  const sc=scoreColor(score);
+
+  const pillarRows=PILLARS.map(p=>{
+    const pct=Math.round(latest.pillars[p.id]?.pct||0);
+    return `<div style="display:flex;align-items:center;gap:8px;margin-bottom:7px;">
+      <div style="font-size:11px;font-weight:600;width:80px;color:var(--text2);flex-shrink:0;">${p.id} · ${p.name.split('(')[0].trim()}</div>
+      <div style="flex:1;height:5px;background:var(--surface2);border-radius:99px;overflow:hidden;"><div style="height:100%;width:${pct}%;background:${p.color};border-radius:99px;"></div></div>
+      <div style="font-size:11px;font-weight:600;width:32px;text-align:right;color:${p.color};">${pct}%</div>
+    </div>`;
+  }).join('');
+
+  cw.innerHTML=`
+    <div style="display:flex;align-items:center;gap:18px;margin-bottom:14px;">
+      <svg width="110" height="110" viewBox="0 0 110 110">
+        <circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="var(--surface2)" stroke-width="10"/>
+        <circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="${sc}" stroke-width="10" stroke-linecap="round"
+          stroke-dasharray="${dash} ${gap}" transform="rotate(-90 ${cx} ${cy})" style="transition:stroke-dasharray .6s;"/>
+      </svg>
+      <div style="position:absolute;transform:none;text-align:center;margin-left:24px;">
+        <div style="font-size:22px;font-weight:700;font-family:var(--mono);color:${sc};">${score}</div>
+        <div style="font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;">/ 100</div>
+      </div>
+      <div style="flex:1;">
+        <div style="font-size:12px;font-weight:600;margin-bottom:2px;">${scoreLabel(score)}</div>
+        <div style="font-size:11px;color:var(--text3);">Son denetim: ${latest.date}</div>
+        <div style="font-size:11px;color:var(--text3);">${latest.area} · ${latest.auditor}</div>
+      </div>
+    </div>
+    <div>${pillarRows}</div>`;
+
+  // Fix SVG circle + text overlap with flexbox
+  cw.querySelector('div').style.position='relative';
+}
+
+// ======= HISTORY =======
+function renderHistory(){
+  const q=(document.getElementById('hist-search')?.value||'').toLowerCase();
+  const f=S.audits.filter(a=>a.area.toLowerCase().includes(q)||a.auditor.toLowerCase().includes(q));
+  document.getElementById('hist-count-lbl').textContent=f.length+' kayıt';
+  const tb=document.getElementById('hist-tbody');
+  if(!f.length){ tb.innerHTML='<tr><td colspan="9" style="text-align:center;color:var(--text3);padding:26px;">Kayıt yok</td></tr>'; return; }
+  tb.innerHTML=f.map((a,i)=>`<tr>
+    <td style="font-family:var(--mono);font-size:11px;color:var(--text3);">${f.length-i}</td>
+    <td>${a.date}</td><td style="font-weight:500;">${a.area}</td><td>${a.auditor}</td>
+    <td><span class="badge badge-gray">${a.shift}</span></td>
+    <td><div class="sbar-wrap"><div class="sbar" style="min-width:55px;"><div class="sbar-fill ${a.totalScore>=75?'hi':a.totalScore>=50?'md':'lo'}" style="width:${a.totalScore}%"></div></div><div class="sbar-val" style="color:${scoreColor(a.totalScore)};">${a.totalScore}</div></div></td>
+    <td><span class="badge ${scoreBadge(a.totalScore)}">${scoreLabel(a.totalScore)}</span></td>
+    <td style="display:flex;gap:4px;flex-wrap:nowrap;align-items:center;">
+      <button class="btn btn-outline btn-sm" onclick="showDetail('${a.id}')">Detay</button>
+      <button class="btn btn-sm" style="color:#0d7a3e;border:1px solid #0d7a3e;background:#e6f4ec;white-space:nowrap;" onclick="openEditModal('${a.id}')">✎ Düzenle</button>
+      <button class="btn btn-sm" style="color:var(--brand);border:1px solid var(--brand);background:var(--brand-light);white-space:nowrap;" onclick="generateAIReport('${a.id}')">✦ AI Rapor</button>
+      <button class="btn btn-sm" style="color:var(--red);border:1px solid var(--red);background:var(--red-light);" onclick="delAudit('${a.id}')">Sil</button>
+    </td>
+  </tr>`).join('');
+  document.getElementById('hist-badge').textContent=S.audits.length;
+}
+function delAudit(id){ if(!confirm('Sil?')) return; S.audits=S.audits.filter(a=>a.id!=id); saveS(); renderHistory(); updateBadges(); showToast('Silindi.'); }
+
+function openEditModal(id){
+  const a=S.audits.find(x=>x.id==id); if(!a) return;
+  document.getElementById('edit-audit-id').value=id;
+  // populate area dropdown
+  const sel=document.getElementById('edit-area');
+  sel.innerHTML='<option value="">-- Seçin --</option>';
+  S.areas.forEach(ar=>sel.innerHTML+=`<option value="${ar.id}" ${ar.id===a.areaId?'selected':''}>${ar.name} (${ar.dept})</option>`);
+  document.getElementById('edit-auditor').value=a.auditor||'';
+  document.getElementById('edit-date').value=a.date||'';
+  document.getElementById('edit-shift').value=a.shift||'Sabah';
+  document.getElementById('edit-location').value=a.location||'';
+  document.getElementById('edit-dept').value=a.dept||'';
+  document.getElementById('edit-team-leader').value=a.teamLeader||'';
+  document.getElementById('edit-form-code').value=a.formCode||'';
+  document.getElementById('edit-notes').value=a.notes||'';
+  openModal('modal-edit-audit');
+}
+
+function saveEditAudit(){
+  const id=document.getElementById('edit-audit-id').value;
+  const a=S.audits.find(x=>x.id==id); if(!a) return;
+  const areaId=document.getElementById('edit-area').value;
+  const areaObj=S.areas.find(x=>x.id===areaId);
+  a.areaId=areaId;
+  a.area=areaObj?.name||a.area;
+  a.auditor=document.getElementById('edit-auditor').value.trim()||a.auditor;
+  a.date=document.getElementById('edit-date').value||a.date;
+  a.shift=document.getElementById('edit-shift').value;
+  a.location=document.getElementById('edit-location').value;
+  a.dept=document.getElementById('edit-dept').value;
+  a.teamLeader=document.getElementById('edit-team-leader').value.trim();
+  a.formCode=document.getElementById('edit-form-code').value.trim();
+  a.notes=document.getElementById('edit-notes').value;
+  saveS(); closeModal('modal-edit-audit'); renderHistory(); showToast('✓ Denetim güncellendi!');
+}
+
+// ======= DETAIL MODAL =======
+let _currentDetailId=null;
+function showDetail(id){
+  _currentDetailId=id;
+  const a=S.audits.find(x=>x.id==id); if(!a) return;
+  document.getElementById('det-title').textContent=a.area+' — Denetim';
+  document.getElementById('det-sub').textContent=a.date+' · '+a.auditor+' · '+a.shift;
+  document.getElementById('det-ai-btn').onclick=()=>{ closeModal('modal-detail'); generateAIReport(a.id); };
+
+  let html=`<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin-bottom:14px;">
+    ${PILLARS.map(p=>{ const pd=a.pillars[p.id]; const pct=Math.round(pd?.pct||0); return `<div style="text-align:center;padding:10px;border:1px solid var(--border);border-radius:8px;"><div style="font-size:10px;color:var(--text3);">${p.id}</div><div style="font-size:17px;font-weight:700;font-family:var(--mono);color:${pct>=75?'var(--green)':pct>=50?'var(--amber)':'var(--red)'}">${pct}%</div></div>`; }).join('')}
+    <div style="text-align:center;padding:10px;border:2px solid var(--brand);border-radius:8px;grid-column:1/-1;"><div style="font-size:11px;color:var(--text3);">TOPLAM AĞIRLIKLI SKOR</div><div style="font-size:26px;font-weight:700;font-family:var(--mono);color:${scoreColor(a.totalScore)}">${a.totalScore}/100</div><span class="badge ${scoreBadge(a.totalScore)}">${scoreLabel(a.totalScore)}</span></div>
+  </div>`;
+
+  // Show photos if any
+  let allPhotos=[];
+  PILLARS.forEach((p,pi)=>{
+    const pd=a.pillars[p.id]; if(!pd?.photos) return;
+    p.questions.forEach((q,qi)=>{
+      const photos=(pd.photos[qi]||[]); if(!photos.length) return;
+      allPhotos.push({label:`${p.id} S${qi+1}: ${q.text.substring(0,50)}...`, photos});
+    });
+  });
+  if(allPhotos.length){
+    html+=`<div style="margin-bottom:12px;"><div style="font-size:12px;font-weight:600;margin-bottom:8px;color:var(--text2);">Fotoğraflar</div>`;
+    allPhotos.forEach(ph=>{
+      html+=`<div style="margin-bottom:8px;"><div style="font-size:11px;color:var(--text3);margin-bottom:4px;">${ph.label}</div><div style="display:flex;gap:6px;flex-wrap:wrap;">${ph.photos.map(src=>`<img src="${src}" class="report-photo">`).join('')}</div></div>`;
+    });
+    html+=`</div>`;
+  }
+  if(a.notes) html+=`<div style="padding:9px 13px;background:var(--surface2);border-radius:6px;font-size:12px;color:var(--text2);"><strong>Not:</strong> ${a.notes}</div>`;
+  html+=renderBeforeAfter(id);
+  document.getElementById('det-content').innerHTML=html;
+  openModal('modal-detail');
+}
+
+// ======= AREAS =======
+function renderAreas(){
+  const g=document.getElementById('area-grid');
+  g.innerHTML=S.areas.map(a=>{
+    const last=S.audits.find(au=>au.areaId===a.id);
+    return `<div class="area-card">
+      <div style="font-size:14px;font-weight:600;margin-bottom:3px;">${a.name}</div>
+      <div style="margin-bottom:8px;"><span class="badge badge-blue">${a.dept}</span></div>
+      <div style="font-size:11px;color:var(--text2);margin-bottom:8px;">${a.desc||''}</div>
+      <div style="font-size:11px;color:var(--text3);">${last?'Son: '+last.date:'Denetlenmedi'}</div>
+      <div style="margin-top:9px;"><button class="btn btn-outline btn-sm" onclick="delArea('${a.id}')">Sil</button></div>
+    </div>`;
+  }).join('');
+  g.innerHTML+=`<div class="area-card add" onclick="openModal('modal-area-add')"><div style="font-size:22px;">＋</div><div style="font-size:13px;font-weight:500;">Bölge Ekle</div></div>`;
+}
+function addArea(){
+  const n=document.getElementById('new-area-name').value.trim(); if(!n){showToast('⚠ Ad zorunlu!');return;}
+  S.areas.push({id:'a'+Date.now(),name:n,dept:document.getElementById('new-area-dept').value.trim()||'Genel',desc:document.getElementById('new-area-desc').value.trim()});
+  saveS(); closeModal('modal-area-add'); renderAreas(); showToast('✓ Bölge eklendi!');
+  document.getElementById('new-area-name').value='';
+}
+function delArea(id){ if(!confirm('Sil?')) return; S.areas=S.areas.filter(a=>a.id!==id); saveS(); renderAreas(); }
+
+// ======= ACTIONS =======
+function renderActions(){
+  const filter=document.getElementById('act-filter')?.value||'all';
+  let list=S.actions;
+  if(filter==='Açık'||filter==='Devam Ediyor'||filter==='Tamamlandı') list=list.filter(a=>a.status===filter);
+  else if(filter==='Kritik'||filter==='Yüksek') list=list.filter(a=>a.priority===filter);
+
+  // update metrics
+  const setM=(id,val)=>{ const el=document.getElementById(id); if(el) el.textContent=val; };
+  setM('act-kritik', S.actions.filter(a=>a.priority==='Kritik'&&a.status!=='Tamamlandı').length);
+  setM('act-yuksek', S.actions.filter(a=>a.priority==='Yüksek'&&a.status!=='Tamamlandı').length);
+  setM('act-orta', S.actions.filter(a=>a.priority==='Orta'&&a.status!=='Tamamlandı').length);
+  setM('act-done', S.actions.filter(a=>a.status==='Tamamlandı').length);
+
+  const tb=document.getElementById('actions-tbody');
+  if(!list.length){ tb.innerHTML='<tr><td colspan="8" style="text-align:center;color:var(--text3);padding:26px;">Aksiyon yok</td></tr>'; updateBadges(); return; }
+
+  // sort: kritik first, then by due date
+  const prioOrder={'Kritik':0,'Yüksek':1,'Orta':2,'Düşük':3};
+  list=[...list].sort((a,b)=>{
+    const pd=(prioOrder[a.priority]||3)-(prioOrder[b.priority]||3);
+    if(pd!==0) return pd;
+    if(a.due&&b.due) return a.due.localeCompare(b.due);
+    return 0;
+  });
+
+  const today=new Date().toISOString().split('T')[0];
+  tb.innerHTML=list.map((a,i)=>{
+    const overdue=a.due&&a.due<today&&a.status!=='Tamamlandı';
+    const dueTxt=a.due?(overdue?`<span style="color:var(--red);font-weight:600;">⚠ ${a.due}</span>`:a.due):'—';
+    return `<tr style="${overdue?'background:var(--red-light);':''}">
+      <td style="font-family:var(--mono);font-size:11px;color:var(--text3)">${i+1}</td>
+      <td style="font-weight:500;max-width:180px;">${a.title}${a.desc?`<div style="font-size:10px;color:var(--text3);margin-top:2px;">${a.desc.substring(0,60)}${a.desc.length>60?'...':''}</div>`:''}</td>
+      <td>${a.area}</td><td>${a.owner||'—'}</td>
+      <td><span class="badge ${a.priority==='Kritik'?'badge-red':a.priority==='Yüksek'?'badge-amber':a.priority==='Orta'?'badge-blue':'badge-gray'}">${a.priority}</span></td>
+      <td style="font-family:var(--mono);font-size:11px;">${dueTxt}</td>
+      <td><select onchange="updateActStatus('${a.id}',this.value)" style="font-size:11px;padding:4px 7px;"><option ${a.status==='Açık'?'selected':''}>Açık</option><option ${a.status==='Devam Ediyor'?'selected':''}>Devam Ediyor</option><option ${a.status==='Tamamlandı'?'selected':''}>Tamamlandı</option></select></td>
+      <td><button class="btn btn-sm" style="color:var(--red);border:1px solid var(--red);background:var(--red-light);" onclick="delAction('${a.id}')">Sil</button></td>
+    </tr>`;
+  }).join('');
+  updateBadges();
+}
+function openModal(id){
+  document.getElementById(id).classList.add('open');
+  if(id==='modal-action-add'){
+    const sel=document.getElementById('na-area'); sel.innerHTML='<option value="">-- Bölge --</option>';
+    S.areas.forEach(a=>sel.innerHTML+=`<option value="${a.name}">${a.name}</option>`);
+  }
+}
+function closeModal(id){ document.getElementById(id).classList.remove('open'); }
+function addAction(){
+  const t=document.getElementById('na-title').value.trim(); if(!t){showToast('⚠ Başlık zorunlu!');return;}
+  S.actions.push({id:'ac'+Date.now(),title:t,area:document.getElementById('na-area').value||'Genel',owner:document.getElementById('na-owner').value.trim(),priority:document.getElementById('na-prio').value,due:document.getElementById('na-due').value,desc:document.getElementById('na-desc').value,status:'Açık',createdAt:new Date().toISOString()});
+  saveS(); closeModal('modal-action-add'); renderActions(); showToast('✓ Aksiyon eklendi!');
+}
+function updateActStatus(id,status){ const a=S.actions.find(x=>x.id===id); if(a){a.status=status;saveS();updateBadges();} }
+function delAction(id){ if(!confirm('Sil?')) return; S.actions=S.actions.filter(a=>a.id!==id); saveS(); renderActions(); }
+document.getElementById('modal-action-add').addEventListener('click',e=>{ if(e.target===document.getElementById('modal-action-add')){
+  const sel=document.getElementById('na-area'); sel.innerHTML='<option value="">-- Bölge --</option>';
+  S.areas.forEach(a=>sel.innerHTML+=`<option value="${a.name}">${a.name}</option>`);
+}});
+
+// ======= REPORTS =======
+let tChart=null, pChart=null;
+function renderReports(){
+  if(!S.audits.length){ document.getElementById('r-best').textContent='—'; document.getElementById('r-worst').textContent='—'; document.getElementById('r-trend').textContent='—'; document.getElementById('r-comp').textContent='0%'; return; }
+  const am={};
+  S.audits.forEach(a=>{ if(!am[a.area]) am[a.area]=[]; am[a.area].push(a.totalScore); });
+  const aa=Object.entries(am).map(([n,s])=>({n,avg:Math.round(s.reduce((a,b)=>a+b,0)/s.length)})).sort((a,b)=>b.avg-a.avg);
+  document.getElementById('r-best').textContent=aa[0]?.n||'—'; document.getElementById('r-best-s').textContent='Ort. '+(aa[0]?.avg||0);
+  document.getElementById('r-worst').textContent=aa[aa.length-1]?.n||'—'; document.getElementById('r-worst-s').textContent='Ort. '+(aa[aa.length-1]?.avg||0);
+  const sorted=[...S.audits].sort((a,b)=>new Date(a.date)-new Date(b.date));
+  document.getElementById('r-trend').textContent=sorted.length>=2?(sorted[sorted.length-1].totalScore-sorted[0].totalScore>0?'+':'')+(sorted[sorted.length-1].totalScore-sorted[0].totalScore):'—';
+  const done=S.actions.filter(a=>a.status==='Tamamlandı').length;
+  document.getElementById('r-comp').textContent=S.actions.length>0?Math.round(done/S.actions.length*100)+'%':'0%';
+  if(tChart) tChart.destroy();
+  tChart=new Chart(document.getElementById('trendChart'),{type:'line',data:{labels:sorted.slice(-10).map(a=>a.date.slice(5)),datasets:[{label:'Skor',data:sorted.slice(-10).map(a=>a.totalScore),borderColor:'#E63312',backgroundColor:'rgba(230,51,18,.08)',borderWidth:2,pointRadius:3,tension:.3,fill:true}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{min:0,max:100,grid:{color:'rgba(0,0,0,.04)'},ticks:{font:{size:10}}},x:{grid:{display:false},ticks:{font:{size:9},maxRotation:45}}}}});
+  if(pChart) pChart.destroy();
+  const pavgs=PILLARS.map(p=>{ const a=S.audits.map(x=>x.pillars[p.id]?.pct||0); return a.length?Math.round(a.reduce((s,v)=>s+v,0)/a.length):0; });
+  pChart=new Chart(document.getElementById('pillarChart'),{type:'bar',data:{labels:PILLARS.map(p=>p.id),datasets:[{label:'%',data:pavgs,backgroundColor:PILLARS.map(p=>p.color+'cc'),borderColor:PILLARS.map(p=>p.color),borderWidth:1.5,borderRadius:5}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{min:0,max:100,grid:{color:'rgba(0,0,0,.04)'},ticks:{font:{size:10}}},x:{grid:{display:false},ticks:{font:{size:10}}}}}});
+}
+
+// ======= CSV =======
+function exportCSV(){
+  const h=['#','Tarih','Bölge','Denetçi','Vardiya','Skor','Durum'];
+  const rows=S.audits.map((a,i)=>[i+1,a.date,`"${a.area}"`,`"${a.auditor}"`,a.shift,a.totalScore,scoreLabel(a.totalScore)]);
+  const csv=[h,...rows].map(r=>r.join(',')).join('\n');
+  const url=URL.createObjectURL(new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8;'}));
+  const el=document.createElement('a'); el.href=url; el.download='5S_'+new Date().toISOString().split('T')[0]+'.csv'; el.click();
+  showToast('CSV dışa aktarıldı!');
+}
+
+// ======= AI REPORT =======
+async function generateAIReport(auditId){
+  const audit=S.audits.find(a=>a.id==auditId); if(!audit) return;
+  document.getElementById('ai-title').textContent=audit.area+' — AI Denetim Raporu';
+  document.getElementById('ai-sub').textContent=audit.date+' · '+audit.auditor+' · Skor: '+audit.totalScore+'/100';
+  document.getElementById('ai-loading').style.display='block';
+  document.getElementById('ai-content').style.display='none';
+  document.getElementById('pdf-btn').style.display='none';
+  openModal('modal-ai');
+
+  let prog=0;
+  const bar=document.getElementById('ai-prog');
+  const msgs=['Denetim verileri hazırlanıyor...','Pillar skorları analiz ediliyor...','Bulgular değerlendiriliyor...','Aksiyon planı hazırlanıyor...','Rapor oluşturuluyor...'];
+  let mi=0;
+  const iv=setInterval(()=>{ prog=Math.min(prog+Math.random()*9,88); bar.style.width=prog+'%'; if(Math.random()>.65&&mi<msgs.length-1) document.getElementById('ai-load-txt').textContent=msgs[++mi]; },380);
+
+  const pillarText=PILLARS.map((p,pi)=>{
+    const pd=audit.pillars[p.id]; if(!pd) return '';
+    const badQ=p.questions.map((q,qi)=>{
+      const ans=pd.answers?.[qi]; const s=getAnswerScore(q,ans);
+      if(s===null||s>2) return '';
+      let ansStr='';
+      if(q.type==='yn') ansStr=ans==='hayır'?'Hayır':'Evet';
+      else if(q.type==='count') ansStr=ans+' adet';
+      else if(q.type==='score') ansStr=s+'/4';
+      else if(q.type==='mc') ansStr=q.options?.[ans]||'—';
+      const photoNote=(pd.photos?.[qi]?.length>0)?` [${pd.photos[qi].length} fotoğraf eklendi]`:'';
+      return `  - "${q.text}" → ${ansStr}${q.w>=2?' [KRİTİK]':q.w>=1.5?' [ÖNEMLİ]':''}${photoNote}`;
+    }).filter(Boolean).join('\n');
+    const note=pd.notes?.filter(n=>n&&n.trim()).map(n=>'  Not: '+n).join('\n')||'';
+    return `${p.name} (Ağırlık %${PW[p.id]}, Skor: %${Math.round(pd.pct||0)}):\n${badQ||'  Tüm sorular yeterli.'}\n${note}`;
+  }).filter(Boolean).join('\n\n');
+
+  const prompt=`Sen Lean Manufacturing ve 5S uzmanısın. Saueressig Türkiye OPEX departmanı için denetim raporu hazırla.
+
+DENETİM BİLGİLERİ:
+- Bölge: ${audit.area} | Denetçi: ${audit.auditor} | Tarih: ${audit.date} | Vardiya: ${audit.shift}
+- Toplam Ağırlıklı Skor: ${audit.totalScore}/100
+- Puanlama: Seiri %15, Seiton %20, Seiso %15, Seiketsu %20, Shitsuke %30
+- Kritik sorular ×2, önemli sorular ×1.5 ağırlıkla hesaplanıyor
+
+DÜŞÜK PUANLI BULGULAR:
+${pillarText}
+
+Şu bölümleri içeren Türkçe rapor yaz:
+
+## Yönetici Özeti
+[2-3 cümle, genel performans]
+
+## Güçlü Yönler
+[3-4 madde]
+
+## Kritik Bulgular ve Kök Nedenler
+[Her önemli bulgu için kök neden analizi]
+
+## Ağırlıklı Skor Analizi
+[Shitsuke %30 ağırlığının etkisi, hangi pillar toplam skoru en çok etkiliyor]
+
+## Öncelikli Aksiyon Planı
+[5 aksiyon: Başlık | Sorumlu Rol | Süre | Beklenen Skor Artışı]
+
+## Sürdürülebilirlik Önerileri
+[2-3 uzun vadeli öneri]
+
+Net, profesyonel, uygulanabilir ol.`;
+
+  try {
+    const anthropicKey = localStorage.getItem('5s-anthropic-key')||'';
+    if(!anthropicKey){ throw new Error('NO_API_KEY'); }
+    let resText='';
+    const res=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{
+        'Content-Type':'application/json',
+        'x-api-key':anthropicKey,
+        'anthropic-version':'2023-06-01',
+        'anthropic-dangerous-direct-browser-access':'true'
+      },
+      body:JSON.stringify({model:'claude-haiku-4-5-20251001',max_tokens:1600,messages:[{role:'user',content:prompt}]})
+    });
+    if(!res.ok){ const err=await res.json().catch(()=>({})); throw new Error(err.error?.message||'API Hatası '+res.status); }
+    const data=await res.json();
+    resText=data.content?.[0]?.text||'Rapor oluşturulamadı.';
+    clearInterval(iv); bar.style.width='100%';
+    setTimeout(()=>{
+      document.getElementById('ai-loading').style.display='none';
+      document.getElementById('pdf-btn').style.display='inline-flex';
+      const cd=document.getElementById('ai-content'); cd.style.display='block';
+      cd.innerHTML=renderAIContent(resText,audit); cd.dataset.auditJson=JSON.stringify(audit);
+    },300);
+  } catch(e) {
+    clearInterval(iv);
+    document.getElementById('ai-loading').style.display='none';
+    document.getElementById('ai-content').style.display='block';
+    const isNoKey=e.message==='NO_API_KEY';
+    const sa=localStorage.getItem('5s-anthropic-key')||'';
+    document.getElementById('ai-content').innerHTML=`
+      <div style="padding:18px;border:1px solid var(--border);border-radius:10px;">
+        <div style="text-align:center;margin-bottom:16px;">
+          <div style="font-size:26px;margin-bottom:6px;">${isNoKey?'🔑':'⚠️'}</div>
+          <div style="font-size:14px;font-weight:600;margin-bottom:4px;">${isNoKey?'API Anahtarı Gerekli':'AI Bağlantı Hatası'}</div>
+          <div style="font-size:12px;color:var(--text2);">${isNoKey?'Anthropic API anahtarı girin.':'Hata: '+e.message}</div>
+        </div>
+        <div style="background:var(--accent-light);border:1px solid var(--border);border-radius:10px;padding:15px;">
+          <div style="font-size:13px;font-weight:700;color:var(--accent);margin-bottom:8px;">🔑 Anthropic (Claude) API Anahtarı</div>
+          <div style="font-size:11px;color:var(--text2);margin-bottom:10px;">
+            <a href="https://console.anthropic.com/keys" target="_blank" style="color:var(--brand);">console.anthropic.com</a> → API Keys → Create Key → Kopyala
+          </div>
+          <div style="display:flex;gap:7px;">
+            <input type="password" id="anthropic-key-input" placeholder="sk-ant-api03-..." style="flex:1;font-size:12px;font-family:monospace;" value="${sa}">
+            <button onclick="saveAnthropicKeyAndRetry('${audit.id}')" style="background:var(--brand);color:#fff;border:none;border-radius:5px;padding:7px 13px;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;">Kaydet &amp; Dene</button>
+          </div>
+          <div style="font-size:10px;color:var(--text3);margin-top:5px;">Key sadece tarayıcınızda saklanır. Ücretsiz $5 kredi ile ~500 rapor yazabilirsiniz.</div>
+        </div>
+      </div>`;
+  }
+}
+function saveGrokKeyAndRetry(auditId){
+  const key=document.getElementById('grok-key-input')?.value?.trim();
+  if(!key){ showToast('⚠ Grok API key girin!'); return; }
+  localStorage.setItem('5s-grok-key', key);
+  localStorage.removeItem('5s-anthropic-key');
+  showToast('✓ Grok key kaydedildi, deneniyor...');
+  setTimeout(()=>generateAIReport(auditId), 400);
+}
+function saveAnthropicKeyAndRetry(auditId){
+  const key=document.getElementById('anthropic-key-input')?.value?.trim();
+  if(!key||!key.startsWith('sk-')){ showToast('⚠ Geçersiz Anthropic key!'); return; }
+  localStorage.setItem('5s-anthropic-key', key);
+  localStorage.removeItem('5s-grok-key'); // Grok'u temizle, Anthropic öncelikli olsun
+  showToast('✓ Anthropic key kaydedildi, deneniyor...');
+  setTimeout(()=>generateAIReport(auditId), 400);
+}
+
+function downloadBat(){
+  const code=`@echo off
+chcp 65001 >nul
+echo ============================================
+echo   5S Denetim Sistemi - Web Sunucusu
+echo ============================================
+echo.
+echo Sunucu baslatiliyor: http://localhost:8000
+echo Kapatmak icin bu pencereyi kapatin.
+echo.
+python -m http.server 8000
+if %errorlevel% neq 0 (
+  echo Python bulunamadi! py komutu deneniyor...
+  py -m http.server 8000
+)
+pause`;
+  const blob=new Blob([code],{type:'text/plain'});
+  const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='baslat.bat'; a.click();
+  showToast('✓ başlat.bat indirildi! HTML ile aynı klasöre koy.');
+}
+
+function downloadServerPy(){
+  const code=`from flask import Flask, request, jsonify, send_from_directory
+import os, requests
+
+app = Flask(__name__, static_folder='.')
+XAI_KEY = os.environ.get('XAI_API_KEY','')
+
+@app.route('/')
+def index():
+    return send_from_directory('.', '5s-denetim.html')
+
+@app.route('/xai/v1/chat/completions', methods=['POST'])
+def grok_proxy():
+    r = requests.post('https://api.x.ai/v1/chat/completions',
+        headers={'Authorization': 'Bearer '+XAI_KEY, 'Content-Type':'application/json'},
+        json=request.json)
+    return r.json(), r.status_code
+
+if __name__ == '__main__':
+    print("5S Sunucusu: http://localhost:5000")
+    print("Grok key icin: XAI_API_KEY=xai-xxx python server.py")
+    app.run(port=5000, debug=True)
+`;
+  const blob=new Blob([code],{type:'text/plain'});
+  const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='server.py'; a.click();
+  showToast('server.py indirildi!');
+}
+
+function renderAIContent(text, audit){
+  const sc=scoreColor(audit.totalScore);
+  let html=`<div style="border:2px solid var(--brand);border-radius:10px;padding:14px;margin-bottom:16px;display:flex;flex-wrap:wrap;align-items:center;gap:16px;">
+    <div>
+      <div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:1px;">Ağırlıklı Toplam Skor</div>
+      <div style="font-size:36px;font-weight:700;font-family:var(--mono);color:${sc};line-height:1;">${audit.totalScore}<span style="font-size:14px;font-weight:400;">/100</span></div>
+      <span class="badge ${scoreBadge(audit.totalScore)}" style="font-size:12px;">${scoreLabel(audit.totalScore)}</span>
+    </div>
+    <table style="font-size:11px;border-collapse:collapse;flex:1;min-width:280px;">
+      <tr style="background:var(--surface2);">${['Pillar','Skor','Ağırlık','Katkı'].map(h=>`<th style="padding:5px 9px;font-size:9px;text-transform:uppercase;letter-spacing:.8px;">${h}</th>`).join('')}</tr>
+      ${PILLARS.map(p=>{ const pd=audit.pillars[p.id]; const pct=Math.round(pd?.pct||0); const c=Math.round(pd?.contribution*10||0)/10;
+        return `<tr><td style="padding:6px 9px;font-weight:600;">${p.id}</td><td style="padding:6px 9px;"><div style="display:flex;align-items:center;gap:5px;"><div style="width:50px;height:5px;background:var(--surface2);border-radius:3px;overflow:hidden;"><div style="height:100%;width:${pct}%;background:${p.color};"></div></div><span>${pct}%</span></div></td><td style="padding:6px 9px;text-align:center;">%${PW[p.id]}</td><td style="padding:6px 9px;text-align:center;font-weight:600;">${c}</td></tr>`;
+      }).join('')}
+    </table>
+  </div>`;
+
+  // Render photos section if any
+  let photoSections=[];
+  PILLARS.forEach((p,pi)=>{
+    const pd=audit.pillars[p.id]; if(!pd?.photos) return;
+    p.questions.forEach((q,qi)=>{
+      const photos=pd.photos[qi]||[]; if(!photos.length) return;
+      photoSections.push({label:`${p.id} S${qi+1}: ${q.text.substring(0,60)}...`, photos, note:pd.notes?.[qi]||''});
+    });
+  });
+  if(photoSections.length){
+    html+=`<div class="ai-section-title">Fotoğraf Belgeleri</div>`;
+    photoSections.forEach(ps=>{
+      html+=`<div style="margin-bottom:10px;"><div style="font-size:11px;color:var(--text2);margin-bottom:5px;">${ps.label}</div>`;
+      html+=`<div class="report-photos-row">${ps.photos.map(src=>`<img src="${src}" class="report-photo">`).join('')}</div>`;
+      if(ps.note) html+=`<div style="font-size:11px;color:var(--text3);margin-top:3px;">Not: ${ps.note}</div>`;
+      html+=`</div>`;
+    });
+  }
+
+  text.split('\n').forEach(line=>{
+    if(line.startsWith('## ')) html+=`<div class="ai-section-title">${line.slice(3)}</div>`;
+    else if(line.startsWith('- ')||line.startsWith('* ')) html+=`<div class="ai-bullet"><span class="dot">▸</span><span>${line.slice(2).replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>')}</span></div>`;
+    else if(line.match(/^\d+\./)) html+=`<div class="ai-bullet"><span class="dot" style="font-weight:600;">${line.match(/^\d+/)[0]}.</span><span>${line.replace(/^\d+\.\s*/,'').replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>')}</span></div>`;
+    else if(line.trim()) html+=`<p class="ai-para">${line.replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>')}</p>`;
+  });
+
+  html+=`<div style="margin-top:18px;padding:10px 14px;background:var(--surface2);border-radius:7px;font-size:10px;color:var(--text3);">Saueressig Türkiye OPEX 5S Denetim Sistemi · AI destekli rapor · ${new Date().toLocaleDateString('tr-TR')} · ${audit.auditor}</div>`;
+  return html;
+}
+
+// ======= PDF =======
+function exportPDF(){
+  const cd=document.getElementById('ai-content');
+  const audit=JSON.parse(cd.dataset.auditJson||'{}');
+  const w=window.open('','_blank');
+  w.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>5S Raporu — ${audit.area}</title>
+  <style>body{font-family:Arial,sans-serif;margin:0;padding:30px 36px;color:#1a1a2e;font-size:12px;} h1{font-size:18px;color:#0d2240;border-bottom:3px solid #E63312;padding-bottom:9px;} .meta{font-size:11px;color:#8a96a8;margin-bottom:18px;} .sec{font-size:13px;font-weight:700;color:#0d2240;margin:15px 0 7px;padding-bottom:4px;border-bottom:2px solid #E63312;} p{margin:4px 0;line-height:1.6;color:#4a5568;} .bul{display:flex;gap:6px;margin:3px 0;} .bul .d{color:#E63312;flex-shrink:0;} table{width:100%;border-collapse:collapse;margin-bottom:14px;} th{background:#f0f2f5;padding:6px 9px;font-size:9px;text-transform:uppercase;} td{padding:6px 9px;border-bottom:1px solid #e8ecf0;} img.rp{max-width:140px;height:90px;object-fit:cover;border-radius:5px;margin:3px;} .foot{margin-top:20px;padding:9px 12px;background:#f0f2f5;border-radius:5px;font-size:9px;color:#8a96a8;}</style>
+  </head><body>
+  <h1>5S Denetim Raporu — ${audit.area||''}</h1>
+  <div class="meta">${audit.date||''} · ${audit.auditor||''} · ${audit.shift||''} · Skor: ${audit.totalScore||0}/100</div>
+  ${cd.innerHTML}
+  <div class="foot">Saueressig Türkiye OPEX 5S Denetim Sistemi · ${new Date().toLocaleDateString('tr-TR')}</div>
+  </body></html>`);
+  w.document.close();
+  setTimeout(()=>w.print(),700);
+}
+
+// ======= LEADERBOARD =======
+function renderLeaderboard(){
+  const filter=document.getElementById('lb-filter')?.value||'all';
+  const now=new Date();
+  let audits=S.audits;
+  if(filter==='month') audits=audits.filter(a=>{ const d=new Date(a.date); return d.getMonth()===now.getMonth()&&d.getFullYear()===now.getFullYear(); });
+  if(filter==='week'){ const wk=new Date(now); wk.setDate(now.getDate()-7); audits=audits.filter(a=>new Date(a.date)>=wk); }
+
+  // group by area, calc avg score
+  const areaMap={};
+  audits.forEach(a=>{
+    if(!areaMap[a.area]) areaMap[a.area]={name:a.area,scores:[],count:0,last:a.date};
+    areaMap[a.area].scores.push(a.totalScore);
+    areaMap[a.area].count++;
+    if(a.date>areaMap[a.area].last) areaMap[a.area].last=a.date;
+  });
+  const ranked=Object.values(areaMap).map(x=>({...x,avg:Math.round(x.scores.reduce((s,v)=>s+v,0)/x.scores.length)}))
+    .sort((a,b)=>b.avg-a.avg);
+
+  const el=document.getElementById('leaderboard-list');
+  if(!ranked.length){ el.innerHTML='<div style="text-align:center;padding:36px;color:var(--text3);">Henüz denetim yok</div>'; return; }
+
+  const medals=['🥇','🥈','🥉'];
+  el.innerHTML=ranked.map((r,i)=>{
+    const sc=scoreColor(r.avg); const trend=r.scores.length>1?(r.scores[0]>=r.scores[r.scores.length-1]?'↑':'↓'):'—';
+    const trendColor=trend==='↑'?'var(--green)':trend==='↓'?'var(--red)':'var(--text3)';
+    return `<div style="display:flex;align-items:center;gap:14px;padding:13px 0;border-bottom:1px solid var(--border);${i===0?'background:linear-gradient(90deg,var(--amber-light),transparent);margin:0 -18px;padding:13px 18px;':''}">
+      <div style="font-size:${i<3?'22px':'14px'};font-weight:700;width:32px;text-align:center;flex-shrink:0;">${i<3?medals[i]:i+1}</div>
+      <div style="flex:1;">
+        <div style="font-size:14px;font-weight:600;">${r.name}</div>
+        <div style="font-size:11px;color:var(--text3);">${r.count} denetim · Son: ${r.last}</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;">
+        <div style="width:80px;height:7px;background:var(--surface2);border-radius:99px;overflow:hidden;"><div style="height:100%;width:${r.avg}%;background:${sc};border-radius:99px;"></div></div>
+        <div style="font-size:18px;font-weight:700;font-family:var(--mono);color:${sc};min-width:38px;">${r.avg}</div>
+        <span style="font-size:14px;color:${trendColor};font-weight:700;">${trend}</span>
+        <span class="badge ${scoreBadge(r.avg)}">${scoreLabel(r.avg)}</span>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function renderLeaderboardPreview(){
+  const el=document.getElementById('leaderboard-preview'); if(!el) return;
+  if(!S.audits.length){ el.innerHTML='<div style="text-align:center;padding:20px;color:var(--text3);font-size:12px;">Denetim yok</div>'; return; }
+  const areaMap={};
+  S.audits.forEach(a=>{
+    if(!areaMap[a.area]) areaMap[a.area]={name:a.area,scores:[]};
+    areaMap[a.area].scores.push(a.totalScore);
+  });
+  const ranked=Object.values(areaMap).map(x=>({...x,avg:Math.round(x.scores.reduce((s,v)=>s+v,0)/x.scores.length)}))
+    .sort((a,b)=>b.avg-a.avg).slice(0,5);
+  const medals=['🥇','🥈','🥉','4.','5.'];
+  el.innerHTML=ranked.map((r,i)=>`
+    <div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border);">
+      <span style="font-size:${i<3?'16px':'12px'};width:24px;text-align:center;flex-shrink:0;">${medals[i]}</span>
+      <div style="flex:1;font-size:13px;font-weight:${i===0?'600':'400'}">${r.name}</div>
+      <div style="font-size:13px;font-weight:700;font-family:var(--mono);color:${scoreColor(r.avg)};">${r.avg}</div>
+    </div>`).join('');
+}
+
+function renderActionDashboardWidget(){
+  const el=document.getElementById('action-dashboard-widget'); if(!el) return;
+  const open=S.actions.filter(a=>a.status!=='Tamamlandı');
+  if(!open.length){ el.innerHTML='<div style="text-align:center;padding:20px;color:var(--green);font-size:12px;">✓ Açık aksiyon yok!</div>'; return; }
+  const kritik=open.filter(a=>a.priority==='Kritik');
+  const yuksek=open.filter(a=>a.priority==='Yüksek');
+  const today=new Date().toISOString().split('T')[0];
+  const overdue=open.filter(a=>a.due&&a.due<today);
+  el.innerHTML=`
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:12px;">
+      <div style="text-align:center;padding:10px;background:var(--red-light);border-radius:var(--rs);">
+        <div style="font-size:20px;font-weight:700;color:var(--red);">${kritik.length}</div>
+        <div style="font-size:10px;color:var(--red);font-weight:500;">KRİTİK</div>
+      </div>
+      <div style="text-align:center;padding:10px;background:var(--amber-light);border-radius:var(--rs);">
+        <div style="font-size:20px;font-weight:700;color:var(--amber);">${yuksek.length}</div>
+        <div style="font-size:10px;color:var(--amber);font-weight:500;">YÜKSEK</div>
+      </div>
+      <div style="text-align:center;padding:10px;background:var(--red-light);border-radius:var(--rs);">
+        <div style="font-size:20px;font-weight:700;color:var(--red);">${overdue.length}</div>
+        <div style="font-size:10px;color:var(--red);font-weight:500;">GECİKEN</div>
+      </div>
+    </div>
+    ${open.slice(0,4).map(a=>`
+      <div style="display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid var(--border);">
+        <span class="badge ${a.priority==='Kritik'?'badge-red':a.priority==='Yüksek'?'badge-amber':'badge-blue'}" style="font-size:9px;">${a.priority}</span>
+        <div style="flex:1;font-size:12px;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${a.title}</div>
+        <div style="font-size:10px;color:var(--text3);">${a.due||'—'}</div>
+      </div>`).join('')}`;
+}
+
+// ======= QR KODLAR =======
+function renderQRPage(){
+  const grid=document.getElementById('qr-grid'); if(!grid) return;
+  grid.innerHTML='';
+  const baseUrl=location.protocol==='file:'?'http://localhost:8000':location.origin+location.pathname;
+  S.areas.forEach(area=>{
+    const url=`${baseUrl}?area=${encodeURIComponent(area.id)}&autostart=1`;
+    const card=document.createElement('div');
+    card.style.cssText='background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:16px;text-align:center;';
+    card.innerHTML=`
+      <div style="font-size:13px;font-weight:600;margin-bottom:4px;">${area.name}</div>
+      <div style="font-size:11px;color:var(--text3);margin-bottom:12px;">${area.dept}</div>
+      <div id="qr-${area.id}" style="display:flex;justify-content:center;margin-bottom:12px;"></div>
+      <button class="btn btn-outline btn-sm" style="width:100%;" onclick="downloadQR('${area.id}','${area.name}')">⬇ İndir</button>`;
+    grid.appendChild(card);
+    setTimeout(()=>{
+      try{
+        new QRCode(document.getElementById('qr-'+area.id),{text:url,width:140,height:140,colorDark:'#0d2240',colorLight:'#ffffff',correctLevel:QRCode.CorrectLevel.M});
+      }catch(e){ document.getElementById('qr-'+area.id).innerHTML='<div style="font-size:11px;color:var(--text3);">QR oluşturulamadı</div>'; }
+    },100);
+  });
+  if(!S.areas.length) grid.innerHTML='<div style="color:var(--text3);padding:24px;">Önce Bölge Yönetimi\'nden bölge ekleyin.</div>';
+}
+
+function downloadQR(areaId, areaName){
+  const container=document.getElementById('qr-'+areaId);
+  const canvas=container?.querySelector('canvas');
+  if(!canvas){ showToast('QR henüz yüklenmedi, bekleyin.'); return; }
+  const a=document.createElement('a');
+  a.download=`QR_${areaName.replace(/\s/g,'_')}.png`;
+  a.href=canvas.toDataURL('image/png');
+  a.click();
+  showToast('QR kodu indirildi!');
+}
+
+function printAllQR(){
+  const canvases=document.querySelectorAll('#qr-grid canvas');
+  if(!canvases.length){ showToast('Önce QR kodları yükleyin.'); return; }
+  const w=window.open('','_blank');
+  let imgs='';
+  canvases.forEach((c,i)=>{
+    const name=S.areas[i]?.name||'';
+    imgs+=`<div style="display:inline-block;margin:10px;text-align:center;page-break-inside:avoid;">
+      <img src="${c.toDataURL()}" style="width:150px;height:150px;display:block;">
+      <div style="font-size:12px;font-weight:600;margin-top:6px;">${name}</div>
+    </div>`;
+  });
+  w.document.write(`<!DOCTYPE html><html><head><title>5S QR Kodlar</title><style>body{font-family:Arial;padding:20px;}@media print{button{display:none;}}</style></head><body><h2>5S Denetim QR Kodları — Saueressig Türkiye</h2>${imgs}<br><button onclick="window.print()">🖨️ Yazdır</button></body></html>`);
+  w.document.close();
+}
+
+// QR autostart — URL'de ?area= varsa formu otomatik aç
+function checkQRAutostart(){
+  const params=new URLSearchParams(location.search);
+  if(params.get('autostart')==='1'&&params.get('area')){
+    navigate('new-audit');
+    setTimeout(()=>{
+      const sel=document.getElementById('audit-area');
+      if(sel) sel.value=params.get('area');
+    },300);
+  }
+}
+
+// ======= ÖNCE / SONRA KARŞILAŞTIRMA =======
+function renderBeforeAfter(auditId){
+  const current=S.audits.find(a=>a.id==auditId); if(!current) return '';
+  const previous=S.audits.filter(a=>a.areaId===current.areaId&&a.id!=current.id&&a.date<current.date)
+    .sort((a,b)=>b.date.localeCompare(a.date))[0];
+  if(!previous) return '';
+
+  let html=`<div style="margin-top:14px;border:1px solid var(--border);border-radius:var(--r);overflow:hidden;">
+    <div style="background:var(--accent);color:#fff;padding:10px 14px;font-size:13px;font-weight:600;">📸 Önce / Sonra Karşılaştırması</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:0;">
+      <div style="padding:12px;border-right:1px solid var(--border);">
+        <div style="font-size:11px;font-weight:600;color:var(--text2);margin-bottom:8px;">ÖNCE — ${previous.date} (Skor: ${previous.totalScore})</div>`;
+
+  let hasPhotos=false;
+  PILLARS.forEach((p,pi)=>{
+    const pd=previous.pillars[p.id]; if(!pd?.photos) return;
+    p.questions.forEach((q,qi)=>{
+      const photos=pd.photos[qi]||[]; if(!photos.length) return;
+      hasPhotos=true;
+      photos.forEach(src=>{ html+=`<img src="${src}" style="width:100%;max-width:120px;height:80px;object-fit:cover;border-radius:5px;margin:2px;border:1px solid var(--border);">`; });
+    });
+  });
+  if(!hasPhotos) html+=`<div style="font-size:11px;color:var(--text3);padding:12px 0;">Bu denetimde fotoğraf yok</div>`;
+
+  html+=`</div><div style="padding:12px;">
+    <div style="font-size:11px;font-weight:600;color:var(--green);margin-bottom:8px;">SONRA — ${current.date} (Skor: ${current.totalScore})</div>`;
+
+  hasPhotos=false;
+  PILLARS.forEach((p,pi)=>{
+    const pd=current.pillars[p.id]; if(!pd?.photos) return;
+    p.questions.forEach((q,qi)=>{
+      const photos=pd.photos[qi]||[]; if(!photos.length) return;
+      hasPhotos=true;
+      photos.forEach(src=>{ html+=`<img src="${src}" style="width:100%;max-width:120px;height:80px;object-fit:cover;border-radius:5px;margin:2px;border:1px solid var(--border);">`; });
+    });
+  });
+  if(!hasPhotos) html+=`<div style="font-size:11px;color:var(--text3);padding:12px 0;">Bu denetimde fotoğraf yok</div>`;
+
+  const diff=current.totalScore-previous.totalScore;
+  const diffColor=diff>0?'var(--green)':diff<0?'var(--red)':'var(--text3)';
+  html+=`</div></div>
+    <div style="padding:10px 14px;background:var(--surface2);display:flex;align-items:center;gap:12px;">
+      <span style="font-size:12px;color:var(--text2);">Skor değişimi:</span>
+      <span style="font-size:16px;font-weight:700;font-family:var(--mono);color:${diffColor};">${diff>0?'+':''}${diff}</span>
+      <span style="font-size:12px;color:var(--text3);">${previous.totalScore} → ${current.totalScore}</span>
+    </div>
+  </div>`;
+  return html;
+}
+
+// ======= HELPERS =======
+function scoreColor(s){ return s>=85?'var(--green)':s>=70?'var(--blue)':s>=50?'var(--amber)':'var(--red)'; }
+function scoreLabel(s){ return s>=85?'Mükemmel':s>=70?'İyi':s>=50?'Orta':'Geliştirilmeli'; }
+function scoreBadge(s){ return s>=85?'badge-green':s>=70?'badge-blue':s>=50?'badge-amber':'badge-red'; }
+function showToast(m){ const t=document.getElementById('toast'); t.textContent=m; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),2600); }
+function updateBadges(){
+  const open=S.actions.filter(a=>a.status!=='Tamamlandı').length;
+  document.getElementById('hist-badge').textContent=S.audits.length;
+  document.getElementById('action-badge').textContent=open;
+  // mobile bottom nav badge
+  const bb=document.getElementById('bnav-action-count');
+  if(bb){ bb.textContent=open; bb.style.display=open>0?'block':'none'; }
+}
+
+// Close sidebar when nav-btn clicked on mobile
+document.querySelectorAll('.nav-btn').forEach(b=>b.addEventListener('click',()=>{ if(window.innerWidth<=640) closeSidebar(); }));
+
+// Close modals on backdrop
+document.querySelectorAll('.modal-ov').forEach(o=>o.addEventListener('click',e=>{ if(e.target===o) o.classList.remove('open'); }));
+
+// ======= INIT =======
+loadS();
+if(!S.auditors) S.auditors=['Bahadır Göktürk','Mehmet Yılmaz','Ayşe Kaya','Hasan Demir'];
+document.getElementById('topbar-date').textContent=new Date().toLocaleDateString('tr-TR',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+renderDashboard();
+updateBadges();
+checkQRAutostart();
+initMobile();
+window.addEventListener('resize', initMobile);
+</script>
+</body>
+</html>

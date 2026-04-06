@@ -1535,22 +1535,21 @@ ${pillarText}
 Net, profesyonel, uygulanabilir ol.`;
 
   try {
-    const anthropicKey = localStorage.getItem('5s-anthropic-key')||'';
-    if(!anthropicKey){ throw new Error('NO_API_KEY'); }
+    const grokKey = localStorage.getItem('5s-grok-key')||'';
+    if(!grokKey){ throw new Error('NO_API_KEY'); }
     let resText='';
-    const res=await fetch('https://api.anthropic.com/v1/messages',{
+    // Grok API - direkt çağrı
+    const res=await fetch('https://api.x.ai/v1/chat/completions',{
       method:'POST',
       headers:{
         'Content-Type':'application/json',
-        'x-api-key':anthropicKey,
-        'anthropic-version':'2023-06-01',
-        'anthropic-dangerous-direct-browser-access':'true'
+        'Authorization':'Bearer '+grokKey
       },
-      body:JSON.stringify({model:'claude-haiku-4-5-20251001',max_tokens:1600,messages:[{role:'user',content:prompt}]})
+      body:JSON.stringify({model:'grok-3-fast',max_tokens:1600,messages:[{role:'user',content:prompt}]})
     });
-    if(!res.ok){ const err=await res.json().catch(()=>({})); throw new Error(err.error?.message||'API Hatası '+res.status); }
+    if(!res.ok){ const err=await res.json().catch(()=>({})); throw new Error(err.error?.message||'Grok Hatası '+res.status); }
     const data=await res.json();
-    resText=data.content?.[0]?.text||'Rapor oluşturulamadı.';
+    resText=data.choices?.[0]?.message?.content||'Rapor oluşturulamadı.';
     clearInterval(iv); bar.style.width='100%';
     setTimeout(()=>{
       document.getElementById('ai-loading').style.display='none';
@@ -1563,24 +1562,28 @@ Net, profesyonel, uygulanabilir ol.`;
     document.getElementById('ai-loading').style.display='none';
     document.getElementById('ai-content').style.display='block';
     const isNoKey=e.message==='NO_API_KEY';
-    const sa=localStorage.getItem('5s-anthropic-key')||'';
+    const sg=localStorage.getItem('5s-grok-key')||'';
     document.getElementById('ai-content').innerHTML=`
       <div style="padding:18px;border:1px solid var(--border);border-radius:10px;">
         <div style="text-align:center;margin-bottom:16px;">
           <div style="font-size:26px;margin-bottom:6px;">${isNoKey?'🔑':'⚠️'}</div>
           <div style="font-size:14px;font-weight:600;margin-bottom:4px;">${isNoKey?'API Anahtarı Gerekli':'AI Bağlantı Hatası'}</div>
-          <div style="font-size:12px;color:var(--text2);">${isNoKey?'Anthropic API anahtarı girin.':'Hata: '+e.message}</div>
+          <div style="font-size:12px;color:var(--text2);">${isNoKey?'Grok API anahtarı girin.':'Hata: '+e.message}</div>
         </div>
-        <div style="background:var(--accent-light);border:1px solid var(--border);border-radius:10px;padding:15px;">
-          <div style="font-size:13px;font-weight:700;color:var(--accent);margin-bottom:8px;">🔑 Anthropic (Claude) API Anahtarı</div>
-          <div style="font-size:11px;color:var(--text2);margin-bottom:10px;">
-            <a href="https://console.anthropic.com/keys" target="_blank" style="color:var(--brand);">console.anthropic.com</a> → API Keys → Create Key → Kopyala
+        <div style="background:#0d1b2a;border:2px solid #1d9bf0;border-radius:10px;padding:15px;">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
+            <span style="font-size:20px;color:#fff;">𝕏</span>
+            <span style="font-size:13px;font-weight:700;color:#fff;">Grok API Anahtarı</span>
+            <span style="background:#1d9bf0;color:#fff;font-size:10px;padding:2px 8px;border-radius:20px;">$25 ÜCRETSİZ</span>
+          </div>
+          <div style="font-size:11px;color:#7ec8e3;margin-bottom:10px;">
+            <a href="https://console.x.ai" target="_blank" style="color:#4ade80;">console.x.ai</a> → API Keys → Create Key → Kopyala
           </div>
           <div style="display:flex;gap:7px;">
-            <input type="password" id="anthropic-key-input" placeholder="sk-ant-api03-..." style="flex:1;font-size:12px;font-family:monospace;" value="${sa}">
-            <button onclick="saveAnthropicKeyAndRetry('${audit.id}')" style="background:var(--brand);color:#fff;border:none;border-radius:5px;padding:7px 13px;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;">Kaydet &amp; Dene</button>
+            <input type="password" id="grok-key-input" placeholder="xai-xxxxxxxxxxxx..." style="flex:1;font-size:12px;font-family:monospace;background:#1a2535;border:1px solid #1d9bf0;color:#fff;border-radius:5px;padding:7px 10px;" value="${sg}">
+            <button onclick="saveGrokKeyAndRetry('${audit.id}')" style="background:#1d9bf0;color:#fff;border:none;border-radius:5px;padding:7px 13px;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;">Kaydet &amp; Dene</button>
           </div>
-          <div style="font-size:10px;color:var(--text3);margin-top:5px;">Key sadece tarayıcınızda saklanır. Ücretsiz $5 kredi ile ~500 rapor yazabilirsiniz.</div>
+          <div style="font-size:10px;color:#445566;margin-top:5px;">Key sadece tarayıcınızda saklanır.</div>
         </div>
       </div>`;
   }

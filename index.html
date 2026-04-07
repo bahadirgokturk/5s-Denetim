@@ -36,7 +36,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
 .nav-badge{margin-left:auto;background:rgba(255,255,255,0.18);color:rgba(255,255,255,0.9);font-size:10px;padding:1px 7px;border-radius:20px;font-family:var(--mono);}
 .sb-foot{padding:14px 18px;border-top:1px solid rgba(255,255,255,0.1);font-size:10px;color:rgba(255,255,255,0.28);}
 /* TOPBAR */
-.topbar{background:var(--surface);border-bottom:1px solid var(--border);padding:0 26px;height:58px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:90;}
+.topbar{background:var(--surface);border-bottom:1px solid var(--border);padding:0 26px;height:58px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50;}
 .topbar-title{font-size:15px;font-weight:600;}
 .topbar-right{display:flex;align-items:center;gap:10px;}
 .topbar-date{font-size:11px;color:var(--text3);font-family:var(--mono);}
@@ -188,8 +188,8 @@ textarea{resize:vertical;min-height:70px;}
 .area-card.add{border-style:dashed;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;color:var(--text3);min-height:100px;}
 .area-card.add:hover{border-color:var(--brand);color:var(--brand);background:var(--brand-light);}
 /* MODALS */
-.modal-ov{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:200;align-items:center;justify-content:center;pointer-events:none;}
-.modal-ov.open{display:flex;pointer-events:auto;}
+.modal-ov{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:200;align-items:center;justify-content:center;}
+.modal-ov.open{display:flex;}
 .modal{background:var(--surface);border-radius:14px;padding:26px;max-width:510px;width:92%;box-shadow:0 20px 60px rgba(0,0,0,.2);}
 .modal-xl{max-width:740px;max-height:92vh;overflow-y:auto;}
 .modal-title{font-size:16px;font-weight:600;margin-bottom:3px;}
@@ -206,22 +206,22 @@ textarea{resize:vertical;min-height:70px;}
 .report-photo{width:100%;max-width:160px;height:100px;object-fit:cover;border-radius:6px;border:1px solid var(--border);}
 .report-photos-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:6px;}
 .divider{height:1px;background:var(--border);margin:16px 0;}
+@media(max-width:768px){.sidebar{width:220px;}.main{margin-left:220px;}.form-grid{grid-template-columns:1fr;}.summary-grid{grid-template-columns:repeat(3,1fr);}}
 @media print{.sidebar,.topbar{display:none!important;}.main{margin-left:0!important;}.page{padding:0!important;}}
-
-/* ===== TABLET ===== */
-@media(max-width:768px){
-  .sidebar{width:220px;}
-  .main{margin-left:220px;}
-  .form-grid{grid-template-columns:1fr;}
-  .summary-grid{grid-template-columns:repeat(3,1fr);}
-}
-.hamburger{display:none;}
+/* MOBILE */
+.hamburger{display:none;flex-direction:column;gap:5px;padding:8px;border:none;background:none;cursor:pointer;}
+.hamburger span{width:22px;height:2px;background:var(--text);border-radius:2px;display:block;}
 .bottom-nav{display:none;}
-.sb-overlay{display:none;}
+.sb-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:9998;}
+.modal-ov{pointer-events:none;}
+.modal-ov.open{pointer-events:auto;}
 @media(max-width:640px){
-  .hamburger{display:flex;flex-direction:column;gap:5px;padding:8px;border:none;background:none;cursor:pointer;}
-  .hamburger span{width:22px;height:2px;background:var(--text);border-radius:2px;display:block;}
-  .main{margin-left:0!important;padding-bottom:68px;}
+  .hamburger{display:flex;}
+  .sidebar{position:fixed;left:-260px;top:0;bottom:0;width:260px;z-index:9999;transition:left .25s ease;overflow-y:auto;}
+  .sidebar.mob-open{left:0;}
+  .sb-overlay{display:block;}
+  .sb-overlay.mob-open{display:block;z-index:9998;}
+  .main{margin-left:0!important;padding-bottom:66px;}
   .topbar{padding:0 12px;height:50px;}
   .topbar-date{display:none;}
   .topbar-right .btn{padding:6px 10px;font-size:12px;}
@@ -232,37 +232,24 @@ textarea{resize:vertical;min-height:70px;}
   .summary-grid{grid-template-columns:repeat(3,1fr);}
   .pillar-bars-grid{grid-template-columns:repeat(3,1fr);}
   .area-grid{grid-template-columns:repeat(2,1fr);}
-  .dash-two-col{display:block!important;}
-  .dash-two-col>div{margin-bottom:12px;}
   .tbl-wrap{overflow-x:auto;}
-  table{min-width:540px;}
-  th,td{padding:7px 9px;font-size:11px;}
-  .modal{width:96%;padding:14px;}
-  .modal-xl{max-height:90vh;overflow-y:auto;}
+  table{min-width:520px;}
+  th,td{padding:7px 8px;font-size:11px;}
+  .modal{width:96%;padding:14px;max-height:92vh;overflow-y:auto;}
   input,select,textarea{font-size:16px!important;}
-  .yn-btn{padding:12px 20px;font-size:14px;}
-  .score-btn{padding:10px 14px;font-size:13px;}
+  .yn-btn{padding:12px 18px;font-size:14px;}
+  .score-btn{padding:10px 13px;font-size:13px;}
   .mc-btn{padding:10px 12px;font-size:12px;}
   .count-btn{width:44px;height:44px;font-size:22px;}
-  #qr-grid{grid-template-columns:repeat(2,1fr)!important;}
-  .bottom-nav{
-    display:flex!important;
-    position:fixed;bottom:0;left:0;right:0;height:58px;
-    background:var(--surface);border-top:1px solid var(--border);
-    z-index:500;
-  }
+  .bottom-nav{display:flex;position:fixed;bottom:0;left:0;right:0;height:58px;background:var(--surface);border-top:1px solid var(--border);z-index:500;}
   .bnav-item{flex:1;position:relative;}
-  .bnav-btn{
-    width:100%;height:58px;
-    display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;
-    border:none;background:none;cursor:pointer;
-    color:var(--text3);font-size:9px;font-family:var(--font);
-  }
+  .bnav-btn{width:100%;height:58px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;border:none;background:none;cursor:pointer;color:var(--text3);font-size:9px;font-family:var(--font);}
   .bnav-btn.active{color:var(--brand);}
   .bnav-icon{font-size:20px;line-height:1;}
-  .bnav-badge{position:absolute;top:6px;right:6px;background:var(--red);color:#fff;font-size:9px;padding:1px 4px;border-radius:10px;}
+  .bnav-badge{position:absolute;top:5px;right:6px;background:var(--red);color:#fff;font-size:9px;padding:1px 4px;border-radius:10px;}
+  .dash-grid-2{display:block!important;}
+  .dash-grid-2>div{margin-bottom:12px;}
 }
-
 </style>
 </head>
 <body>
@@ -286,16 +273,16 @@ textarea{resize:vertical;min-height:70px;}
     <button class="nav-btn" onclick="navigate('leaderboard')"><span class="nav-icon">🏆</span>Sıralama</button>
     <button class="nav-btn" onclick="navigate('qr')"><span class="nav-icon">⬛</span>QR Kodlar</button>
     <button class="nav-btn" onclick="navigate('reports')"><span class="nav-icon">▤</span>Raporlar</button>
+    <button class="nav-btn" onclick="navigate('hedefler')"><span class="nav-icon">🎯</span>Hedef Skorlar</button>
+    <button class="nav-btn" onclick="navigate('takvim')"><span class="nav-icon">📅</span>Denetim Takvimi</button>
   </nav>
-  <div class="sb-foot">v3.0 · OPEX Dept.</div>
+  <div class="sb-foot">v4.0 · OPEX Dept.</div>
 </aside>
 
 <main class="main">
 <div class="topbar">
-  <div style="display:flex;align-items:center;gap:10px;">
-    <button class="hamburger" onclick="toggleSidebar()" aria-label="Menü">
-      <span></span><span></span><span></span>
-    </button>
+  <div style="display:flex;align-items:center;gap:8px;">
+    <button class="hamburger" onclick="toggleSidebar()" aria-label="Menü"><span></span><span></span><span></span></button>
     <div class="topbar-title" id="topbar-title">Dashboard</div>
   </div>
   <div class="topbar-right">
@@ -312,7 +299,7 @@ textarea{resize:vertical;min-height:70px;}
     <div class="metric amber"><div class="metric-label">Ort. Skor</div><div class="metric-val" id="m-avg">—</div><div class="metric-sub">/ 100 puan</div></div>
     <div class="metric red"><div class="metric-label">Açık Aksiyon</div><div class="metric-val" id="m-actions">0</div><div class="metric-sub">bekleyen</div></div>
   </div>
-  <div class="dash-two-col" style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;">
+  <div class="dash-grid-2" style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;">
     <div class="card">
       <div class="sec-hdr"><div><div style="font-size:14px;font-weight:600;">Son Denetimler</div><div style="font-size:11px;color:var(--text3);">En yeni 5 kayıt</div></div><button class="btn btn-outline btn-sm" onclick="navigate('history')">Tümü</button></div>
       <div id="recent-list"><div style="text-align:center;padding:28px;color:var(--text3);font-size:13px;">Henüz denetim yok</div></div>
@@ -322,7 +309,7 @@ textarea{resize:vertical;min-height:70px;}
       <div id="compliance-widget"></div>
     </div>
   </div>
-  <div class="dash-two-col" style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;">
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;">
     <div class="card">
       <div class="sec-hdr"><div><div style="font-size:14px;font-weight:600;">🏆 Takım Sıralaması</div><div style="font-size:11px;color:var(--text3);">Ort. skora göre</div></div><button class="btn btn-outline btn-sm" onclick="navigate('leaderboard')">Tümü</button></div>
       <div id="leaderboard-preview"></div>
@@ -537,41 +524,39 @@ textarea{resize:vertical;min-height:70px;}
   <div id="qr-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:16px;"></div>
 </div>
 
+<!-- HEDEF SKORLAR -->
+<div class="page" id="page-hedefler">
+  <div class="card" style="margin-bottom:14px;">
+    <div class="sec-hdr" style="margin-bottom:14px;">
+      <div><div style="font-size:15px;font-weight:600;">🎯 Hedef Skorlar</div><div style="font-size:11px;color:var(--text3);">Bölge bazında hedef belirle, ilerlemeyi takip et</div></div>
+    </div>
+    <div id="hedef-list"><div style="text-align:center;padding:20px;color:var(--text3);">Yükleniyor...</div></div>
+  </div>
+</div>
+
+<!-- DENETİM TAKVİMİ -->
+<div class="page" id="page-takvim">
+  <div class="card">
+    <div class="sec-hdr" style="margin-bottom:14px;">
+      <div><div style="font-size:15px;font-weight:600;">📅 Denetim Takvimi</div><div style="font-size:11px;color:var(--text3);">Hangi bölge ne zaman denetlenmeli</div></div>
+    </div>
+    <div id="takvim-list"><div style="text-align:center;padding:20px;color:var(--text3);">Yükleniyor...</div></div>
+  </div>
+</div>
+
 </main>
 </div>
 
-<!-- Mobile sidebar overlay -->
+<!-- Sidebar overlay -->
 <div class="sb-overlay" id="sb-overlay" onclick="toggleSidebar()"></div>
 
-<!-- Mobile bottom navigation -->
+<!-- Mobile bottom nav -->
 <nav class="bottom-nav">
-  <div class="bnav-item">
-    <button class="bnav-btn active" id="bnav-dashboard" onclick="navigate('dashboard')">
-      <span class="bnav-icon">◈</span>Ana Sayfa
-    </button>
-  </div>
-  <div class="bnav-item">
-    <button class="bnav-btn" id="bnav-new-audit" onclick="navigate('new-audit')">
-      <span class="bnav-icon" style="width:34px;height:34px;background:var(--brand);border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-size:18px;">＋</span>
-      Denetim
-    </button>
-  </div>
-  <div class="bnav-item" style="position:relative;">
-    <button class="bnav-btn" id="bnav-actions" onclick="navigate('actions')">
-      <span class="bnav-icon">✓</span>Aksiyonlar
-    </button>
-    <span class="bnav-badge" id="bnav-action-count" style="display:none;"></span>
-  </div>
-  <div class="bnav-item">
-    <button class="bnav-btn" id="bnav-history" onclick="navigate('history')">
-      <span class="bnav-icon">⊙</span>Geçmiş
-    </button>
-  </div>
-  <div class="bnav-item">
-    <button class="bnav-btn" id="bnav-leaderboard" onclick="navigate('leaderboard')">
-      <span class="bnav-icon">🏆</span>Sıralama
-    </button>
-  </div>
+  <div class="bnav-item"><button class="bnav-btn active" id="bnav-dashboard" onclick="navigate('dashboard')"><span class="bnav-icon">◈</span>Ana Sayfa</button></div>
+  <div class="bnav-item"><button class="bnav-btn" id="bnav-new-audit" onclick="navigate('new-audit')"><span class="bnav-icon" style="width:32px;height:32px;background:var(--brand);border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-size:17px;">＋</span>Denetim</button></div>
+  <div class="bnav-item" style="position:relative;"><button class="bnav-btn" id="bnav-actions" onclick="navigate('actions')"><span class="bnav-icon">✓</span>Aksiyonlar</button><span class="bnav-badge" id="bnav-act-badge" style="display:none;"></span></div>
+  <div class="bnav-item"><button class="bnav-btn" id="bnav-history" onclick="navigate('history')"><span class="bnav-icon">⊙</span>Geçmiş</button></div>
+  <div class="bnav-item"><button class="bnav-btn" id="bnav-leaderboard" onclick="navigate('leaderboard')"><span class="bnav-icon">🏆</span>Sıralama</button></div>
 </nav>
 
 <!-- MODALS -->
@@ -846,55 +831,16 @@ let S = {
   actions:[], answers:{}, photos:{}, notes:{}
 };
 function loadS(){ try{ const d=localStorage.getItem('5s-v2'); if(d) Object.assign(S,JSON.parse(d)); }catch(e){} }
-function saveS(){ localStorage.setItem('5s-v2',JSON.stringify(S)); }
-
-// ======= MOBILE NAV =======
-var _sidebarOpen = false;
-function toggleSidebar(){
-  _sidebarOpen = !_sidebarOpen;
-  var sb = document.querySelector('.sidebar');
-  var ov = document.getElementById('sb-overlay');
-  if(_sidebarOpen){
-    sb.style.cssText = 'position:fixed;left:0;top:0;bottom:0;width:260px;z-index:9999;background:var(--accent);display:flex;flex-direction:column;overflow-y:auto;';
-    ov.style.cssText = 'display:block;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:9998;';
-  } else {
-    closeSidebar();
-  }
-}
-function closeSidebar(){
-  _sidebarOpen = false;
-  var sb = document.querySelector('.sidebar');
-  var ov = document.getElementById('sb-overlay');
-  if(window.innerWidth <= 640){
-    sb.style.cssText = 'position:fixed;left:-260px;top:0;bottom:0;width:260px;z-index:9999;background:var(--accent);display:flex;flex-direction:column;overflow-y:auto;transition:left .2s ease;';
-  } else {
-    sb.style.cssText = '';
-  }
-  ov.style.cssText = 'display:none;';
-}
-function setActiveBottomNav(page){
-  document.querySelectorAll('.bnav-btn').forEach(function(b){ b.classList.remove('active'); });
-  var btn = document.getElementById('bnav-'+page);
-  if(btn) btn.classList.add('active');
-}
-function initMobile(){
-  if(window.innerWidth <= 640){
-    var sb = document.querySelector('.sidebar');
-    sb.style.cssText = 'position:fixed;left:-260px;top:0;bottom:0;width:260px;z-index:9999;background:var(--accent);display:flex;flex-direction:column;overflow-y:auto;';
-    document.getElementById('sb-overlay').style.cssText = 'display:none;';
-  }
-}
+function saveS(){ if(!S.hedefler)S.hedefler={}; if(!S.auditors)S.auditors=[]; localStorage.setItem('5s-v2',JSON.stringify(S)); }
 
 // ======= NAVIGATION =======
-const TITLES={'dashboard':'Dashboard','new-audit':'Yeni Denetim','history':'Denetim Geçmişi','areas':'Bölge Yönetimi','actions':'Aksiyonlar','reports':'Raporlar','leaderboard':'🏆 Takım Sıralaması','qr':'⬛ QR Kodlar'};
+const TITLES={'dashboard':'Dashboard','new-audit':'Yeni Denetim','history':'Denetim Geçmişi','areas':'Bölge Yönetimi','actions':'Aksiyonlar','reports':'Raporlar','leaderboard':'🏆 Takım Sıralaması','qr':'⬛ QR Kodlar','hedefler':'🎯 Hedef Skorlar','takvim':'📅 Denetim Takvimi'};
 function navigate(p){
   document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));
   document.querySelectorAll('.nav-btn').forEach(x=>x.classList.remove('active'));
   document.getElementById('page-'+p).classList.add('active');
   document.querySelectorAll('.nav-btn').forEach(x=>{ if(x.getAttribute('onclick')?.includes("'"+p+"'")) x.classList.add('active'); });
   document.getElementById('topbar-title').textContent=TITLES[p]||'';
-  setActiveBottomNav(p);
-  closeSidebar();
   if(p==='dashboard') renderDashboard();
   if(p==='history') renderHistory();
   if(p==='areas') renderAreas();
@@ -903,6 +849,8 @@ function navigate(p){
   if(p==='new-audit') initForm();
   if(p==='leaderboard') renderLeaderboard();
   if(p==='qr') renderQRPage();
+  if(p==='hedefler') renderHedefler();
+  if(p==='takvim') renderTakvim();
 }
 
 // ======= AUDIT FORM =======
@@ -1468,7 +1416,141 @@ function exportCSV(){
   showToast('CSV dışa aktarıldı!');
 }
 
-// ======= AI REPORT =======
+// ======= AI REPORT (Key gerektirmez — tamamen tarayıcıda çalışır) =======
+
+// Her pillar için düşük skor tespitlerine göre otomatik yorum üretir
+const AI_RULES = {
+  S1: {
+    name: 'Seiri (Sınıflandırma)',
+    tips: [
+      { keywords: ['gereksiz','malzeme','ürün'], öneri: 'Çalışma alanındaki gereksiz malzemeler kırmızı etiket (Red Tag) yöntemiyle tanımlanmalı ve 48 saat içinde bölgeden uzaklaştırılmalıdır.' },
+      { keywords: ['ekipman','alet','araç'], öneri: 'Kullanılmayan ekipman ve aletler için karantina bölgesi oluşturulmalı, 2 hafta kullanılmayanlar depoya kaldırılmalıdır.' },
+      { keywords: ['stok','fazla'], öneri: 'Fazla stok minimize edilmeli, min-max seviyeleri belirlenerek görsel yönetim panosu kurulmalıdır.' },
+    ],
+    genel: 'Seiri pillarında tespit edilen eksiklikler, çalışma alanında gereksiz öğelerin birikmesine ve iş akışının yavaşlamasına yol açmaktadır. Sistematik bir Red Tag kampanyası planlanmalıdır.'
+  },
+  S2: {
+    name: 'Seiton (Düzenleme)',
+    tips: [
+      { keywords: ['yer','konum','depo'], öneri: 'Her malzeme ve ekipman için sabit konumlar belirlenmeli, zemin ve raf işaretlemeleri yapılmalıdır.' },
+      { keywords: ['etiket','işaret','görsel'], öneri: 'Görsel yönetim araçları (etiket, ok işareti, gölge panosu) uygulanarak herkesin neyin nerede olduğunu anlık görmesi sağlanmalıdır.' },
+      { keywords: ['erişim','uzak','zor'], öneri: 'Sık kullanılan ekipmanlar el mesafesinde (sarı bölge), seyrek kullanılanlar daha uzakta konumlandırılmalıdır.' },
+    ],
+    genel: 'Seiton eksiklikleri, çalışanların malzeme aramakta zaman kaybetmesine neden olmaktadır. "Her şeyin bir yeri, her şey yerinde" prensibi uygulanmalıdır.'
+  },
+  S3: {
+    name: 'Seiso (Temizlik)',
+    tips: [
+      { keywords: ['temizlik','kirli','pislik'], öneri: 'Günlük temizlik çizelgesi oluşturulmalı, sorumlular ve kontrol saatleri açıkça belirtilmelidir.' },
+      { keywords: ['makine','ekipman','sızıntı'], öneri: 'Ekipman sızıntıları kaynağında giderilmeli, temizlik sırasında olası arızalar için görsel kontrol listesi hazırlanmalıdır.' },
+      { keywords: ['atık','çöp','döküntü'], öneri: 'Atık kaynakları tespit edilerek kök neden analizi yapılmalı, kirlenmeyi önleyici tedbirler alınmalıdır.' },
+    ],
+    genel: 'Seiso eksiklikleri hem güvenlik riskini artırmakta hem de ekipman ömrünü kısaltmaktadır. Temizlik bir görev değil, kontrol mekanizması olarak ele alınmalıdır.'
+  },
+  S4: {
+    name: 'Seiketsu (Standardizasyon)',
+    tips: [
+      { keywords: ['standart','prosedür','talimat'], öneri: 'Mevcut en iyi uygulama (best practice) yazılı hale getirilmeli ve çalışma alanına görsel talimat olarak asılmalıdır.' },
+      { keywords: ['denetim','kontrol','checkliste'], öneri: 'Günlük/haftalık 5S kontrol listesi oluşturulmalı, vardiya geçişlerinde doldurulması zorunlu hale getirilmelidir.' },
+      { keywords: ['eğitim','bilgi','farkındalık'], öneri: 'Yeni başlayan çalışanlar için standart oryantasyon içeriğine 5S modülü eklenmeli, görsel rehberler hazırlanmalıdır.' },
+    ],
+    genel: 'Seiketsu pillarındaki eksiklikler, kazanılan iyileştirmelerin kalıcı olmamasına yol açmaktadır. Standartlar oluşturulmadan sürdürülebilirlik mümkün değildir.'
+  },
+  S5: {
+    name: 'Shitsuke (Disiplin)',
+    tips: [
+      { keywords: ['alışkanlık','rutin','kültür'], öneri: '5S kültürünü pekiştirmek için aylık skor panosu güncellenmeli, en iyi bölge ödüllendirilmelidir.' },
+      { keywords: ['denetim','takip','ölçüm'], öneri: 'Periyodik çapraz denetim sistemi kurulmalı, farklı bölgelerden denetçiler birbirini denetlemelidir.' },
+      { keywords: ['yönetici','lider','destek'], öneri: 'Yönetim Gemba Walk\'larını düzenli gerçekleştirmeli, 5S iyileştirmelerini toplantılarda gündem maddesi olarak ele almalıdır.' },
+    ],
+    genel: 'Shitsuke (en yüksek ağırlıklı pillar %30) eksiklikleri tüm sistemin sürdürülebilirliğini tehdit etmektedir. Disiplin ve alışkanlık oluşturmak için yönetim desteği kritik öneme sahiptir.'
+  }
+};
+
+function buildOfflineReport(audit) {
+  const lines = [];
+  const sc = audit.totalScore;
+  const seviye = sc>=85?'Mükemmel':sc>=70?'İyi':sc>=50?'Orta':'Kritik Gelişim Gerekli';
+
+  // --- Yönetici Özeti ---
+  lines.push('## Yönetici Özeti');
+  lines.push(`${audit.area} bölgesinde ${audit.date} tarihinde gerçekleştirilen 5S denetiminde ağırlıklı toplam skor **${sc}/100** olarak ölçülmüştür. Genel değerlendirme: **${seviye}**.`);
+  if(sc<50) lines.push('Bölge, temel 5S gerekliliklerini henüz karşılamamaktadır. Acil ve kapsamlı bir iyileştirme planı hayata geçirilmelidir.');
+  else if(sc<70) lines.push('Bölgede kısmi uyum sağlanmış olmakla birlikte, özellikle yüksek ağırlıklı pillarlardaki eksiklikler öncelikli olarak ele alınmalıdır.');
+  else if(sc<85) lines.push('Bölge genel olarak iyi bir seviyededir. Mükemmel düzeye ulaşmak için tespit edilen spesifik eksiklikler giderilmelidir.');
+  else lines.push('Bölge 5S standartlarını yüksek seviyede karşılamaktadır. Sürdürülebilirlik ve benchmark paylaşımı önceliklendirilmelidir.');
+
+  // --- Güçlü Yönler ---
+  lines.push('## Güçlü Yönler');
+  const strongPillars = PILLARS.filter(p => Math.round(audit.pillars[p.id]?.pct||0) >= 70);
+  if(strongPillars.length) {
+    strongPillars.forEach(p => {
+      const pct = Math.round(audit.pillars[p.id]?.pct||0);
+      lines.push(`- **${AI_RULES[p.id]?.name||p.name}** alanında %${pct} skor elde edilmiştir. Bu pillar bölgenin güçlü yanını oluşturmaktadır.`);
+    });
+  } else {
+    lines.push('- Mevcut denetimde tüm pillarlar gelişim gerektirmektedir. Öncelik sıralamasına göre sistematik iyileştirme yapılmalıdır.');
+  }
+
+  // --- Kritik Bulgular ---
+  lines.push('## Kritik Bulgular ve Kök Nedenler');
+  let bulgularVar = false;
+  PILLARS.forEach(p => {
+    const pd = audit.pillars[p.id]; if(!pd) return;
+    const pct = Math.round(pd.pct||0);
+    if(pct >= 70) return;
+    bulgularVar = true;
+    lines.push(`- **${AI_RULES[p.id]?.name||p.name} (%${pct}):** ${AI_RULES[p.id]?.genel||'Bu pillar gelişim gerektirmektedir.'}`);
+    // Soru bazlı spesifik bulgular
+    p.questions.forEach((q, qi) => {
+      const ans = pd.answers?.[qi];
+      const s = getAnswerScore(q, ans);
+      if(s===null || s>1) return;
+      lines.push(`  - "${q.text.substring(0,80)}" sorusunda düşük puan tespit edilmiştir${q.w>=2?' **(KRİTİK)**':q.w>=1.5?' (Önemli)':''}.`);
+    });
+  });
+  if(!bulgularVar) lines.push('- Kritik seviyede bulgu tespit edilmemiştir. Mevcut standartların korunması önceliklendirilmelidir.');
+
+  // --- Skor Analizi ---
+  lines.push('## Ağırlıklı Skor Analizi');
+  PILLARS.forEach(p => {
+    const pd = audit.pillars[p.id];
+    const pct = Math.round(pd?.pct||0);
+    const contrib = Math.round((pd?.contribution||0)*10)/10;
+    const durum = pct>=85?'✓ Hedef üstü':pct>=70?'◎ Hedef civarı':pct>=50?'△ Gelişim gerekli':'✗ Kritik';
+    lines.push(`- **${p.id} — ${AI_RULES[p.id]?.name||p.name}:** %${pct} skor, ${contrib} puan katkı (Ağırlık %${PW[p.id]}) — ${durum}`);
+  });
+
+  // --- Aksiyon Planı ---
+  lines.push('## Öncelikli Aksiyon Planı');
+  const aksiyonlar = [];
+  PILLARS.forEach(p => {
+    const pd = audit.pillars[p.id]; if(!pd) return;
+    const pct = Math.round(pd.pct||0);
+    if(pct >= 85) return;
+    const rule = AI_RULES[p.id];
+    if(rule) {
+      // En uygun tip'i seç
+      const tip = rule.tips[pct<50?0:pct<70?1:2] || rule.tips[0];
+      aksiyonlar.push({ pillar: p.id, pct, oneri: tip.öneri, sure: pct<50?'1 hafta':pct<70?'2 hafta':'1 ay', etki: pct<50?'Yüksek':pct<70?'Orta':'Düşük' });
+    }
+  });
+  // En kötüden iyiye sırala, max 5
+  aksiyonlar.sort((a,b)=>a.pct-b.pct).slice(0,5).forEach((ak,i) => {
+    lines.push(`${i+1}. **[${ak.pillar}]** ${ak.oneri} | Süre: ${ak.sure} | Etki: ${ak.etki}`);
+  });
+  if(!aksiyonlar.length) lines.push('1. Mevcut 5S standartlarının korunması ve periyodik denetim planının sürdürülmesi önerilir.');
+
+  // --- Sürdürülebilirlik ---
+  lines.push('## Sürdürülebilirlik Önerileri');
+  lines.push('- Haftalık kısa 5S yürüyüşleri (Gemba Walk) programı oluşturulmalı, bulgular anlık olarak bu sisteme kaydedilmelidir.');
+  lines.push('- Aylık pillar bazlı skor trendi panosu bölgeye asılmalı, ekip motivasyonu için skor hedefleri görünür hale getirilmelidir.');
+  lines.push('- 5S başarılarını ödüllendiren bir tanıma sistemi (En İyi Bölge Ödülü vb.) kurularak sürdürülebilirlik kültürü desteklenmelidir.');
+  lines.push('- Denetim bulguları aksiyonlarla ilişkilendirilmeli, kapatılmayan aksiyonlar bir sonraki denetimde öncelikli olarak ele alınmalıdır.');
+
+  return lines.join('\n');
+}
+
 async function generateAIReport(auditId){
   const audit=S.audits.find(a=>a.id==auditId); if(!audit) return;
   document.getElementById('ai-title').textContent=audit.area+' — AI Denetim Raporu';
@@ -1482,176 +1564,20 @@ async function generateAIReport(auditId){
   const bar=document.getElementById('ai-prog');
   const msgs=['Denetim verileri hazırlanıyor...','Pillar skorları analiz ediliyor...','Bulgular değerlendiriliyor...','Aksiyon planı hazırlanıyor...','Rapor oluşturuluyor...'];
   let mi=0;
-  const iv=setInterval(()=>{ prog=Math.min(prog+Math.random()*9,88); bar.style.width=prog+'%'; if(Math.random()>.65&&mi<msgs.length-1) document.getElementById('ai-load-txt').textContent=msgs[++mi]; },380);
+  const iv=setInterval(()=>{ prog=Math.min(prog+Math.random()*18,88); bar.style.width=prog+'%'; if(Math.random()>.55&&mi<msgs.length-1) document.getElementById('ai-load-txt').textContent=msgs[++mi]; },220);
 
-  const pillarText=PILLARS.map((p,pi)=>{
-    const pd=audit.pillars[p.id]; if(!pd) return '';
-    const badQ=p.questions.map((q,qi)=>{
-      const ans=pd.answers?.[qi]; const s=getAnswerScore(q,ans);
-      if(s===null||s>2) return '';
-      let ansStr='';
-      if(q.type==='yn') ansStr=ans==='hayır'?'Hayır':'Evet';
-      else if(q.type==='count') ansStr=ans+' adet';
-      else if(q.type==='score') ansStr=s+'/4';
-      else if(q.type==='mc') ansStr=q.options?.[ans]||'—';
-      const photoNote=(pd.photos?.[qi]?.length>0)?` [${pd.photos[qi].length} fotoğraf eklendi]`:'';
-      return `  - "${q.text}" → ${ansStr}${q.w>=2?' [KRİTİK]':q.w>=1.5?' [ÖNEMLİ]':''}${photoNote}`;
-    }).filter(Boolean).join('\n');
-    const note=pd.notes?.filter(n=>n&&n.trim()).map(n=>'  Not: '+n).join('\n')||'';
-    return `${p.name} (Ağırlık %${PW[p.id]}, Skor: %${Math.round(pd.pct||0)}):\n${badQ||'  Tüm sorular yeterli.'}\n${note}`;
-  }).filter(Boolean).join('\n\n');
+  // Küçük gecikme — kullanıcıya "analiz yapılıyor" hissi ver
+  await new Promise(r=>setTimeout(r,1400));
 
-  const prompt=`Sen Lean Manufacturing ve 5S uzmanısın. Saueressig Türkiye OPEX departmanı için denetim raporu hazırla.
+  const resText = buildOfflineReport(audit);
 
-DENETİM BİLGİLERİ:
-- Bölge: ${audit.area} | Denetçi: ${audit.auditor} | Tarih: ${audit.date} | Vardiya: ${audit.shift}
-- Toplam Ağırlıklı Skor: ${audit.totalScore}/100
-- Puanlama: Seiri %15, Seiton %20, Seiso %15, Seiketsu %20, Shitsuke %30
-- Kritik sorular ×2, önemli sorular ×1.5 ağırlıkla hesaplanıyor
-
-DÜŞÜK PUANLI BULGULAR:
-${pillarText}
-
-Şu bölümleri içeren Türkçe rapor yaz:
-
-## Yönetici Özeti
-[2-3 cümle, genel performans]
-
-## Güçlü Yönler
-[3-4 madde]
-
-## Kritik Bulgular ve Kök Nedenler
-[Her önemli bulgu için kök neden analizi]
-
-## Ağırlıklı Skor Analizi
-[Shitsuke %30 ağırlığının etkisi, hangi pillar toplam skoru en çok etkiliyor]
-
-## Öncelikli Aksiyon Planı
-[5 aksiyon: Başlık | Sorumlu Rol | Süre | Beklenen Skor Artışı]
-
-## Sürdürülebilirlik Önerileri
-[2-3 uzun vadeli öneri]
-
-Net, profesyonel, uygulanabilir ol.`;
-
-  try {
-    const grokKey = localStorage.getItem('5s-grok-key')||'';
-    if(!grokKey){ throw new Error('NO_API_KEY'); }
-    let resText='';
-    // Grok API - direkt çağrı
-    const res=await fetch('https://api.x.ai/v1/chat/completions',{
-      method:'POST',
-      headers:{
-        'Content-Type':'application/json',
-        'Authorization':'Bearer '+grokKey
-      },
-      body:JSON.stringify({model:'grok-beta',max_tokens:1600,messages:[{role:'user',content:prompt}]})
-    });
-    if(!res.ok){ const err=await res.json().catch(()=>({})); throw new Error(err.error?.message||'Grok Hatası '+res.status); }
-    const data=await res.json();
-    resText=data.choices?.[0]?.message?.content||'Rapor oluşturulamadı.';
-    clearInterval(iv); bar.style.width='100%';
-    setTimeout(()=>{
-      document.getElementById('ai-loading').style.display='none';
-      document.getElementById('pdf-btn').style.display='inline-flex';
-      const cd=document.getElementById('ai-content'); cd.style.display='block';
-      cd.innerHTML=renderAIContent(resText,audit); cd.dataset.auditJson=JSON.stringify(audit);
-    },300);
-  } catch(e) {
-    clearInterval(iv);
+  clearInterval(iv); bar.style.width='100%';
+  setTimeout(()=>{
     document.getElementById('ai-loading').style.display='none';
-    document.getElementById('ai-content').style.display='block';
-    const isNoKey=e.message==='NO_API_KEY';
-    const sg=localStorage.getItem('5s-grok-key')||'';
-    document.getElementById('ai-content').innerHTML=`
-      <div style="padding:18px;border:1px solid var(--border);border-radius:10px;">
-        <div style="text-align:center;margin-bottom:16px;">
-          <div style="font-size:26px;margin-bottom:6px;">${isNoKey?'🔑':'⚠️'}</div>
-          <div style="font-size:14px;font-weight:600;margin-bottom:4px;">${isNoKey?'API Anahtarı Gerekli':'AI Bağlantı Hatası'}</div>
-          <div style="font-size:12px;color:var(--text2);">${isNoKey?'Grok API anahtarı girin.':'Hata: '+e.message}</div>
-        </div>
-        <div style="background:#0d1b2a;border:2px solid #1d9bf0;border-radius:10px;padding:15px;">
-          <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
-            <span style="font-size:20px;color:#fff;">𝕏</span>
-            <span style="font-size:13px;font-weight:700;color:#fff;">Grok API Anahtarı</span>
-            <span style="background:#1d9bf0;color:#fff;font-size:10px;padding:2px 8px;border-radius:20px;">$25 ÜCRETSİZ</span>
-          </div>
-          <div style="font-size:11px;color:#7ec8e3;margin-bottom:10px;">
-            <a href="https://console.x.ai" target="_blank" style="color:#4ade80;">console.x.ai</a> → API Keys → Create Key → Kopyala
-          </div>
-          <div style="display:flex;gap:7px;">
-            <input type="password" id="grok-key-input" placeholder="xai-xxxxxxxxxxxx..." style="flex:1;font-size:12px;font-family:monospace;background:#1a2535;border:1px solid #1d9bf0;color:#fff;border-radius:5px;padding:7px 10px;" value="${sg}">
-            <button onclick="saveGrokKeyAndRetry('${audit.id}')" style="background:#1d9bf0;color:#fff;border:none;border-radius:5px;padding:7px 13px;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;">Kaydet &amp; Dene</button>
-          </div>
-          <div style="font-size:10px;color:#445566;margin-top:5px;">Key sadece tarayıcınızda saklanır.</div>
-        </div>
-      </div>`;
-  }
-}
-function saveGrokKeyAndRetry(auditId){
-  const key=document.getElementById('grok-key-input')?.value?.trim();
-  if(!key){ showToast('⚠ Grok API key girin!'); return; }
-  localStorage.setItem('5s-grok-key', key);
-  localStorage.removeItem('5s-anthropic-key');
-  showToast('✓ Grok key kaydedildi, deneniyor...');
-  setTimeout(()=>generateAIReport(auditId), 400);
-}
-function saveAnthropicKeyAndRetry(auditId){
-  const key=document.getElementById('anthropic-key-input')?.value?.trim();
-  if(!key||!key.startsWith('sk-')){ showToast('⚠ Geçersiz Anthropic key!'); return; }
-  localStorage.setItem('5s-anthropic-key', key);
-  localStorage.removeItem('5s-grok-key'); // Grok'u temizle, Anthropic öncelikli olsun
-  showToast('✓ Anthropic key kaydedildi, deneniyor...');
-  setTimeout(()=>generateAIReport(auditId), 400);
-}
-
-function downloadBat(){
-  const code=`@echo off
-chcp 65001 >nul
-echo ============================================
-echo   5S Denetim Sistemi - Web Sunucusu
-echo ============================================
-echo.
-echo Sunucu baslatiliyor: http://localhost:8000
-echo Kapatmak icin bu pencereyi kapatin.
-echo.
-python -m http.server 8000
-if %errorlevel% neq 0 (
-  echo Python bulunamadi! py komutu deneniyor...
-  py -m http.server 8000
-)
-pause`;
-  const blob=new Blob([code],{type:'text/plain'});
-  const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='baslat.bat'; a.click();
-  showToast('✓ başlat.bat indirildi! HTML ile aynı klasöre koy.');
-}
-
-function downloadServerPy(){
-  const code=`from flask import Flask, request, jsonify, send_from_directory
-import os, requests
-
-app = Flask(__name__, static_folder='.')
-XAI_KEY = os.environ.get('XAI_API_KEY','')
-
-@app.route('/')
-def index():
-    return send_from_directory('.', '5s-denetim.html')
-
-@app.route('/xai/v1/chat/completions', methods=['POST'])
-def grok_proxy():
-    r = requests.post('https://api.x.ai/v1/chat/completions',
-        headers={'Authorization': 'Bearer '+XAI_KEY, 'Content-Type':'application/json'},
-        json=request.json)
-    return r.json(), r.status_code
-
-if __name__ == '__main__':
-    print("5S Sunucusu: http://localhost:5000")
-    print("Grok key icin: XAI_API_KEY=xai-xxx python server.py")
-    app.run(port=5000, debug=True)
-`;
-  const blob=new Blob([code],{type:'text/plain'});
-  const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='server.py'; a.click();
-  showToast('server.py indirildi!');
+    document.getElementById('pdf-btn').style.display='inline-flex';
+    const cd=document.getElementById('ai-content'); cd.style.display='block';
+    cd.innerHTML=renderAIContent(resText,audit); cd.dataset.auditJson=JSON.stringify(audit);
+  },300);
 }
 
 function renderAIContent(text, audit){
@@ -1922,22 +1848,119 @@ function renderBeforeAfter(auditId){
   return html;
 }
 
+// ======= MOBILE NAV =======
+function toggleSidebar(){
+  var sb=document.querySelector('.sidebar');
+  var ov=document.getElementById('sb-overlay');
+  var open=sb.classList.toggle('mob-open');
+  ov.classList.toggle('mob-open',open);
+}
+function closeSidebar(){
+  document.querySelector('.sidebar').classList.remove('mob-open');
+  document.getElementById('sb-overlay').classList.remove('mob-open');
+}
+function setBottomNav(p){
+  document.querySelectorAll('.bnav-btn').forEach(b=>b.classList.remove('active'));
+  var btn=document.getElementById('bnav-'+p);
+  if(btn) btn.classList.add('active');
+}
+// navigate override with mobile support
+var _origNavigate=navigate;
+navigate=function(p){
+  _origNavigate(p);
+  setBottomNav(p);
+  closeSidebar();
+};
+
+// ======= HEDEF SKOR =======
+function renderHedefler(){
+  var el=document.getElementById('hedef-list'); if(!el) return;
+  if(!S.audits.length){ el.innerHTML='<div style="text-align:center;padding:20px;color:var(--text3);font-size:12px;">Henüz denetim yok</div>'; return; }
+  var areaMap={};
+  S.audits.forEach(a=>{
+    if(!areaMap[a.areaId||a.area]) areaMap[a.areaId||a.area]={name:a.area,scores:[],last:a.totalScore};
+    areaMap[a.areaId||a.area].scores.push(a.totalScore);
+    areaMap[a.areaId||a.area].last=a.totalScore;
+  });
+  if(!S.hedefler) S.hedefler={};
+  el.innerHTML=Object.entries(areaMap).map(([id,area])=>{
+    var hedef=S.hedefler[id]||80;
+    var avg=Math.round(area.scores.reduce((s,v)=>s+v,0)/area.scores.length);
+    var fark=avg-hedef;
+    var durum=avg>=hedef?'✓':'✗';
+    var durumRenk=avg>=hedef?'var(--green)':'var(--red)';
+    return `<div style="display:flex;align-items:center;gap:12px;padding:11px 0;border-bottom:1px solid var(--border);">
+      <div style="flex:1;">
+        <div style="font-size:13px;font-weight:600;">${area.name}</div>
+        <div style="font-size:11px;color:var(--text3);">Ort: ${avg} · Hedef: ${hedef}</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;">
+        <input type="range" min="50" max="100" value="${hedef}" style="width:80px;" 
+          oninput="setHedef('${id}',+this.value,this.nextElementSibling)">
+        <span style="font-size:12px;font-weight:600;width:28px;">${hedef}</span>
+        <span style="font-size:16px;font-weight:700;color:${durumRenk};">${durum}</span>
+        <span style="font-size:12px;color:${durumRenk};">${fark>=0?'+'+fark:fark}</span>
+      </div>
+    </div>`;
+  }).join('');
+}
+function setHedef(areaId,val,span){
+  if(!S.hedefler) S.hedefler={};
+  S.hedefler[areaId]=val;
+  if(span) span.textContent=val;
+  saveS();
+}
+
+// ======= DENETİM TAKVİMİ =======
+function renderTakvim(){
+  var el=document.getElementById('takvim-list'); if(!el) return;
+  var today=new Date(); today.setHours(0,0,0,0);
+  // Her bölgenin son denetim tarihini bul
+  var areaLastAudit={};
+  S.audits.forEach(a=>{ 
+    if(!areaLastAudit[a.area]||a.date>areaLastAudit[a.area]) areaLastAudit[a.area]=a.date;
+  });
+  var periyot=S.auditPeriyot||14; // gün
+  var rows=S.areas.map(area=>{
+    var last=areaLastAudit[area.name];
+    var lastDate=last?new Date(last):null;
+    var nextDate=lastDate?new Date(lastDate.getTime()+periyot*86400000):today;
+    var diff=Math.ceil((nextDate-today)/86400000);
+    var durum=!last?'Hiç denetlenmedi':diff<0?`${Math.abs(diff)} gün gecikti`:diff===0?'Bugün!':diff<=3?`${diff} gün kaldı`:`${diff} gün kaldı`;
+    var renk=!last||diff<0?'var(--red)':diff<=3?'var(--amber)':'var(--green)';
+    return {area,last,nextDate,diff,durum,renk};
+  }).sort((a,b)=>a.diff-b.diff);
+  
+  el.innerHTML=`<div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;padding:10px;background:var(--surface2);border-radius:var(--rs);">
+    <label style="font-size:12px;font-weight:500;">Denetim periyodu:</label>
+    <input type="range" min="7" max="30" value="${periyot}" style="flex:1;" oninput="S.auditPeriyot=+this.value;document.getElementById('periyot-lbl').textContent=this.value;saveS();renderTakvim()">
+    <span id="periyot-lbl" style="font-size:12px;font-weight:600;">${periyot}</span>
+    <span style="font-size:12px;color:var(--text3);">gün</span>
+  </div>` +
+  rows.map(r=>`
+    <div style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--border);">
+      <div style="width:10px;height:10px;border-radius:50%;background:${r.renk};flex-shrink:0;"></div>
+      <div style="flex:1;">
+        <div style="font-size:13px;font-weight:600;">${r.area.name}</div>
+        <div style="font-size:11px;color:var(--text3);">Son: ${r.last||'—'} · Sonraki: ${r.nextDate.toLocaleDateString('tr-TR')}</div>
+      </div>
+      <span style="font-size:11px;font-weight:600;color:${r.renk};white-space:nowrap;">${r.durum}</span>
+      <button class="btn btn-primary btn-sm" onclick="navigate('new-audit')" style="white-space:nowrap;">Denetle</button>
+    </div>`).join('');
+}
+
 // ======= HELPERS =======
 function scoreColor(s){ return s>=85?'var(--green)':s>=70?'var(--blue)':s>=50?'var(--amber)':'var(--red)'; }
 function scoreLabel(s){ return s>=85?'Mükemmel':s>=70?'İyi':s>=50?'Orta':'Geliştirilmeli'; }
 function scoreBadge(s){ return s>=85?'badge-green':s>=70?'badge-blue':s>=50?'badge-amber':'badge-red'; }
 function showToast(m){ const t=document.getElementById('toast'); t.textContent=m; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),2600); }
 function updateBadges(){
-  const open=S.actions.filter(a=>a.status!=='Tamamlandı').length;
+  var open=S.actions.filter(a=>a.status!=='Tamamlandı').length;
   document.getElementById('hist-badge').textContent=S.audits.length;
   document.getElementById('action-badge').textContent=open;
-  // mobile bottom nav badge
-  const bb=document.getElementById('bnav-action-count');
-  if(bb){ bb.textContent=open; bb.style.display=open>0?'block':'none'; }
+  var bb=document.getElementById('bnav-act-badge');
+  if(bb){bb.textContent=open;bb.style.display=open>0?'block':'none';}
 }
-
-// Close sidebar when nav-btn clicked on mobile
-document.querySelectorAll('.nav-btn').forEach(b=>b.addEventListener('click',()=>{ if(window.innerWidth<=640) closeSidebar(); }));
 
 // Close modals on backdrop
 document.querySelectorAll('.modal-ov').forEach(o=>o.addEventListener('click',e=>{ if(e.target===o) o.classList.remove('open'); }));
@@ -1949,8 +1972,6 @@ document.getElementById('topbar-date').textContent=new Date().toLocaleDateString
 renderDashboard();
 updateBadges();
 checkQRAutostart();
-initMobile();
-window.addEventListener('resize', initMobile);
 </script>
 </body>
 </html>

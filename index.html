@@ -219,8 +219,8 @@ textarea{resize:vertical;min-height:70px;}
   .hamburger{display:flex;}
   .sidebar{position:fixed;left:-260px;top:0;bottom:0;width:260px;z-index:9999;transition:left .25s ease;overflow-y:auto;}
   .sidebar.mob-open{left:0;}
-  .sb-overlay{display:block;}
-  .sb-overlay.mob-open{display:block;z-index:9998;}
+  .sb-overlay{display:none;z-index:9998;}
+  .sb-overlay.mob-open{display:block;}
   .main{margin-left:0!important;padding-bottom:66px;}
   .topbar{padding:0 12px;height:50px;}
   .topbar-date{display:none;}
@@ -824,7 +824,7 @@ let S = {
     {id:'a3',name:'Üretim Hattı C',dept:'Üretim',desc:'Hat C montaj bölgesi'},
     {id:'a4',name:'Depo / Ambar',dept:'Lojistik',desc:'Ana depo alanı'},
     {id:'a5',name:'Ofis Alanı',dept:'Yönetim',desc:'Ofis katı'},
-    {id:'a6',name:'Kalite',dept:'Üretim',desc:'Boya ve kaplama bölgesi'},
+    {id:'a6',name:'Boyahane',dept:'Üretim',desc:'Boya ve kaplama bölgesi'},
     {id:'a7',name:'Kalite Kontrol',dept:'Kalite',desc:'QC muayene alanı'}
   ],
   auditors:['Bahadır Göktürk','Mehmet Yılmaz','Ayşe Kaya','Hasan Demir'],
@@ -1852,12 +1852,13 @@ function renderBeforeAfter(auditId){
 function toggleSidebar(){
   var sb=document.querySelector('.sidebar');
   var ov=document.getElementById('sb-overlay');
-  var open=sb.classList.toggle('mob-open');
-  ov.classList.toggle('mob-open',open);
+  var isOpen=sb.classList.contains('mob-open');
+  if(isOpen){ closeSidebar(); } else { sb.classList.add('mob-open'); ov.classList.add('mob-open'); }
 }
 function closeSidebar(){
   document.querySelector('.sidebar').classList.remove('mob-open');
-  document.getElementById('sb-overlay').classList.remove('mob-open');
+  var ov=document.getElementById('sb-overlay');
+  if(ov) ov.classList.remove('mob-open');
 }
 function setBottomNav(p){
   document.querySelectorAll('.bnav-btn').forEach(b=>b.classList.remove('active'));

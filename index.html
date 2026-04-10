@@ -295,7 +295,8 @@ body.role-takimlider .hide-takimlider{display:none!important;}
       <div style="font-weight:600;margin-bottom:6px;">Demo Hesaplar:</div>
       <div>👑 <b>admin</b> / admin123 — Yönetici</div>
       <div>🔍 <b>denetci</b> / den123 — Denetçi</div>
-      <div>👔 <b>lider</b> / lid123 — Takım Lideri</div>
+      <div>🏭 <b>uretim</b> / ure123 — Üretim (CFM + Gravür)</div>
+      <div>✅ <b>kalite</b> / kal123 — Kalite</div>
     </div>
   </div>
 </div>
@@ -354,7 +355,7 @@ body.role-takimlider .hide-takimlider{display:none!important;}
     </div>
   </nav>
   <div id="sb-user" style="padding:12px 16px;border-top:1px solid rgba(255,255,255,.1);font-size:11px;color:rgba(255,255,255,.5);"></div>
-  <div class="sb-foot">v7.0 · OPEX Dept.</div>
+  <div class="sb-foot">v8.0 · OPEX Dept.</div>
 </aside>
 
 <main class="main">
@@ -378,9 +379,18 @@ body.role-takimlider .hide-takimlider{display:none!important;}
 
   <!-- ===== ADMİN DASHBOARD ===== -->
   <div id="dash-admin" style="display:none;">
+    <!-- Departman/Bölüm filtre butonları -->
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;flex-wrap:wrap;">
+      <span style="font-size:12px;font-weight:600;color:var(--text2);">Filtre:</span>
+      <button class="btn btn-primary btn-sm" id="filter-btn-all" onclick="setAdminFilter('all')">🏭 Tümü</button>
+      <button class="btn btn-outline btn-sm" id="filter-btn-Üretim" onclick="setAdminFilter('Üretim')">⚙ Üretim</button>
+      <button class="btn btn-outline btn-sm" id="filter-btn-Üretim-CFM" onclick="setAdminFilter('Üretim','CFM')">— CFM</button>
+      <button class="btn btn-outline btn-sm" id="filter-btn-Üretim-Gravür" onclick="setAdminFilter('Üretim','Gravür')">— Gravür</button>
+      <button class="btn btn-outline btn-sm" id="filter-btn-Kalite" onclick="setAdminFilter('Kalite')">✅ Kalite</button>
+    </div>
     <!-- Üst metrikler -->
     <div class="metrics-grid" style="margin-bottom:14px;">
-      <div class="metric green"><div class="metric-label">Toplam Denetim</div><div class="metric-val" id="m-total">0</div><div class="metric-sub">tüm zamanlar</div></div>
+      <div class="metric green"><div class="metric-label">Toplam Denetim</div><div class="metric-val" id="m-total">0</div><div class="metric-sub" id="m-total-sub">tüm zamanlar</div></div>
       <div class="metric blue"><div class="metric-label">Bu Ay</div><div class="metric-val" id="m-month">0</div><div class="metric-sub">denetim</div></div>
       <div class="metric amber"><div class="metric-label">Ort. Skor</div><div class="metric-val" id="m-avg">—</div><div class="metric-sub">/ 100 puan</div></div>
       <div class="metric red"><div class="metric-label">Açık Aksiyon</div><div class="metric-val" id="m-actions">0</div><div class="metric-sub">bekleyen</div></div>
@@ -460,43 +470,63 @@ body.role-takimlider .hide-takimlider{display:none!important;}
     </div>
   </div>
 
-  <!-- ===== TAKIM LİDERİ DASHBOARD ===== -->
+  <!-- ===== DEPARTMAN DASHBOARD ===== -->
   <div id="dash-takimlider" style="display:none;">
-    <!-- Bölge başlığı -->
-    <div id="lider-bolge-header" style="margin-bottom:14px;padding:20px;border-radius:var(--r);background:var(--accent);color:#fff;">
-      <div style="font-size:11px;opacity:.6;text-transform:uppercase;letter-spacing:1px;">Bölge Durumu</div>
-      <div style="font-size:20px;font-weight:700;margin:4px 0;" id="lider-bolge-adi">—</div>
-      <div style="display:flex;align-items:baseline;gap:12px;">
+    <!-- Departman başlık barı -->
+    <div id="dept-header" style="margin-bottom:14px;padding:20px 24px;border-radius:var(--r);background:var(--accent);color:#fff;position:relative;overflow:hidden;">
+      <div style="font-size:11px;opacity:.6;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:4px;">Departman Durumu</div>
+      <div style="font-size:22px;font-weight:700;margin-bottom:2px;" id="dept-adi">—</div>
+      <div style="font-size:13px;opacity:.7;" id="dept-bolum-adi"></div>
+      <div style="display:flex;align-items:center;gap:16px;margin-top:12px;">
         <div>
-          <div style="font-size:42px;font-weight:700;font-family:var(--mono);line-height:1;" id="lider-skor-big">—</div>
-          <div style="font-size:11px;opacity:.6;">/ 100 puan</div>
+          <div style="font-size:48px;font-weight:700;font-family:var(--mono);line-height:1;" id="dept-skor-big">—</div>
+          <div style="font-size:11px;opacity:.6;">/100 ort. skor</div>
         </div>
-        <div id="lider-skor-badge"></div>
+        <div>
+          <div id="dept-skor-badge"></div>
+          <div style="font-size:12px;opacity:.7;margin-top:6px;" id="dept-audit-count"></div>
+        </div>
       </div>
     </div>
-    <!-- Pillar özeti -->
-    <div class="card" style="margin-bottom:14px;">
-      <div style="font-size:14px;font-weight:600;margin-bottom:12px;">📊 Pillar Durumu — Son Denetim</div>
-      <div id="lider-pillar-bars"></div>
+
+    <!-- Bölüm seçici (sadece dept varsa) -->
+    <div id="dept-bolum-filter" style="display:none;margin-bottom:14px;">
+      <div style="display:flex;gap:8px;flex-wrap:wrap;" id="dept-bolum-btns"></div>
     </div>
-    <!-- Son denetimler + Açık aksiyonlar -->
+
+    <!-- Metrikler -->
+    <div class="metrics-grid" style="margin-bottom:14px;">
+      <div class="metric green"><div class="metric-label">Toplam Denetim</div><div class="metric-val" id="dept-total">0</div><div class="metric-sub">bu bölüm</div></div>
+      <div class="metric blue"><div class="metric-label">Bu Ay</div><div class="metric-val" id="dept-month">0</div><div class="metric-sub">denetim</div></div>
+      <div class="metric amber"><div class="metric-label">En İyi Skor</div><div class="metric-val" id="dept-best">—</div><div class="metric-sub">tüm zamanlar</div></div>
+      <div class="metric red"><div class="metric-label">Açık Aksiyon</div><div class="metric-val" id="dept-actions">0</div><div class="metric-sub">bekleyen</div></div>
+    </div>
+
+    <!-- Pillar durumu + Son denetimler -->
     <div class="dash-grid-2" style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px;">
       <div class="card">
-        <div style="font-size:14px;font-weight:600;margin-bottom:12px;">📅 Son 5 Denetim</div>
-        <div id="lider-recent"></div>
+        <div style="font-size:14px;font-weight:600;margin-bottom:14px;">📊 5S Pillar Durumu</div>
+        <div id="dept-pillar-bars"></div>
       </div>
+      <div class="card">
+        <div style="font-size:14px;font-weight:600;margin-bottom:12px;">📅 Son Denetimler</div>
+        <div id="dept-recent"></div>
+      </div>
+    </div>
+
+    <!-- Aksiyon + Sonraki denetim -->
+    <div class="dash-grid-2" style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
       <div class="card">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
           <div style="font-size:14px;font-weight:600;">⚠️ Açık Aksiyonlar</div>
-          <span id="lider-aksiyon-count" class="badge badge-red">0</span>
+          <span id="dept-aksiyon-count" class="badge badge-red">0</span>
         </div>
-        <div id="lider-aksiyonlar"></div>
+        <div id="dept-aksiyonlar"></div>
       </div>
-    </div>
-    <!-- Sonraki denetim -->
-    <div class="card" id="lider-sonraki-card">
-      <div style="font-size:14px;font-weight:600;margin-bottom:8px;">📆 Sonraki Denetim</div>
-      <div id="lider-sonraki"></div>
+      <div class="card">
+        <div style="font-size:14px;font-weight:600;margin-bottom:10px;">📆 Sonraki Denetim</div>
+        <div id="dept-sonraki"></div>
+      </div>
     </div>
   </div>
 
@@ -944,8 +974,18 @@ body.role-takimlider .hide-takimlider{display:none!important;}
       </select>
     </div>
     <div class="fg" style="margin-bottom:10px;">
-      <label>Bölge (Takım Lideri için)</label>
-      <select id="nu-area"><option value="">— Seçin —</option></select>
+      <label>Departman (Departman kullanıcısı için)</label>
+      <select id="nu-dept" onchange="updateBolumSelect()">
+        <option value="">— Seçin —</option>
+        <option value="Üretim">Üretim</option>
+        <option value="Kalite">Kalite</option>
+      </select>
+    </div>
+    <div class="fg" style="margin-bottom:10px;">
+      <label>Bölüm</label>
+      <select id="nu-bolum">
+        <option value="">— Önce departman seçin —</option>
+      </select>
     </div>
     <div class="modal-actions">
       <button class="btn btn-outline" onclick="closeModal('modal-user-add')">İptal</button>
@@ -1056,10 +1096,23 @@ function calcTotal(allAnswers){
 
 // ======= STATE =======
 // ======= KULLANICI SİSTEMİ =======
+// Departman hiyerarşisi
+const DEPARTMANLAR = {
+  'Üretim': {
+    renk: '#2980b9',
+    bolumler: ['CFM', 'Gravür']
+  },
+  'Kalite': {
+    renk: '#27ae60',
+    bolumler: ['Kalite Kontrol']
+  }
+};
+
 const DEFAULT_USERS = [
-  {id:'u1', username:'admin',   password:'admin123', name:'Bahadır Göktürk', role:'admin',       area:''},
-  {id:'u2', username:'denetci', password:'den123',   name:'Mehmet Yılmaz',   role:'denetci',     area:''},
-  {id:'u3', username:'lider',   password:'lid123',   name:'Ayşe Kaya',       role:'takimlider',  area:'a1'},
+  {id:'u1', username:'admin',   password:'admin123', name:'Bahadır Göktürk', role:'admin',        dept:'',       bolum:''},
+  {id:'u2', username:'denetci', password:'den123',   name:'Mehmet Yılmaz',   role:'denetci',      dept:'',       bolum:''},
+  {id:'u3', username:'uretim',  password:'ure123',   name:'Üretim Dept.',    role:'departman',    dept:'Üretim', bolum:''},
+  {id:'u4', username:'kalite',  password:'kal123',   name:'Kalite Dept.',    role:'departman',    dept:'Kalite', bolum:'Kalite Kontrol'},
 ];
 
 let CURRENT_USER = null;
@@ -1092,8 +1145,8 @@ function applyRole(user){
   document.body.className='role-'+user.role;
 
   // Kullanıcı bilgisi
-  const roleLabels={admin:'👑 Yönetici',denetci:'🔍 Denetçi',takimlider:'👔 Takım Lideri'};
-  const roleClasses={admin:'role-admin',denetci:'role-denetci',takimlider:'role-takimlider'};
+  const roleLabels={admin:'👑 Yönetici',denetci:'🔍 Denetçi',takimlider:'👔 Takım Lideri',departman:'🏭 Departman'};
+  const roleClasses={admin:'role-admin',denetci:'role-denetci',takimlider:'role-takimlider',departman:'role-takimlider'};
   const badge=document.getElementById('user-badge');
   if(badge){ badge.textContent=roleLabels[user.role]||user.role; badge.className='role-badge '+roleClasses[user.role]; }
   const sbUser=document.getElementById('sb-user');
@@ -1102,12 +1155,13 @@ function applyRole(user){
   // Rol bazlı sidebar menüsü — sadece o rolün bölümünü göster
   document.querySelectorAll('#sidebar-nav [data-roles]').forEach(div=>{
     const roles=div.getAttribute('data-roles').split(' ');
-    div.style.display=roles.includes(user.role)?'block':'none';
+    const roleMatch=roles.includes(user.role)||(user.role==='departman'&&roles.includes('takimlider'));
+    div.style.display=roleMatch?'block':'none';
   });
 
   // Yeni Denetim butonu — takım liderinde gizle
   const newAuditBtn=document.querySelector('.topbar-right .btn-primary');
-  if(newAuditBtn) newAuditBtn.style.display=user.role==='takimlider'?'none':'';
+  if(newAuditBtn) newAuditBtn.style.display=user.role==='takimlider'||role==='departman'?'none':'';
 
   renderDashboard();
   updateBadges();
@@ -1124,13 +1178,9 @@ function atamaYap(auditId, denetciId){
 
 let S = {
   audits:[], areas:[
-    {id:'a1',name:'Üretim Hattı A',dept:'Üretim',desc:'Hat A montaj bölgesi'},
-    {id:'a2',name:'Üretim Hattı B',dept:'Üretim',desc:'Hat B montaj bölgesi'},
-    {id:'a3',name:'Üretim Hattı C',dept:'Üretim',desc:'Hat C montaj bölgesi'},
-    {id:'a4',name:'Depo / Ambar',dept:'Lojistik',desc:'Ana depo alanı'},
-    {id:'a5',name:'Ofis Alanı',dept:'Yönetim',desc:'Ofis katı'},
-    {id:'a6',name:'Boyahane',dept:'Üretim',desc:'Boya ve kaplama bölgesi'},
-    {id:'a7',name:'Kalite Kontrol',dept:'Kalite',desc:'QC muayene alanı'}
+    {id:'a1',name:'CFM',           dept:'Üretim', desc:'CFM üretim bölümü'},
+    {id:'a2',name:'Gravür',        dept:'Üretim', desc:'Gravür üretim bölümü'},
+    {id:'a3',name:'Kalite Kontrol',dept:'Kalite', desc:'Kalite kontrol birimi'},
   ],
   auditors:['Bahadır Göktürk','Mehmet Yılmaz','Ayşe Kaya','Hasan Demir'],
   users: DEFAULT_USERS,
@@ -1142,9 +1192,10 @@ function saveS(){ if(!S.hedefler)S.hedefler={}; if(!S.auditors)S.auditors=[]; if
 // ======= NAVIGATION =======
 const TITLES={'dashboard':'Dashboard','new-audit':'Yeni Denetim','history':'Denetim Geçmişi','areas':'Bölge Yönetimi','actions':'Aksiyonlar','reports':'Raporlar','leaderboard':'🏆 Takım Sıralaması','qr':'⬛ QR Kodlar','hedefler':'🎯 Hedef Skorlar','takvim':'📅 Denetim Takvimi','denetciler':'👤 Denetçi Performansı','karsilastirma':'📊 Bölge Karşılaştırma','kullanicilar':'⚙ Kullanıcı Yönetimi'};
 function navigate(p){
-  document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));
+  document.querySelectorAll('.page').forEach(x=>{ x.classList.remove('active'); x.style.display=''; });
   document.querySelectorAll('.nav-btn').forEach(x=>x.classList.remove('active'));
-  document.getElementById('page-'+p).classList.add('active');
+  const targetPage=document.getElementById('page-'+p);
+  if(targetPage){ targetPage.classList.add('active'); }
   document.querySelectorAll('.nav-btn').forEach(x=>{ if(x.getAttribute('onclick')?.includes("'"+p+"'")) x.classList.add('active'); });
   document.getElementById('topbar-title').textContent=TITLES[p]||'';
   if(p==='dashboard') renderDashboard();
@@ -1427,27 +1478,58 @@ function resetAudit(){ if(confirm('Formu sıfırla?')) initForm(); }
 // ======= DASHBOARD =======
 function renderDashboard(){
   const role=CURRENT_USER?.role||'admin';
-  // Önce hepsini gizle, sonra ilgili rolü göster
+  // Önce hepsini gizle
   ['dash-admin','dash-denetci','dash-takimlider'].forEach(id=>{
     const el=document.getElementById(id);
     if(el) el.style.display='none';
   });
+  // page-dashboard'u aktif yap
+  const pd=document.getElementById('page-dashboard');
+  if(pd){ pd.style.display='block'; }
   
   if(role==='admin') renderAdminDashboard();
   else if(role==='denetci') renderDenetciDashboard();
-  else if(role==='takimlider') renderTakimLiderDashboard();
-  else renderAdminDashboard(); // fallback
+  else if(role==='takimlider'||role==='departman') renderDepartmanDashboard();
+  else renderAdminDashboard();
 }
 
 // ===== ADMİN DASHBOARD =====
+// Admin filtre state
+var ADMIN_FILTER = {dept: 'all', bolum: null};
+
+function setAdminFilter(dept, bolum=null){
+  ADMIN_FILTER = {dept, bolum};
+  // Buton stillerini güncelle
+  document.querySelectorAll('[id^="filter-btn-"]').forEach(btn=>{
+    btn.className='btn btn-outline btn-sm';
+  });
+  const key = bolum ? `filter-btn-${dept}-${bolum}` : `filter-btn-${dept}`;
+  const activeBtn = document.getElementById(key);
+  if(activeBtn) activeBtn.className='btn btn-primary btn-sm';
+  renderAdminDashboard();
+}
+
+function getFilteredAudits(){
+  if(ADMIN_FILTER.dept==='all') return S.audits;
+  return S.audits.filter(a=>{
+    const area=S.areas.find(x=>x.id===a.areaId||x.name===a.area);
+    if(!area) return false;
+    if(ADMIN_FILTER.bolum) return area.dept===ADMIN_FILTER.dept && area.name===ADMIN_FILTER.bolum;
+    return area.dept===ADMIN_FILTER.dept;
+  });
+}
+
 function renderAdminDashboard(){
   const el=document.getElementById('dash-admin'); if(el) el.style.display='block';
+  const filtered=getFilteredAudits();
   const now=new Date();
-  const monthAudits=S.audits.filter(a=>{ const d=new Date(a.date); return d.getMonth()===now.getMonth()&&d.getFullYear()===now.getFullYear(); });
-  const avg=S.audits.length>0?Math.round(S.audits.reduce((s,a)=>s+a.totalScore,0)/S.audits.length):null;
+  const monthAudits=filtered.filter(a=>{ const d=new Date(a.date); return d.getMonth()===now.getMonth()&&d.getFullYear()===now.getFullYear(); });
+  const avg=filtered.length>0?Math.round(filtered.reduce((s,a)=>s+a.totalScore,0)/filtered.length):null;
   const open=S.actions.filter(a=>a.status!=='Tamamlandı').length;
+  const filterLabel=ADMIN_FILTER.dept==='all'?'Tüm Fabrika':(ADMIN_FILTER.bolum?`${ADMIN_FILTER.dept} › ${ADMIN_FILTER.bolum}`:ADMIN_FILTER.dept);
   
-  document.getElementById('m-total').textContent=S.audits.length;
+  document.getElementById('m-total').textContent=filtered.length;
+  const subEl=document.getElementById('m-total-sub'); if(subEl) subEl.textContent=filterLabel;
   document.getElementById('m-month').textContent=monthAudits.length;
   document.getElementById('m-avg').textContent=avg!==null?avg:'—';
   document.getElementById('m-actions').textContent=open;
@@ -1479,9 +1561,9 @@ function renderAdminDashboard(){
 
   // Pillar bars
   const pb=document.getElementById('pillar-bars');
-  if(!S.audits.length){ pb.innerHTML='<div style="text-align:center;color:var(--text3);font-size:12px;padding:18px;grid-column:1/-1;">Veri yok</div>'; return; }
+  if(!filtered.length){ pb.innerHTML='<div style="text-align:center;color:var(--text3);font-size:12px;padding:18px;grid-column:1/-1;">Veri yok</div>'; return; }
   pb.innerHTML=PILLARS.map(p=>{
-    const pavg=Math.round(S.audits.reduce((s,a)=>s+(a.pillars[p.id]?.pct||0),0)/S.audits.length);
+    const pavg=Math.round(filtered.reduce((s,a)=>s+(a.pillars[p.id]?.pct||0),0)/filtered.length);
     const cls=pavg>=75?'hi':pavg>=50?'md':'lo';
     return `<div class="pb-card">
       <div class="pb-icon" style="background:${p.color}">${p.id}</div>
@@ -1665,80 +1747,132 @@ function atamaKapat(id){
   if(a){ a.durum='Tamamlandı'; saveS(); renderDenetciDashboard(); showToast('✓ Görev tamamlandı!'); }
 }
 
-// ===== TAKIM LİDERİ DASHBOARD =====
-function renderTakimLiderDashboard(){
+// ===== DEPARTMAN DASHBOARD =====
+var DEPT_SELECTED_BOLUM = null;
+
+function renderDepartmanDashboard(){
   const el=document.getElementById('dash-takimlider'); if(el) el.style.display='block';
   const user=CURRENT_USER;
-  const area=S.areas.find(a=>a.id===user?.area);
+  const dept=user?.dept||'';
+  const userBolum=user?.bolum||'';
   
-  // Bölge başlığı
-  const areaAudits=S.audits.filter(a=>a.areaId===user?.area||a.area===area?.name).sort((x,y)=>y.date.localeCompare(x.date));
-  const last=areaAudits[0];
-  const avg=areaAudits.length?Math.round(areaAudits.reduce((s,a)=>s+a.totalScore,0)/areaAudits.length):null;
+  // Bölüm seçici göster/gizle
+  const deptInfo=DEPARTMANLAR[dept];
+  const bolumFilter=document.getElementById('dept-bolum-filter');
+  const bolumBtns=document.getElementById('dept-bolum-btns');
   
-  const adiEl=document.getElementById('lider-bolge-adi');
-  const skorEl=document.getElementById('lider-skor-big');
-  const badgeEl=document.getElementById('lider-skor-badge');
-  if(adiEl) adiEl.textContent=area?.name||'Bölge';
+  if(deptInfo&&deptInfo.bolumler.length>1){
+    bolumFilter.style.display='block';
+    if(!DEPT_SELECTED_BOLUM) DEPT_SELECTED_BOLUM=userBolum||'all';
+    bolumBtns.innerHTML=`<button class="btn ${DEPT_SELECTED_BOLUM==='all'?'btn-primary':'btn-outline'} btn-sm" onclick="selectDeptBolum('all')">📊 Tümü</button>`+
+      deptInfo.bolumler.map(b=>`
+      <button class="btn ${DEPT_SELECTED_BOLUM===b?'btn-primary':'btn-outline'} btn-sm" onclick="selectDeptBolum('${b}')">${b}</button>`).join('');
+  } else {
+    bolumFilter.style.display='none';
+    DEPT_SELECTED_BOLUM=userBolum;
+  }
+  
+  const activeBolum=DEPT_SELECTED_BOLUM||userBolum;
+  
+  // Bu bölüme/departmana ait denetimleri bul
+  const deptAudits=S.audits.filter(a=>{
+    const area=S.areas.find(x=>x.id===a.areaId||x.name===a.area);
+    if(!area) return false;
+    if(activeBolum&&activeBolum!=='all') return area.dept===dept && area.name===activeBolum;
+    return area.dept===dept;
+  }).sort((x,y)=>y.date.localeCompare(x.date));
+  
+  const last=deptAudits[0];
+  const avg=deptAudits.length?Math.round(deptAudits.reduce((s,a)=>s+a.totalScore,0)/deptAudits.length):null;
+  
+  // Header güncelle
+  const headerEl=document.getElementById('dept-header');
+  const sc=avg!==null?(avg>=85?'#27ae60':avg>=70?'#2980b9':avg>=50?'#d4820a':'#E63312'):'var(--accent)';
+  if(headerEl) headerEl.style.background=sc;
+  
+  const adiEl=document.getElementById('dept-adi');
+  const bolumAdiEl=document.getElementById('dept-bolum-adi');
+  const skorEl=document.getElementById('dept-skor-big');
+  const badgeEl=document.getElementById('dept-skor-badge');
+  const countEl=document.getElementById('dept-audit-count');
+  
+  if(adiEl) adiEl.textContent=dept||'Departman';
+  if(bolumAdiEl) bolumAdiEl.textContent=(!activeBolum||activeBolum==='all')?'Tüm Bölümler':`Bölüm: ${activeBolum}`;
   if(skorEl) skorEl.textContent=avg!==null?avg:'—';
-  if(badgeEl) badgeEl.innerHTML=avg!==null?`<span class="badge ${scoreBadge(avg)}" style="font-size:14px;padding:6px 14px;">${scoreLabel(avg)}</span>`:'';
+  if(badgeEl) badgeEl.innerHTML=avg!==null?`<span class="badge ${scoreBadge(avg)}" style="font-size:13px;padding:5px 14px;">${scoreLabel(avg)}</span>`:'';
+  if(countEl) countEl.textContent=`${deptAudits.length} denetim`;
   
-  // Bölge header rengi
-  const header=document.getElementById('lider-bolge-header');
-  if(header&&avg!==null){ header.style.background=avg>=85?'var(--green)':avg>=70?'#0d2240':avg>=50?'var(--amber)':'var(--red)'; }
+  // Metrikler
+  const now=new Date();
+  const monthAudits=deptAudits.filter(a=>{ const d=new Date(a.date); return d.getMonth()===now.getMonth()&&d.getFullYear()===now.getFullYear(); });
+  const best=deptAudits.length?Math.max(...deptAudits.map(a=>a.totalScore)):null;
+  const openActs=S.actions.filter(a=>{
+    const area=S.areas.find(x=>x.name===a.area);
+    return area&&area.dept===dept&&(activeBolum&&activeBolum!=='all'?area.name===activeBolum:true)&&a.status!=='Tamamlandı';
+  });
+  
+  const setEl=(id,val)=>{ const e=document.getElementById(id); if(e) e.textContent=val; };
+  setEl('dept-total', deptAudits.length);
+  setEl('dept-month', monthAudits.length);
+  setEl('dept-best', best!==null?best:'—');
+  setEl('dept-actions', openActs.length);
   
   // Pillar barları
-  const pillarEl=document.getElementById('lider-pillar-bars');
-  if(last&&pillarEl){
-    pillarEl.innerHTML=PILLARS.map(p=>{
-      const pct=Math.round(last.pillars[p.id]?.pct||0);
-      const durum=pct>=75?'✓ İyi':pct>=50?'△ Orta':'✗ Kritik';
-      const durumColor=pct>=75?'var(--green)':pct>=50?'var(--amber)':'var(--red)';
-      return `<div style="margin-bottom:10px;">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">
-          <div>
-            <span style="font-size:12px;font-weight:600;">${p.id}</span>
-            <span style="font-size:11px;color:var(--text2);margin-left:5px;">${p.name}</span>
+  const pillarEl=document.getElementById('dept-pillar-bars');
+  if(pillarEl){
+    if(!last){ pillarEl.innerHTML='<div style="color:var(--text3);padding:12px;font-size:12px;">Henüz denetim yok</div>'; }
+    else {
+      pillarEl.innerHTML=PILLARS.map(p=>{
+        const pct=Math.round(last.pillars[p.id]?.pct||0);
+        const durumColor=pct>=75?'var(--green)':pct>=50?'var(--amber)':'var(--red)';
+        const durum=pct>=75?'✓ İyi':pct>=50?'△ Orta':'✗ Kritik';
+        return `<div style="margin-bottom:11px;">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">
+            <div><span style="font-size:12px;font-weight:600;color:${p.color};">${p.id}</span><span style="font-size:11px;color:var(--text2);margin-left:6px;">${p.name.split('(')[0].trim()}</span></div>
+            <div style="display:flex;align-items:center;gap:8px;">
+              <span style="font-size:11px;font-weight:600;color:${durumColor};">${durum}</span>
+              <span style="font-size:15px;font-weight:700;font-family:var(--mono);color:${p.color};">${pct}%</span>
+            </div>
           </div>
-          <div style="display:flex;align-items:center;gap:8px;">
-            <span style="font-size:11px;color:${durumColor};font-weight:600;">${durum}</span>
-            <span style="font-size:14px;font-weight:700;font-family:var(--mono);color:${p.color};">${pct}%</span>
+          <div style="height:8px;background:var(--surface2);border-radius:99px;overflow:hidden;">
+            <div style="height:100%;width:${pct}%;background:${p.color};border-radius:99px;"></div>
           </div>
-        </div>
-        <div style="height:8px;background:var(--surface2);border-radius:99px;overflow:hidden;">
-          <div style="height:100%;width:${pct}%;background:${p.color};border-radius:99px;transition:width .4s;"></div>
-        </div>
-      </div>`;
-    }).join('');
-  } else if(pillarEl) {
-    pillarEl.innerHTML='<div style="color:var(--text3);padding:12px;">Henüz denetim yok</div>';
+        </div>`;
+      }).join('');
+    }
   }
   
   // Son denetimler
-  const recEl=document.getElementById('lider-recent');
-  if(!areaAudits.length){ recEl.innerHTML='<div style="color:var(--text3);font-size:12px;padding:10px;">Henüz denetim yapılmadı</div>'; }
-  else {
-    recEl.innerHTML=areaAudits.slice(0,5).map(a=>`
-      <div style="display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--border);">
-        <div style="width:32px;height:32px;border-radius:6px;background:${scoreColor(a.totalScore)};color:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;">${a.totalScore}</div>
-        <div style="flex:1;"><div style="font-size:12px;font-weight:500;">${a.date}</div><div style="font-size:10px;color:var(--text3);">Denetçi: ${a.auditor}</div></div>
-        <span class="badge ${scoreBadge(a.totalScore)}">${scoreLabel(a.totalScore)}</span>
-      </div>`).join('');
+  const recEl=document.getElementById('dept-recent');
+  if(recEl){
+    if(!deptAudits.length){ recEl.innerHTML='<div style="color:var(--text3);font-size:12px;padding:10px;">Henüz denetim yok</div>'; }
+    else {
+      recEl.innerHTML=deptAudits.slice(0,5).map(a=>`
+        <div style="display:flex;align-items:center;gap:8px;padding:9px 0;border-bottom:1px solid var(--border);cursor:pointer;" onclick="showDetail('${a.id}')">
+          <div style="width:34px;height:34px;border-radius:7px;background:${scoreColor(a.totalScore)};color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;">${a.totalScore}</div>
+          <div style="flex:1;">
+            <div style="font-size:12px;font-weight:500;">${a.area}</div>
+            <div style="font-size:10px;color:var(--text3);">${a.date} · ${a.auditor}</div>
+          </div>
+          <span class="badge ${scoreBadge(a.totalScore)}">${scoreLabel(a.totalScore)}</span>
+        </div>`).join('');
+    }
   }
   
   // Açık aksiyonlar
-  const openActions=S.actions.filter(a=>a.area===area?.name&&a.status!=='Tamamlandı');
-  const akEl=document.getElementById('lider-aksiyonlar');
-  const countEl=document.getElementById('lider-aksiyon-count');
-  if(countEl) countEl.textContent=openActions.length;
-  if(!openActions.length){ akEl.innerHTML='<div style="color:var(--green);font-size:12px;padding:10px;">✓ Açık aksiyon yok!</div>'; }
-  else {
-    akEl.innerHTML=openActions.slice(0,4).map(a=>`
-      <div style="display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid var(--border);">
-        <span class="badge ${a.priority==='Kritik'?'badge-red':a.priority==='Yüksek'?'badge-amber':'badge-blue'}">${a.priority}</span>
-        <div style="flex:1;font-size:12px;">${a.title}</div>
-        <div style="font-size:10px;color:var(--text3);">${a.due||'—'}</div>
-      </div>`).join('');
+  const akEl=document.getElementById('dept-aksiyonlar');
+  const akCountEl=document.getElementById('dept-aksiyon-count');
+  if(akCountEl) akCountEl.textContent=openActs.length;
+  if(akEl){
+    if(!openActs.length){ akEl.innerHTML='<div style="color:var(--green);font-size:12px;padding:10px;">✓ Açık aksiyon yok!</div>'; }
+    else {
+      akEl.innerHTML=openActs.slice(0,5).map(a=>`
+        <div style="display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--border);">
+          <span class="badge ${a.priority==='Kritik'?'badge-red':a.priority==='Yüksek'?'badge-amber':'badge-blue'}" style="font-size:10px;">${a.priority}</span>
+          <div style="flex:1;font-size:12px;font-weight:500;">${a.title}</div>
+          <div style="font-size:10px;color:var(--text3);">${a.due||'—'}</div>
+        </div>`).join('');
+    }
   }
   
   // Sonraki denetim
@@ -1747,14 +1881,18 @@ function renderTakimLiderDashboard(){
   const nextDate=lastDate?new Date(lastDate.getTime()+periyot*86400000):new Date();
   const today=new Date(); today.setHours(0,0,0,0);
   const diff=Math.ceil((nextDate-today)/86400000);
-  const sonrakiEl=document.getElementById('lider-sonraki');
+  const sonrakiEl=document.getElementById('dept-sonraki');
   if(sonrakiEl){
     const renk=diff<0?'var(--red)':diff<=3?'var(--amber)':'var(--green)';
-    sonrakiEl.innerHTML=`<div style="display:flex;align-items:center;gap:16px;">
-      <div style="font-size:32px;font-weight:700;font-family:var(--mono);color:${renk};">${diff<0?Math.abs(diff)+' gün gecikti':diff===0?'Bugün!':diff+' gün kaldı'}</div>
-      <div style="color:var(--text2);font-size:12px;">Hedef tarih: ${nextDate.toLocaleDateString('tr-TR')}<br>Son denetim: ${last?.date||'—'}</div>
-    </div>`;
+    sonrakiEl.innerHTML=`
+      <div style="font-size:28px;font-weight:700;font-family:var(--mono);color:${renk};margin-bottom:6px;">${diff<0?Math.abs(diff)+' gün gecikti':diff===0?'Bugün!':diff+' gün kaldı'}</div>
+      <div style="font-size:11px;color:var(--text2);">Hedef: ${nextDate.toLocaleDateString('tr-TR')}<br>Son denetim: ${last?.date||'—'}</div>`;
   }
+}
+
+function selectDeptBolum(bolum){
+  DEPT_SELECTED_BOLUM=bolum;
+  renderDepartmanDashboard();
 }
 
 function renderComplianceWidget(){
@@ -2822,7 +2960,7 @@ function exportKarsilastirmaPDF(){
 function renderKullanicilar(){
   const el=document.getElementById('kullanici-list'); if(!el) return;
   const users=S.users||DEFAULT_USERS;
-  const roleLabels={admin:'👑 Yönetici',denetci:'🔍 Denetçi',takimlider:'👔 Takım Lideri'};
+  const roleLabels={admin:'👑 Yönetici',denetci:'🔍 Denetçi',takimlider:'👔 Takım Lideri',departman:'🏭 Departman'};
   const roleColors={admin:'var(--red)',denetci:'var(--blue)',takimlider:'var(--green)'};
   const roleBg={admin:'var(--red-light)',denetci:'var(--blue-light)',takimlider:'var(--green-light)'};
   
@@ -2865,16 +3003,27 @@ function renderKullanicilar(){
     </div>`;
 }
 
+function updateBolumSelect(){
+  const dept=document.getElementById('nu-dept')?.value;
+  const sel=document.getElementById('nu-bolum');
+  if(!sel) return;
+  const bolumler=DEPARTMANLAR[dept]?.bolumler||[];
+  sel.innerHTML=bolumler.length
+    ?bolumler.map(b=>`<option value="${b}">${b}</option>`).join('')
+    :'<option value="">— Bölüm yok —</option>';
+}
+
 function addUser(){
   const name=document.getElementById('nu-name').value.trim();
   const username=document.getElementById('nu-username').value.trim();
   const password=document.getElementById('nu-password').value;
   const role=document.getElementById('nu-role').value;
-  const area=document.getElementById('nu-area').value;
+  const dept=document.getElementById('nu-dept')?.value||'';
+  const bolum=document.getElementById('nu-bolum')?.value||'';
   if(!name||!username||!password){ showToast('⚠ Tüm alanları doldurun!'); return; }
   if(!S.users) S.users=[];
   if(S.users.find(u=>u.username===username)){ showToast('⚠ Bu kullanıcı adı zaten var!'); return; }
-  S.users.push({id:'u'+Date.now(),name,username,password,role,area});
+  S.users.push({id:'u'+Date.now(),name,username,password,role,dept,bolum,area:''});
   saveS(); closeModal('modal-user-add'); renderKullanicilar();
   showToast('✓ Kullanıcı eklendi!');
 }
@@ -2923,7 +3072,18 @@ document.querySelectorAll('.modal-ov').forEach(o=>o.addEventListener('click',e=>
 // ======= INIT =======
 loadS();
 if(!S.auditors) S.auditors=['Bahadır Göktürk','Mehmet Yılmaz','Ayşe Kaya','Hasan Demir'];
-if(!S.users) S.users=DEFAULT_USERS;
+// Her zaman DEFAULT_USERS'ı merge et — yeni kullanıcılar eklendiyse güncelle
+DEFAULT_USERS.forEach(du=>{
+  if(!S.users) S.users=[];
+  const existing=S.users.find(u=>u.id===du.id);
+  if(existing){
+    // Alanları güncelle ama şifreyi koru
+    existing.role=du.role; existing.dept=du.dept; existing.bolum=du.bolum;
+    existing.name=existing.name||du.name;
+  } else {
+    S.users.push(du);
+  }
+});
 document.getElementById('topbar-date').textContent=new Date().toLocaleDateString('tr-TR',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
 
 // Login buton event listener

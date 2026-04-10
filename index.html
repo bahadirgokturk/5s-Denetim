@@ -355,7 +355,7 @@ body.role-takimlider .hide-takimlider{display:none!important;}
     </div>
   </nav>
   <div id="sb-user" style="padding:12px 16px;border-top:1px solid rgba(255,255,255,.1);font-size:11px;color:rgba(255,255,255,.5);"></div>
-  <div class="sb-foot">v8.0 · OPEX Dept.</div>
+  <div class="sb-foot">v9.0 · OPEX Dept.</div>
 </aside>
 
 <main class="main">
@@ -578,7 +578,7 @@ body.role-takimlider .hide-takimlider{display:none!important;}
       <div class="form-grid" style="margin-bottom:16px;">
         <div class="fg">
           <label>Denetlenen Takım</label>
-          <select id="audit-area">
+          <select id="audit-area" onchange="onAreaChange(this.value)">
             <option value="">Takım seçiniz.</option>
           </select>
         </div>
@@ -1192,7 +1192,7 @@ function saveS(){ if(!S.hedefler)S.hedefler={}; if(!S.auditors)S.auditors=[]; if
 // ======= NAVIGATION =======
 const TITLES={'dashboard':'Dashboard','new-audit':'Yeni Denetim','history':'Denetim Geçmişi','areas':'Bölge Yönetimi','actions':'Aksiyonlar','reports':'Raporlar','leaderboard':'🏆 Takım Sıralaması','qr':'⬛ QR Kodlar','hedefler':'🎯 Hedef Skorlar','takvim':'📅 Denetim Takvimi','denetciler':'👤 Denetçi Performansı','karsilastirma':'📊 Bölge Karşılaştırma','kullanicilar':'⚙ Kullanıcı Yönetimi'};
 function navigate(p){
-  document.querySelectorAll('.page').forEach(x=>{ x.classList.remove('active'); x.style.display=''; });
+  document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));
   document.querySelectorAll('.nav-btn').forEach(x=>x.classList.remove('active'));
   const targetPage=document.getElementById('page-'+p);
   if(targetPage){ targetPage.classList.add('active'); }
@@ -1214,11 +1214,23 @@ function navigate(p){
 }
 
 // ======= AUDIT FORM =======
+function onAreaChange(areaId){
+  const area=S.areas.find(a=>a.id===areaId);
+  if(area){
+    const deptEl=document.getElementById('audit-dept');
+    if(deptEl) deptEl.value=area.dept||'';
+  }
+}
+
 function initForm(){
   const sel=document.getElementById('audit-area');
   sel.innerHTML='<option value="">Takım seçiniz.</option>';
   S.areas.forEach(a=>{ sel.innerHTML+=`<option value="${a.id}">${a.name} (${a.dept})</option>`; });
   document.getElementById('audit-date').value=new Date().toISOString().split('T')[0];
+  // Denetçi giriş yapmışsa adını otomatik doldur
+  if(CURRENT_USER?.role==='denetci'){
+    document.getElementById('audit-auditor').value=CURRENT_USER.name||'';
+  }
   // Pre-fill with sample data
   document.getElementById('audit-form-code').value='5S-2026-' + String(S.audits.length+1).padStart(3,'0');
   document.getElementById('audit-location').value='Fabrika-1';
@@ -1478,14 +1490,20 @@ function resetAudit(){ if(confirm('Formu sıfırla?')) initForm(); }
 // ======= DASHBOARD =======
 function renderDashboard(){
   const role=CURRENT_USER?.role||'admin';
-  // Önce hepsini gizle
+  // Önce tüm dash bölümlerini gizle
   ['dash-admin','dash-denetci','dash-takimlider'].forEach(id=>{
     const el=document.getElementById(id);
     if(el) el.style.display='none';
   });
-  // page-dashboard'u aktif yap
+  // page-dashboard'u aktif yap (diğer sayfalardan geri dönüşte de çalışsın)
+  document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));
   const pd=document.getElementById('page-dashboard');
-  if(pd){ pd.style.display='block'; }
+  if(pd){ pd.classList.add('active'); }
+  // navbar'da dashboard aktif
+  document.querySelectorAll('.nav-btn').forEach(x=>{
+    if(x.getAttribute('onclick')?.includes("'dashboard'")) x.classList.add('active');
+    else x.classList.remove('active');
+  });
   
   if(role==='admin') renderAdminDashboard();
   else if(role==='denetci') renderDenetciDashboard();
@@ -2177,10 +2195,7 @@ function openModal(id){
     const sel=document.getElementById('na-area'); sel.innerHTML='<option value="">-- Bölge --</option>';
     S.areas.forEach(a=>sel.innerHTML+=`<option value="${a.name}">${a.name}</option>`);
   }
-  if(id==='modal-user-add'){
-    const sel=document.getElementById('nu-area'); sel.innerHTML='<option value="">— Seçin —</option>';
-    S.areas.forEach(a=>sel.innerHTML+=`<option value="${a.id}">${a.name}</option>`);
-  }
+  // nu-area kaldırıldı, dept/bolum kullanılıyor
 }
 function closeModal(id){ document.getElementById(id).classList.remove('open'); }
 function addAction(){
@@ -2967,7 +2982,7 @@ function renderKullanicilar(){
   // Özet kartlar
   const adminCount=users.filter(u=>u.role==='admin').length;
   const denetciCount=users.filter(u=>u.role==='denetci').length;
-  const liderCount=users.filter(u=>u.role==='takimlider').length;
+  const liderCount=users.filter(u=>u.role==='takimlider'||u.role==='departman').length;
 
   el.innerHTML=`
     <div class="metrics-grid" style="margin-bottom:20px;">
@@ -2978,7 +2993,7 @@ function renderKullanicilar(){
     
     <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px;">
       ${users.map(u=>{
-        const area=S.areas.find(a=>a.id===u.area);
+        // dept/bolum kullanılıyor
         const myAudits=S.audits.filter(a=>a.auditor===u.name).length;
         const initials=u.name.split(' ').map(n=>n[0]).join('').substring(0,2);
         return `<div style="border:1px solid var(--border);border-radius:var(--r);padding:16px;background:var(--surface);">

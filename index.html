@@ -569,7 +569,38 @@ body.role-takimlider .hide-takimlider{display:none!important;}
 
 <!-- NEW AUDIT -->
 <div class="page" id="page-new-audit">
-  <div style="max-width:880px;">
+  <!-- Admin görünümü: sadece atama -->
+  <div id="admin-audit-view" style="display:none;max-width:600px;">
+    <div class="card">
+      <div style="font-size:16px;font-weight:600;color:var(--accent);margin-bottom:4px;">📋 Denetim Oluştur</div>
+      <div style="font-size:12px;color:var(--text3);margin-bottom:20px;">Denetçiye görev ata ve denetim planla</div>
+      <div class="form-grid" style="margin-bottom:12px;">
+        <div class="fg"><label>Denetçi *</label>
+          <select id="admin-ata-denetci" style="font-size:14px;"></select>
+        </div>
+        <div class="fg"><label>Bölge *</label>
+          <select id="admin-ata-alan" style="font-size:14px;"></select>
+        </div>
+      </div>
+      <div class="fg" style="margin-bottom:12px;"><label>Planlanan Tarih *</label>
+        <input type="date" id="admin-ata-tarih">
+      </div>
+      <div class="fg" style="margin-bottom:16px;"><label>Not (opsiyonel)</label>
+        <textarea id="admin-ata-not" placeholder="Denetçiye özel talimat veya not..." style="min-height:60px;"></textarea>
+      </div>
+      <div style="display:flex;gap:8px;">
+        <button class="btn btn-primary" style="flex:1;" onclick="adminDenetimOlustur()">✓ Denetim Oluştur ve Ata</button>
+      </div>
+      <div id="admin-atama-sonuc" style="margin-top:16px;"></div>
+      <div style="margin-top:20px;padding-top:16px;border-top:1px solid var(--border);">
+        <div style="font-size:13px;font-weight:600;margin-bottom:10px;">📋 Bekleyen Atamalar</div>
+        <div id="admin-bekleyen-list"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Denetçi görünümü: tam form -->
+  <div id="denetci-audit-view" style="display:none;max-width:880px;">
     <div class="card" style="margin-bottom:14px;">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
         <div style="font-size:16px;font-weight:600;color:var(--accent);">5S Denetim Formu</div>
@@ -671,8 +702,8 @@ body.role-takimlider .hide-takimlider{display:none!important;}
       <button class="btn btn-sm" style="border:1px solid var(--brand);color:var(--brand);background:var(--brand-light);" onclick="submitAndReport()">✦ Kaydet + AI Rapor</button>
       <button class="btn btn-outline" onclick="resetAudit()">↺ Sıfırla</button>
     </div>
-  </div>
-</div>
+  </div><!-- end denetci-audit-view -->
+</div><!-- end page-new-audit -->
 
 <!-- HISTORY -->
 <div class="page" id="page-history">
@@ -690,8 +721,63 @@ body.role-takimlider .hide-takimlider{display:none!important;}
 
 <!-- AREAS -->
 <div class="page" id="page-areas">
-  <div class="sec-hdr" style="margin-bottom:14px;"><div style="font-size:15px;font-weight:600;">Bölge Yönetimi</div></div>
+  <!-- Üst başlık -->
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:10px;">
+    <div>
+      <div style="font-size:16px;font-weight:600;">Bölge Yönetimi</div>
+      <div style="font-size:12px;color:var(--text3);margin-top:2px;">Tüm denetim bölgelerini yönet ve izle</div>
+    </div>
+    <button class="btn btn-primary" onclick="openModal('modal-area-add')">+ Yeni Bölge Ekle</button>
+  </div>
+  <!-- Özet metrikler -->
+  <div id="areas-summary" style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px;"></div>
+  <!-- Bölge kartları -->
   <div class="area-grid" id="area-grid"></div>
+</div>
+
+<!-- BÖLGE DETAY MODAL -->
+<div class="modal-ov" id="modal-area-detail">
+  <div class="modal" style="max-width:680px;width:96%;max-height:90vh;overflow-y:auto;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+      <div>
+        <div class="modal-title" id="detail-area-name">Bölge Detayı</div>
+        <div class="modal-sub" id="detail-area-sub"></div>
+      </div>
+      <button onclick="closeModal('modal-area-detail')" style="border:none;background:none;font-size:20px;cursor:pointer;color:var(--text3);">✕</button>
+    </div>
+    <!-- Skor + metrikler -->
+    <div style="display:grid;grid-template-columns:auto 1fr;gap:16px;align-items:center;margin-bottom:16px;padding:16px;background:var(--surface2);border-radius:var(--r);">
+      <div style="text-align:center;">
+        <div style="font-size:48px;font-weight:700;font-family:var(--mono);line-height:1;" id="detail-skor">—</div>
+        <div style="font-size:11px;color:var(--text3);">/100 ort. skor</div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;" id="detail-metrics"></div>
+    </div>
+    <!-- Pillar durumu -->
+    <div class="card" style="margin-bottom:12px;">
+      <div style="font-size:13px;font-weight:600;margin-bottom:12px;">📊 Son Denetim — Pillar Skorları</div>
+      <div id="detail-pillars"></div>
+    </div>
+    <!-- Son denetimler -->
+    <div class="card" style="margin-bottom:12px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+        <div style="font-size:13px;font-weight:600;">📅 Son Denetimler</div>
+        <button class="btn btn-outline btn-sm" id="detail-history-btn">Tümünü Gör</button>
+      </div>
+      <div id="detail-audits"></div>
+    </div>
+    <!-- Açık aksiyonlar -->
+    <div class="card" style="margin-bottom:12px;">
+      <div style="font-size:13px;font-weight:600;margin-bottom:10px;">⚠️ Açık Aksiyonlar</div>
+      <div id="detail-actions-list"></div>
+    </div>
+    <!-- Butonlar -->
+    <div style="display:flex;gap:8px;flex-wrap:wrap;">
+      <button class="btn btn-primary" id="detail-denetle-btn">+ Denetim Başlat</button>
+      <button class="btn btn-outline" id="detail-qr-btn">⬛ QR Kodu İndir</button>
+      <button class="btn btn-sm" style="color:var(--red);border:1px solid var(--red);background:var(--red-light);margin-left:auto;" id="detail-del-btn">Bölgeyi Sil</button>
+    </div>
+  </div>
 </div>
 
 <!-- ACTIONS -->
@@ -1250,6 +1336,33 @@ function navigate(p){
 
 // ======= AUDIT FORM =======
 function initForm(){
+  const role=CURRENT_USER?.role||'denetci';
+  const adminView=document.getElementById('admin-audit-view');
+  const denetciView=document.getElementById('denetci-audit-view');
+  
+  if(role==='admin'){
+    if(adminView) adminView.style.display='block';
+    if(denetciView) denetciView.style.display='none';
+    // Admin atama formunu doldur
+    const denetciSel=document.getElementById('admin-ata-denetci');
+    const alanSel=document.getElementById('admin-ata-alan');
+    const tarihEl=document.getElementById('admin-ata-tarih');
+    if(denetciSel){
+      const denetciler=(S.users||DEFAULT_USERS).filter(u=>u.role==='denetci');
+      denetciSel.innerHTML=denetciler.map(d=>`<option value="${d.id}">${d.name}</option>`).join('');
+    }
+    if(alanSel){
+      alanSel.innerHTML=S.areas.map(a=>`<option value="${a.id}">${a.name} (${a.dept})</option>`).join('');
+    }
+    if(tarihEl) tarihEl.value=new Date().toISOString().split('T')[0];
+    renderAdminBekleyenList();
+    return;
+  }
+  
+  // Denetçi / departman görünümü
+  if(adminView) adminView.style.display='none';
+  if(denetciView) denetciView.style.display='block';
+  
   const sel=document.getElementById('audit-area');
   sel.innerHTML='<option value="">Takım seçiniz.</option>';
   S.areas.forEach(a=>{ sel.innerHTML+=`<option value="${a.id}">${a.name} (${a.dept})</option>`; });
@@ -2146,90 +2259,222 @@ function showDetail(id){
 
 // ======= AREAS =======
 function renderAreas(){
-  const g=document.getElementById('area-grid');
+  const g=document.getElementById('area-grid'); if(!g) return;
+  
+  // Özet metrikler
+  const sm=document.getElementById('areas-summary');
+  if(sm){
+    const total=S.areas.length;
+    const denetlenen=S.areas.filter(a=>S.audits.some(au=>au.areaId===a.id||au.area===a.name)).length;
+    const avgAll=S.audits.length?Math.round(S.audits.reduce((s,a)=>s+a.totalScore,0)/S.audits.length):null;
+    const openAll=S.actions.filter(a=>a.status!=='Tamamlandı').length;
+    sm.innerHTML=[
+      {label:'Toplam Bölge',val:total,color:'blue'},
+      {label:'Denetlenen',val:denetlenen,color:'green'},
+      {label:'Ort. Fabrika Skoru',val:avgAll!==null?avgAll:'—',color:'amber'},
+      {label:'Açık Aksiyon',val:openAll,color:'red'},
+    ].map(m=>`<div class="metric ${m.color}"><div class="metric-label">${m.label}</div><div class="metric-val">${m.val}</div></div>`).join('');
+  }
+
   g.innerHTML=S.areas.map(a=>{
     const areaAudits=S.audits.filter(au=>au.areaId===a.id||au.area===a.name).sort((x,y)=>y.date.localeCompare(x.date));
     const last=areaAudits[0];
     const avg=areaAudits.length?Math.round(areaAudits.reduce((s,x)=>s+x.totalScore,0)/areaAudits.length):null;
-    const openActions=S.actions.filter(ac=>ac.area===a.name&&ac.status!=='Tamamlandı').length;
+    const openAct=S.actions.filter(ac=>ac.area===a.name&&ac.status!=='Tamamlandı').length;
     const trend=areaAudits.length>=2?(areaAudits[0].totalScore-areaAudits[1].totalScore):null;
     const sc=avg!==null?scoreColor(avg):'var(--text3)';
     
-    // Pillar mini bar'ları
+    // Kaç gün oldu
+    const daysSince=last?Math.floor((new Date()-new Date(last.date))/86400000):null;
+    const periyot=S.auditPeriyot||14;
+    const daysLeft=last?periyot-daysSince:null;
+    const urgencyColor=daysSince===null?'var(--text3)':daysSince>periyot?'var(--red)':daysSince>periyot*0.7?'var(--amber)':'var(--green)';
+    const urgencyText=daysSince===null?'Hiç denetlenmedi':daysSince>periyot?`${daysSince-periyot} gün gecikti!`:daysSince===0?'Bugün denetlendi':`${daysSince} gün önce`;
+    
+    // Hedef skora ilerleme
+    const hedef=S.hedefler?.[a.id]||80;
+    const hedefPct=avg!==null?Math.min(100,Math.round(avg/hedef*100)):0;
+
+    // Pillar mini barlar
     const pillarBars=last?PILLARS.map(p=>{
       const pct=Math.round(last.pillars[p.id]?.pct||0);
-      return `<div style="margin-bottom:4px;">
-        <div style="display:flex;justify-content:space-between;margin-bottom:2px;">
-          <span style="font-size:9px;color:var(--text3);">${p.id}</span>
-          <span style="font-size:9px;font-weight:600;color:${p.color};">${pct}%</span>
-        </div>
-        <div style="height:4px;background:var(--surface2);border-radius:99px;overflow:hidden;">
+      return `<div style="display:flex;align-items:center;gap:4px;margin-bottom:3px;">
+        <span style="font-size:9px;color:var(--text3);width:16px;">${p.id}</span>
+        <div style="flex:1;height:4px;background:var(--surface2);border-radius:99px;overflow:hidden;">
           <div style="height:100%;width:${pct}%;background:${p.color};border-radius:99px;"></div>
         </div>
+        <span style="font-size:9px;font-weight:600;color:${p.color};width:24px;text-align:right;">${pct}%</span>
       </div>`;
     }).join(''):'';
 
-    return `<div class="area-card" style="cursor:default;padding:16px;">
-      <!-- Başlık -->
-      <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:10px;">
-        <div>
-          <div style="font-size:14px;font-weight:600;margin-bottom:3px;">${a.name}</div>
-          <span class="badge badge-blue">${a.dept}</span>
-        </div>
-        ${avg!==null?`<div style="text-align:center;">
-          <div style="font-size:22px;font-weight:700;font-family:var(--mono);color:${sc};line-height:1;">${avg}</div>
-          <div style="font-size:9px;color:var(--text3);">ort. skor</div>
-        </div>`:'<div style="font-size:11px;color:var(--text3);margin-top:4px;">Denetlenmedi</div>'}
-      </div>
-
-      <!-- İstatistikler -->
-      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:10px;">
-        <div style="background:var(--surface2);border-radius:6px;padding:6px;text-align:center;">
-          <div style="font-size:16px;font-weight:700;font-family:var(--mono);">${areaAudits.length}</div>
-          <div style="font-size:9px;color:var(--text3);">denetim</div>
-        </div>
-        <div style="background:${openActions>0?'var(--red-light)':'var(--green-light)'};border-radius:6px;padding:6px;text-align:center;">
-          <div style="font-size:16px;font-weight:700;font-family:var(--mono);color:${openActions>0?'var(--red)':'var(--green)'};">${openActions}</div>
-          <div style="font-size:9px;color:${openActions>0?'var(--red)':'var(--green)'};">açık aksiyon</div>
-        </div>
-        <div style="background:var(--surface2);border-radius:6px;padding:6px;text-align:center;">
-          <div style="font-size:16px;font-weight:700;font-family:var(--mono);color:${trend===null?'var(--text3)':trend>0?'var(--green)':trend<0?'var(--red)':'var(--text2)'};">
-            ${trend===null?'—':trend>0?'+'+trend:trend}
+    return `<div class="area-card" style="cursor:pointer;padding:0;overflow:hidden;border:1.5px solid var(--border);border-radius:var(--r);transition:box-shadow .15s;" 
+      onclick="openAreaDetail('${a.id}')"
+      onmouseover="this.style.boxShadow='0 4px 16px rgba(0,0,0,.08)'"
+      onmouseout="this.style.boxShadow=''">
+      
+      <!-- Renkli üst bant -->
+      <div style="height:5px;background:${sc};"></div>
+      
+      <div style="padding:14px;">
+        <!-- Başlık + skor -->
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:10px;">
+          <div>
+            <div style="font-size:14px;font-weight:600;margin-bottom:4px;">${a.name}</div>
+            <span class="badge badge-blue">${a.dept}</span>
           </div>
-          <div style="font-size:9px;color:var(--text3);">trend</div>
+          <div style="text-align:center;">
+            <div style="font-size:26px;font-weight:700;font-family:var(--mono);color:${sc};line-height:1;">${avg!==null?avg:'—'}</div>
+            <div style="font-size:9px;color:var(--text3);">/ 100</div>
+          </div>
         </div>
+
+        <!-- 3 mini metrik -->
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:5px;margin-bottom:10px;">
+          <div style="background:var(--surface2);border-radius:5px;padding:5px;text-align:center;">
+            <div style="font-size:14px;font-weight:700;">${areaAudits.length}</div>
+            <div style="font-size:8px;color:var(--text3);">denetim</div>
+          </div>
+          <div style="background:${openAct>0?'var(--red-light)':'var(--green-light)'};border-radius:5px;padding:5px;text-align:center;">
+            <div style="font-size:14px;font-weight:700;color:${openAct>0?'var(--red)':'var(--green)'};">${openAct}</div>
+            <div style="font-size:8px;color:${openAct>0?'var(--red)':'var(--green)'};">aksiyon</div>
+          </div>
+          <div style="background:var(--surface2);border-radius:5px;padding:5px;text-align:center;">
+            <div style="font-size:14px;font-weight:700;color:${trend===null?'var(--text3)':trend>0?'var(--green)':trend<0?'var(--red)':'var(--text2)'};">${trend===null?'—':trend>0?'+'+trend:trend}</div>
+            <div style="font-size:8px;color:var(--text3);">trend</div>
+          </div>
+        </div>
+
+        <!-- Pillar barlar -->
+        ${last?`<div style="margin-bottom:10px;">${pillarBars}</div>`:'<div style="padding:8px 0;text-align:center;font-size:11px;color:var(--text3);margin-bottom:8px;">Henüz denetim yapılmadı</div>'}
+
+        <!-- Hedef ilerleme -->
+        ${avg!==null?`<div style="margin-bottom:8px;">
+          <div style="display:flex;justify-content:space-between;font-size:9px;color:var(--text3);margin-bottom:2px;">
+            <span>Hedefe ilerleme</span><span>${avg}/${hedef}</span>
+          </div>
+          <div style="height:4px;background:var(--surface2);border-radius:99px;overflow:hidden;">
+            <div style="height:100%;width:${hedefPct}%;background:${hedefPct>=100?'var(--green)':'var(--blue)'};border-radius:99px;"></div>
+          </div>
+        </div>`:''}
+
+        <!-- Son denetim zaman bilgisi -->
+        <div style="font-size:10px;color:${urgencyColor};font-weight:500;">${urgencyText}</div>
       </div>
-
-      <!-- Pillar barları -->
-      ${last?`<div style="margin-bottom:10px;">${pillarBars}</div>`:''}
-
-      <!-- Son denetim -->
-      <div style="font-size:11px;color:var(--text3);margin-bottom:10px;">
-        ${last?`Son denetim: <strong>${last.date}</strong> · ${last.auditor}`:'Henüz denetim yapılmadı'}
-      </div>
-
-      <!-- Butonlar -->
-      <div style="display:flex;gap:6px;flex-wrap:wrap;">
-        <button class="btn btn-primary btn-sm" onclick="navigate('new-audit')" style="flex:1;">+ Denetle</button>
-        ${last?`<button class="btn btn-outline btn-sm" onclick="showAreaHistory('${a.id}')">Geçmiş</button>`:''}
-        <button class="btn btn-sm" style="color:var(--red);border:1px solid var(--red);background:var(--red-light);" onclick="delArea('${a.id}')">Sil</button>
+      
+      <!-- Alt buton barı -->
+      <div style="padding:8px 12px;border-top:1px solid var(--border);background:var(--surface2);display:flex;gap:6px;" onclick="event.stopPropagation()">
+        <button class="btn btn-primary btn-sm" style="flex:1;font-size:11px;" onclick="navigate('new-audit')">+ Denetle</button>
+        <button class="btn btn-outline btn-sm" style="font-size:11px;" onclick="openAreaDetail('${a.id}')">Detay →</button>
+        <button class="btn btn-sm" style="color:var(--red);border:1px solid var(--red);background:var(--red-light);font-size:11px;" onclick="delArea('${a.id}')">Sil</button>
       </div>
     </div>`;
   }).join('');
-  g.innerHTML+=`<div class="area-card add" onclick="openModal('modal-area-add')"><div style="font-size:22px;">＋</div><div style="font-size:13px;font-weight:500;">Bölge Ekle</div></div>`;
+  
+  g.innerHTML+=`<div class="area-card add" style="cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;min-height:200px;border:2px dashed var(--border);border-radius:var(--r);" onclick="openModal('modal-area-add')">
+    <div style="font-size:32px;color:var(--text3);">＋</div>
+    <div style="font-size:13px;font-weight:500;color:var(--text2);">Bölge Ekle</div>
+  </div>`;
+}
+
+function openAreaDetail(areaId){
+  const area=S.areas.find(a=>a.id===areaId); if(!area) return;
+  const areaAudits=S.audits.filter(a=>a.areaId===areaId||a.area===area.name).sort((x,y)=>y.date.localeCompare(x.date));
+  const last=areaAudits[0];
+  const avg=areaAudits.length?Math.round(areaAudits.reduce((s,a)=>s+a.totalScore,0)/areaAudits.length):null;
+  const openAct=S.actions.filter(a=>a.area===area.name&&a.status!=='Tamamlandı');
+  const trend=areaAudits.length>=2?(areaAudits[0].totalScore-areaAudits[1].totalScore):null;
+  const best=areaAudits.length?Math.max(...areaAudits.map(a=>a.totalScore)):null;
+  const sc=avg!==null?scoreColor(avg):'var(--text3)';
+  
+  // Başlık
+  document.getElementById('detail-area-name').textContent=area.name;
+  document.getElementById('detail-area-sub').textContent=`${area.dept} · ${areaAudits.length} denetim · ${area.desc||''}`;
+  
+  // Büyük skor
+  const skorEl=document.getElementById('detail-skor');
+  if(skorEl){ skorEl.textContent=avg!==null?avg:'—'; skorEl.style.color=sc; }
+  
+  // Metrikler
+  const dm=document.getElementById('detail-metrics');
+  if(dm) dm.innerHTML=[
+    {label:'En İyi Skor',val:best||'—',color:sc},
+    {label:'Açık Aksiyon',val:openAct.length,color:openAct.length>0?'var(--red)':'var(--green)'},
+    {label:'Trend',val:trend===null?'—':trend>0?'+'+trend:trend,color:trend>0?'var(--green)':trend<0?'var(--red)':'var(--text2)'},
+  ].map(m=>`<div style="background:var(--surface);border-radius:var(--rs);padding:10px;text-align:center;border:1px solid var(--border);">
+    <div style="font-size:20px;font-weight:700;font-family:var(--mono);color:${m.color};">${m.val}</div>
+    <div style="font-size:10px;color:var(--text3);">${m.label}</div>
+  </div>`).join('');
+  
+  // Pillar barlar
+  const dp=document.getElementById('detail-pillars');
+  if(dp){
+    if(!last){ dp.innerHTML='<div style="color:var(--text3);font-size:12px;">Henüz denetim yok</div>'; }
+    else {
+      dp.innerHTML=PILLARS.map(p=>{
+        const pct=Math.round(last.pillars[p.id]?.pct||0);
+        const durum=pct>=75?'✓ İyi':pct>=50?'△ Orta':'✗ Kritik';
+        const dc=pct>=75?'var(--green)':pct>=50?'var(--amber)':'var(--red)';
+        return `<div style="margin-bottom:10px;">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">
+            <div><span style="font-size:12px;font-weight:600;color:${p.color};">${p.id}</span><span style="font-size:11px;color:var(--text2);margin-left:6px;">${p.name.split('(')[0].trim()}</span></div>
+            <div style="display:flex;align-items:center;gap:8px;">
+              <span style="font-size:11px;color:${dc};font-weight:600;">${durum}</span>
+              <span style="font-size:14px;font-weight:700;font-family:var(--mono);color:${p.color};">${pct}%</span>
+            </div>
+          </div>
+          <div style="height:7px;background:var(--surface2);border-radius:99px;overflow:hidden;">
+            <div style="height:100%;width:${pct}%;background:${p.color};border-radius:99px;"></div>
+          </div>
+        </div>`;
+      }).join('');
+    }
+  }
+  
+  // Son denetimler
+  const da=document.getElementById('detail-audits');
+  if(da){
+    if(!areaAudits.length){ da.innerHTML='<div style="color:var(--text3);font-size:12px;">Denetim yok</div>'; }
+    else {
+      da.innerHTML=areaAudits.slice(0,5).map(a=>`
+        <div style="display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--border);cursor:pointer;" onclick="closeModal('modal-area-detail');showDetail('${a.id}')">
+          <div style="width:32px;height:32px;border-radius:6px;background:${scoreColor(a.totalScore)};color:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;">${a.totalScore}</div>
+          <div style="flex:1;"><div style="font-size:12px;font-weight:500;">${a.date}</div><div style="font-size:10px;color:var(--text3);">Denetçi: ${a.auditor}</div></div>
+          <span class="badge ${scoreBadge(a.totalScore)}">${scoreLabel(a.totalScore)}</span>
+        </div>`).join('');
+    }
+  }
+  
+  // Aksiyonlar
+  const dl=document.getElementById('detail-actions-list');
+  if(dl){
+    if(!openAct.length){ dl.innerHTML='<div style="color:var(--green);font-size:12px;">✓ Açık aksiyon yok</div>'; }
+    else {
+      dl.innerHTML=openAct.slice(0,4).map(a=>`
+        <div style="display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid var(--border);">
+          <span class="badge ${a.priority==='Kritik'?'badge-red':a.priority==='Yüksek'?'badge-amber':'badge-blue'}">${a.priority}</span>
+          <div style="flex:1;font-size:12px;">${a.title}</div>
+          <div style="font-size:10px;color:var(--text3);">${a.due||'—'}</div>
+        </div>`).join('');
+    }
+  }
+  
+  // Butonları ayarla
+  const detBtn=document.getElementById('detail-history-btn');
+  if(detBtn) detBtn.onclick=()=>{ closeModal('modal-area-detail'); navigate('history'); setTimeout(()=>{ const s=document.getElementById('hist-search'); if(s){s.value=area.name;renderHistory();} },200); };
+  const delBtn=document.getElementById('detail-del-btn');
+  if(delBtn) delBtn.onclick=()=>{ if(confirm('Bu bölgeyi silmek istediğinizden emin misiniz?')){ closeModal('modal-area-detail'); delArea(areaId); } };
+  const qrBtn=document.getElementById('detail-qr-btn');
+  if(qrBtn) qrBtn.onclick=()=>{ closeModal('modal-area-detail'); navigate('qr'); };
+  
+  openModal('modal-area-detail');
 }
 
 function showAreaHistory(areaId){
   const area=S.areas.find(a=>a.id===areaId); if(!area) return;
-  const areaAudits=S.audits.filter(a=>a.areaId===areaId||a.area===area.name).sort((x,y)=>y.date.localeCompare(x.date));
-  if(!areaAudits.length){ showToast('Bu bölgede henüz denetim yok.'); return; }
-  // Geçmiş sayfasına filtreli git
   navigate('history');
-  setTimeout(()=>{
-    const search=document.getElementById('hist-search');
-    if(search){ search.value=area.name; renderHistory(); }
-  },200);
+  setTimeout(()=>{ const s=document.getElementById('hist-search'); if(s){s.value=area.name;renderHistory();} },200);
 }
+
 function addArea(){
   const n=document.getElementById('new-area-name').value.trim(); if(!n){showToast('⚠ Ad zorunlu!');return;}
   S.areas.push({id:'a'+Date.now(),name:n,dept:document.getElementById('new-area-dept').value.trim()||'Genel',desc:document.getElementById('new-area-desc').value.trim()});
@@ -2824,6 +3069,58 @@ function renderBeforeAfter(auditId){
     </div>
   </div>`;
   return html;
+}
+
+// ======= ADMİN DENETİM OLUŞTUR =======
+function adminDenetimOlustur(){
+  const denetciId=document.getElementById('admin-ata-denetci')?.value;
+  const alanId=document.getElementById('admin-ata-alan')?.value;
+  const tarih=document.getElementById('admin-ata-tarih')?.value;
+  const not=document.getElementById('admin-ata-not')?.value||'';
+  if(!denetciId||!alanId||!tarih){ showToast('⚠ Tüm zorunlu alanları doldurun!'); return; }
+  if(!S.atamalar) S.atamalar=[];
+  const denetci=(S.users||DEFAULT_USERS).find(u=>u.id===denetciId);
+  const alan=S.areas.find(a=>a.id===alanId);
+  S.atamalar.unshift({
+    id:'at'+Date.now(),
+    denetciId, denetciAd:denetci?.name||'',
+    alanId, alanAd:alan?.name||'',
+    tarih, not,
+    durum:'Bekliyor',
+    olusturanId:CURRENT_USER?.id,
+    olusturan:CURRENT_USER?.name,
+    olusturulma:new Date().toISOString()
+  });
+  saveS();
+  const sonuc=document.getElementById('admin-atama-sonuc');
+  if(sonuc){
+    sonuc.innerHTML=`<div style="padding:12px;background:var(--green-light);border-radius:var(--rs);color:var(--green);font-size:13px;">
+      ✓ <b>${denetci?.name}</b> → <b>${alan?.name}</b> için denetim oluşturuldu! (${tarih})
+    </div>`;
+    setTimeout(()=>{ sonuc.innerHTML=''; },4000);
+  }
+  document.getElementById('admin-ata-not').value='';
+  renderAdminBekleyenList();
+  updateBadges();
+  showToast(`✓ ${denetci?.name} → ${alan?.name} atandı!`);
+}
+
+function renderAdminBekleyenList(){
+  const el=document.getElementById('admin-bekleyen-list'); if(!el) return;
+  const bekleyenler=(S.atamalar||[]).filter(a=>a.durum==='Bekliyor');
+  if(!bekleyenler.length){
+    el.innerHTML='<div style="font-size:12px;color:var(--text3);padding:8px;">Bekleyen atama yok.</div>';
+    return;
+  }
+  el.innerHTML=bekleyenler.map(a=>`
+    <div style="display:flex;align-items:center;gap:10px;padding:9px 12px;border:1px solid var(--border);border-radius:var(--rs);margin-bottom:6px;">
+      <div style="flex:1;">
+        <div style="font-size:13px;font-weight:500;">${a.denetciAd} → ${a.alanAd}</div>
+        <div style="font-size:11px;color:var(--text3);">📅 ${a.tarih}${a.not?' · '+a.not:''}</div>
+      </div>
+      <span class="badge badge-amber">Bekliyor</span>
+      <button onclick="atamaIptal('${a.id}')" style="border:none;background:none;color:var(--red);cursor:pointer;font-size:16px;padding:2px 6px;">✕</button>
+    </div>`).join('');
 }
 
 // ======= MOBILE NAV =======

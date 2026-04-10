@@ -294,9 +294,10 @@ body.role-takimlider .hide-takimlider{display:none!important;}
     <div style="margin-top:20px;padding:12px;background:#f8f9fa;border-radius:8px;font-size:11px;color:#666;">
       <div style="font-weight:600;margin-bottom:6px;">Demo Hesaplar:</div>
       <div>👑 <b>admin</b> / admin123 — Yönetici</div>
-      <div>🔍 <b>denetci</b> / den123 — Denetçi</div>
-      <div>🏭 <b>uretim</b> / ure123 — Üretim (CFM + Gravür)</div>
-      <div>✅ <b>kalite</b> / kal123 — Kalite</div>
+      <div>🔍 <b>bahadir</b> / bah123 — Bahadır Göktürk (Denetçi)</div>
+      <div>🔍 <b>furkan</b> / fur123 — Furkan Lafcı (Denetçi)</div>
+      <div>🏭 <b>uretim</b> / ure123 — Üretim Dept.</div>
+      <div>✅ <b>kalite</b> / kal123 — Kalite Dept.</div>
     </div>
   </div>
 </div>
@@ -355,7 +356,7 @@ body.role-takimlider .hide-takimlider{display:none!important;}
     </div>
   </nav>
   <div id="sb-user" style="padding:12px 16px;border-top:1px solid rgba(255,255,255,.1);font-size:11px;color:rgba(255,255,255,.5);"></div>
-  <div class="sb-foot">v9.0 · OPEX Dept.</div>
+  <div class="sb-foot">v10.0 · OPEX Dept.</div>
 </aside>
 
 <main class="main">
@@ -472,35 +473,42 @@ body.role-takimlider .hide-takimlider{display:none!important;}
 
   <!-- ===== DENETÇİ DASHBOARD ===== -->
   <div id="dash-denetci" style="display:none;">
-    <!-- Karşılama -->
-    <div id="denetci-welcome" style="margin-bottom:14px;padding:16px 20px;background:var(--accent);border-radius:var(--r);color:#fff;">
-      <div style="font-size:13px;opacity:.7;margin-bottom:3px;">Hoş geldin 👋</div>
-      <div style="font-size:18px;font-weight:700;" id="denetci-name-lbl">Denetçi</div>
+    <!-- Karşılama barı -->
+    <div style="margin-bottom:16px;padding:18px 20px;background:var(--accent);border-radius:var(--r);color:#fff;">
+      <div style="font-size:12px;opacity:.7;margin-bottom:2px;">Hoş geldin 👋</div>
+      <div style="font-size:20px;font-weight:700;" id="denetci-name-lbl">Denetçi</div>
       <div style="font-size:12px;opacity:.6;margin-top:2px;" id="denetci-date-lbl"></div>
     </div>
-    <!-- Metrikler -->
-    <div class="metrics-grid" style="margin-bottom:14px;">
-      <div class="metric green"><div class="metric-label">Bu Ay Denetim</div><div class="metric-val" id="d-month">0</div><div class="metric-sub">tamamlanan</div></div>
-      <div class="metric blue"><div class="metric-label">Ort. Skorun</div><div class="metric-val" id="d-avg">—</div><div class="metric-sub">/ 100 puan</div></div>
-      <div class="metric amber"><div class="metric-label">Toplam</div><div class="metric-val" id="d-total">0</div><div class="metric-sub">denetim</div></div>
-      <div class="metric red"><div class="metric-label">Atanan</div><div class="metric-val" id="d-atanan">0</div><div class="metric-sub">bekleyen görev</div></div>
-    </div>
-    <!-- Bana atanan görevler -->
-    <div class="card" style="margin-bottom:14px;border-left:4px solid var(--brand);">
-      <div class="sec-hdr"><div><div style="font-size:14px;font-weight:600;">📋 Bana Atanan Denetimler</div><div style="font-size:11px;color:var(--text3);">Bugün yapılacaklar</div></div>
-        <button class="btn btn-primary btn-sm" onclick="navigate('new-audit')">+ Hızlı Başlat</button>
+
+    <!-- BUGÜNKÜ GÖREVLER — en önemli bölüm, en üstte büyük -->
+    <div class="card" style="margin-bottom:14px;border:2px solid var(--brand);">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+        <div>
+          <div style="font-size:15px;font-weight:700;color:var(--accent);">📋 Görev Listesi</div>
+          <div style="font-size:11px;color:var(--text3);">Admin tarafından atanan denetimler</div>
+        </div>
+        <span id="d-atanan-badge" class="badge badge-red" style="font-size:13px;"></span>
       </div>
       <div id="atanan-list"></div>
     </div>
-    <!-- Son denetimlerim -->
+
+    <!-- Metrikler -->
+    <div class="metrics-grid" style="margin-bottom:14px;">
+      <div class="metric green"><div class="metric-label">Bu Ay</div><div class="metric-val" id="d-month">0</div><div class="metric-sub">denetim yaptım</div></div>
+      <div class="metric blue"><div class="metric-label">Ort. Skorum</div><div class="metric-val" id="d-avg">—</div><div class="metric-sub">/ 100 puan</div></div>
+      <div class="metric amber"><div class="metric-label">Toplam</div><div class="metric-val" id="d-total">0</div><div class="metric-sub">tüm zamanlar</div></div>
+      <div class="metric red"><div class="metric-label">Tamamlanan</div><div class="metric-val" id="d-atanan">0</div><div class="metric-sub">bu ay</div></div>
+    </div>
+
+    <!-- Son denetimlerim + trend -->
     <div class="dash-grid-2" style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
       <div class="card">
-        <div class="sec-hdr"><div style="font-size:14px;font-weight:600;">Son Denetimlerim</div></div>
+        <div style="font-size:14px;font-weight:600;margin-bottom:12px;">Son Denetimlerim</div>
         <div id="denetci-recent"></div>
       </div>
       <div class="card">
-        <div class="sec-hdr"><div style="font-size:14px;font-weight:600;">📈 Skor Trendi</div></div>
-        <div id="denetci-trend" style="text-align:center;padding:20px;color:var(--text3);">Veri yok</div>
+        <div style="font-size:14px;font-weight:600;margin-bottom:12px;">📈 Performansım</div>
+        <div id="denetci-trend"></div>
       </div>
     </div>
   </div>
@@ -574,19 +582,29 @@ body.role-takimlider .hide-takimlider{display:none!important;}
     <div class="card">
       <div style="font-size:16px;font-weight:600;color:var(--accent);margin-bottom:4px;">📋 Denetim Oluştur</div>
       <div style="font-size:12px;color:var(--text3);margin-bottom:20px;">Denetçiye görev ata ve denetim planla</div>
+      <!-- Denetçi seçimi — kart formatında -->
+      <div style="font-size:12px;font-weight:600;color:var(--text2);margin-bottom:8px;">Denetçi Seç *</div>
+      <div id="denetci-kart-listesi" style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px;"></div>
+      <input type="hidden" id="admin-ata-denetci">
+
+      <!-- Bölge seçimi — checkbox'lı çoklu seçim -->
+      <div style="font-size:12px;font-weight:600;color:var(--text2);margin-bottom:8px;">Denetlenecek Bölge(ler) *</div>
+      <div id="bolge-secim-listesi" style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px;"></div>
+
       <div class="form-grid" style="margin-bottom:12px;">
-        <div class="fg"><label>Denetçi *</label>
-          <select id="admin-ata-denetci" style="font-size:14px;"></select>
+        <div class="fg"><label>Planlanan Tarih *</label>
+          <input type="date" id="admin-ata-tarih">
         </div>
-        <div class="fg"><label>Bölge *</label>
-          <select id="admin-ata-alan" style="font-size:14px;"></select>
+        <div class="fg"><label>Vardiya</label>
+          <select id="admin-ata-vardiya">
+            <option value="Sabah">Sabah (06-14)</option>
+            <option value="Öğle">Öğle (14-22)</option>
+            <option value="Gece">Gece (22-06)</option>
+          </select>
         </div>
       </div>
-      <div class="fg" style="margin-bottom:12px;"><label>Planlanan Tarih *</label>
-        <input type="date" id="admin-ata-tarih">
-      </div>
-      <div class="fg" style="margin-bottom:16px;"><label>Not (opsiyonel)</label>
-        <textarea id="admin-ata-not" placeholder="Denetçiye özel talimat veya not..." style="min-height:60px;"></textarea>
+      <div class="fg" style="margin-bottom:16px;"><label>Denetçiye Not (opsiyonel)</label>
+        <textarea id="admin-ata-not" placeholder="Özel talimat veya dikkat edilmesi gereken konular..." style="min-height:50px;"></textarea>
       </div>
       <div style="display:flex;gap:8px;">
         <button class="btn btn-primary" style="flex:1;" onclick="adminDenetimOlustur()">✓ Denetim Oluştur ve Ata</button>
@@ -1230,10 +1248,11 @@ const DEPARTMANLAR = {
 };
 
 const DEFAULT_USERS = [
-  {id:'u1', username:'admin',   password:'admin123', name:'Bahadır Göktürk', role:'admin',        dept:'',       bolum:''},
-  {id:'u2', username:'denetci', password:'den123',   name:'Mehmet Yılmaz',   role:'denetci',      dept:'',       bolum:''},
-  {id:'u3', username:'uretim',  password:'ure123',   name:'Üretim Dept.',    role:'departman',    dept:'Üretim', bolum:''},
-  {id:'u4', username:'kalite',  password:'kal123',   name:'Kalite Dept.',    role:'departman',    dept:'Kalite', bolum:'Kalite Kontrol'},
+  {id:'u1', username:'admin',   password:'admin123', name:'Bahadır Göktürk', role:'admin',      dept:'', bolum:''},
+  {id:'u2', username:'bahadir', password:'bah123',   name:'Bahadır Göktürk', role:'denetci',    dept:'', bolum:''},
+  {id:'u3', username:'furkan',  password:'fur123',   name:'Furkan Lafcı',    role:'denetci',    dept:'', bolum:''},
+  {id:'u4', username:'uretim',  password:'ure123',   name:'Üretim Dept.',    role:'departman',  dept:'Üretim', bolum:''},
+  {id:'u5', username:'kalite',  password:'kal123',   name:'Kalite Dept.',    role:'departman',  dept:'Kalite', bolum:'Kalite Kontrol'},
 ];
 
 let CURRENT_USER = null;
@@ -1303,7 +1322,7 @@ let S = {
     {id:'a2',name:'Gravür',        dept:'Üretim', desc:'Gravür üretim bölümü'},
     {id:'a3',name:'Kalite Kontrol',dept:'Kalite', desc:'Kalite kontrol birimi'},
   ],
-  auditors:['Bahadır Göktürk','Mehmet Yılmaz','Ayşe Kaya','Hasan Demir'],
+  auditors:['Bahadır Göktürk','Furkan Lafcı'],
   users: DEFAULT_USERS,
   actions:[], answers:{}, photos:{}, notes:{}
 };
@@ -1344,17 +1363,52 @@ function initForm(){
     if(adminView) adminView.style.display='block';
     if(denetciView) denetciView.style.display='none';
     // Admin atama formunu doldur
-    const denetciSel=document.getElementById('admin-ata-denetci');
-    const alanSel=document.getElementById('admin-ata-alan');
+    // Tarih
     const tarihEl=document.getElementById('admin-ata-tarih');
-    if(denetciSel){
-      const denetciler=(S.users||DEFAULT_USERS).filter(u=>u.role==='denetci');
-      denetciSel.innerHTML=denetciler.map(d=>`<option value="${d.id}">${d.name}</option>`).join('');
-    }
-    if(alanSel){
-      alanSel.innerHTML=S.areas.map(a=>`<option value="${a.id}">${a.name} (${a.dept})</option>`).join('');
-    }
     if(tarihEl) tarihEl.value=new Date().toISOString().split('T')[0];
+    
+    // Denetçi kartları
+    const denetciListEl=document.getElementById('denetci-kart-listesi');
+    if(denetciListEl){
+      const denetciler=(S.users||DEFAULT_USERS).filter(u=>u.role==='denetci');
+      denetciListEl.innerHTML=denetciler.map(d=>{
+        const myAudits=S.audits.filter(a=>a.auditor===d.name).length;
+        const bekleyen=(S.atamalar||[]).filter(a=>a.denetciId===d.id&&a.durum==='Bekliyor').length;
+        const initials=d.name.split(' ').map(n=>n[0]).join('').substring(0,2);
+        return `<div id="dcard-${d.id}" onclick="selectDenetci('${d.id}')" style="cursor:pointer;padding:12px;border:2px solid var(--border);border-radius:var(--r);transition:all .15s;">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+            <div style="width:36px;height:36px;border-radius:50%;background:var(--accent);color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;">${initials}</div>
+            <div><div style="font-size:13px;font-weight:600;">${d.name}</div><div style="font-size:10px;color:var(--text3);">Denetçi</div></div>
+          </div>
+          <div style="display:flex;gap:8px;font-size:10px;color:var(--text2);">
+            <span>📋 ${myAudits} denetim</span>
+            <span style="color:${bekleyen>0?'var(--amber)':'var(--text3)'};">⏳ ${bekleyen} bekliyor</span>
+          </div>
+        </div>`;
+      }).join('');
+    }
+    
+    // Bölge listesi — checkbox
+    const bolgeListEl=document.getElementById('bolge-secim-listesi');
+    if(bolgeListEl){
+      bolgeListEl.innerHTML=S.areas.map(a=>{
+        const lastAudit=S.audits.filter(au=>au.areaId===a.id||au.area===a.name).sort((x,y)=>y.date.localeCompare(x.date))[0];
+        const daysSince=lastAudit?Math.floor((new Date()-new Date(lastAudit.date))/86400000):null;
+        const urgency=daysSince===null?'Hiç denetlenmedi':daysSince>14?`⚠ ${daysSince} gün oldu`:daysSince===0?'✓ Bugün denetlendi':`${daysSince} gün önce`;
+        const urgencyColor=daysSince===null||daysSince>14?'var(--red)':daysSince>7?'var(--amber)':'var(--green)';
+        return `<label id="blabel-${a.id}" style="cursor:pointer;padding:10px;border:2px solid var(--border);border-radius:var(--r);display:flex;align-items:flex-start;gap:8px;transition:all .15s;">
+          <input type="checkbox" id="bchk-${a.id}" value="${a.id}" style="margin-top:2px;width:16px;height:16px;cursor:pointer;" onchange="updateBolgeStyle('${a.id}')">
+          <div>
+            <div style="font-size:13px;font-weight:600;">${a.name}</div>
+            <div style="font-size:10px;"><span class="badge badge-blue" style="font-size:9px;">${a.dept}</span></div>
+            <div style="font-size:10px;color:${urgencyColor};margin-top:3px;">${urgency}</div>
+          </div>
+        </label>`;
+      }).join('');
+    }
+    
+    // Seçili denetçi sıfırla
+    document.getElementById('admin-ata-denetci').value='';
     renderAdminBekleyenList();
     return;
   }
@@ -1367,6 +1421,20 @@ function initForm(){
   sel.innerHTML='<option value="">Takım seçiniz.</option>';
   S.areas.forEach(a=>{ sel.innerHTML+=`<option value="${a.id}">${a.name} (${a.dept})</option>`; });
   document.getElementById('audit-date').value=new Date().toISOString().split('T')[0];
+  
+  // Denetimden gelen atama varsa otomatik doldur
+  if(window._aktifAtama){
+    const {atamaId, alanId, alanAd}=window._aktifAtama;
+    if(sel) sel.value=alanId;
+    // Denetçi adını otomatik ata
+    const auditorInput=document.getElementById('audit-auditor');
+    const auditorDisplay=document.getElementById('auditor-display');
+    if(auditorInput) auditorInput.value=CURRENT_USER?.name||'';
+    if(auditorDisplay) auditorDisplay.textContent=CURRENT_USER?.name||'';
+    // Banner göster
+    showToast(`📋 ${alanAd} denetimi yüklendi`);
+    window._aktifAtama=null;
+  }
   // Pre-fill with sample data
   document.getElementById('audit-form-code').value='5S-2026-' + String(S.audits.length+1).padStart(3,'0');
   document.getElementById('audit-location').value='Fabrika-1';
@@ -1615,7 +1683,12 @@ function submitAudit(){
     totalScore:calcTotal(S.answers), pillars,
     createdAt:new Date().toISOString()
   };
-  S.audits.unshift(audit); saveS(); updateBadges(); showToast('✓ Denetim kaydedildi!');
+  S.audits.unshift(audit);
+  if(CURRENT_USER){
+    const benimAtama=(S.atamalar||[]).find(a=>a.denetciId===CURRENT_USER.id&&(a.alanId===audit.areaId||a.alanAd===audit.area)&&a.durum==='Bekliyor');
+    if(benimAtama) benimAtama.durum='Tamamlandı';
+  }
+  saveS(); updateBadges(); showToast('✓ Denetim kaydedildi!');
   return audit;
 }
 function submitAndReport(){
@@ -1906,7 +1979,7 @@ function renderDenetciDashboard(){
   const nameEl=document.getElementById('denetci-name-lbl');
   const dateEl=document.getElementById('denetci-date-lbl');
   if(nameEl) nameEl.textContent=user?.name||'Denetçi';
-  if(dateEl) dateEl.textContent=new Date().toLocaleDateString('tr-TR',{weekday:'long',day:'numeric',month:'long'});
+  if(dateEl) dateEl.textContent=new Date().toLocaleDateString('tr-TR',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
   
   // Kendi denetimleri
   const myAudits=S.audits.filter(a=>a.auditor===user?.name);
@@ -1914,60 +1987,118 @@ function renderDenetciDashboard(){
   const myMonthAudits=myAudits.filter(a=>{ const d=new Date(a.date); return d.getMonth()===now.getMonth()&&d.getFullYear()===now.getFullYear(); });
   const myAvg=myAudits.length?Math.round(myAudits.reduce((s,a)=>s+a.totalScore,0)/myAudits.length):null;
   
-  // Bana atanan görevler
-  const myAtamalar=(S.atamalar||[]).filter(a=>a.denetciId===user?.id&&a.durum==='Bekliyor');
+  // Bana atanan bekleyen görevler
+  const myAtamalar=(S.atamalar||[]).filter(a=>a.denetciId===user?.id&&a.durum==='Bekliyor')
+    .sort((a,b)=>a.tarih.localeCompare(b.tarih));
+  
+  // Bu ay tamamlanan
+  const myMonthDone=(S.atamalar||[]).filter(a=>{
+    if(a.denetciId!==user?.id||a.durum!=='Tamamlandı') return false;
+    const d=new Date(a.olusturulma||a.tarih);
+    return d.getMonth()===now.getMonth()&&d.getFullYear()===now.getFullYear();
+  }).length;
+
+  // Badge güncelle
+  const badge=document.getElementById('d-atanan-badge');
+  if(badge){ badge.textContent=myAtamalar.length>0?myAtamalar.length+' bekliyor':'✓ Tümü tamam'; badge.className=myAtamalar.length>0?'badge badge-red':'badge badge-green'; }
   
   document.getElementById('d-month').textContent=myMonthAudits.length;
   document.getElementById('d-avg').textContent=myAvg!==null?myAvg:'—';
   document.getElementById('d-total').textContent=myAudits.length;
-  document.getElementById('d-atanan').textContent=myAtamalar.length;
+  document.getElementById('d-atanan').textContent=myMonthDone;
   
-  // Atanan liste
+  // Atanan görev listesi — ana ekran
   const atEl=document.getElementById('atanan-list');
   if(!myAtamalar.length){
-    atEl.innerHTML='<div style="text-align:center;padding:18px;color:var(--text3);font-size:12px;">Bekleyen görev yok ✓</div>';
+    atEl.innerHTML=`<div style="text-align:center;padding:24px;">
+      <div style="font-size:32px;margin-bottom:8px;">✅</div>
+      <div style="font-size:14px;font-weight:600;color:var(--green);">Tüm görevler tamamlandı!</div>
+      <div style="font-size:12px;color:var(--text3);margin-top:4px;">Yeni görev atanınca burada görünecek</div>
+    </div>`;
   } else {
-    atEl.innerHTML=myAtamalar.map(a=>`
-      <div style="display:flex;align-items:center;gap:10px;padding:10px 12px;border:1px solid var(--border);border-radius:var(--rs);margin-bottom:6px;background:var(--brand-light);">
-        <div style="flex:1;">
-          <div style="font-size:13px;font-weight:600;">${a.alanAd}</div>
-          <div style="font-size:11px;color:var(--text3);">Planlanan: ${a.tarih} · Atayan: ${a.olusturan||'Admin'}</div>
+    const today=new Date().toISOString().split('T')[0];
+    atEl.innerHTML=myAtamalar.map(a=>{
+      const isToday=a.tarih===today;
+      const isPast=a.tarih<today;
+      const urgencyBg=isPast?'#FCEBEB':isToday?'#EAF3DE':'var(--brand-light)';
+      const urgencyBorder=isPast?'var(--red)':isToday?'var(--green)':'var(--brand)';
+      const urgencyLabel=isPast?`⚠ ${Math.floor((new Date()-new Date(a.tarih))/86400000)} gün gecikti!`:isToday?'📅 Bugün!':'📅 '+a.tarih;
+      const urgencyColor=isPast?'var(--red)':isToday?'var(--green)':'var(--text3)';
+      return `<div style="border:1.5px solid ${urgencyBorder};border-radius:var(--r);margin-bottom:10px;overflow:hidden;background:${urgencyBg};">
+        <div style="padding:12px 14px;">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
+            <div style="font-size:15px;font-weight:700;">${a.alanAd}</div>
+            <span style="font-size:11px;font-weight:600;color:${urgencyColor};">${urgencyLabel}</span>
+          </div>
+          <div style="font-size:11px;color:var(--text2);margin-bottom:${a.not?'8px':'0'};">
+            🕐 ${a.vardiya||'Sabah'} vardiyası · Atayan: ${a.olusturan||'Admin'}
+          </div>
+          ${a.not?`<div style="font-size:11px;padding:6px 10px;background:rgba(0,0,0,.04);border-radius:4px;color:var(--text2);">💬 ${a.not}</div>`:''}
         </div>
-        <button class="btn btn-primary btn-sm" onclick="navigate('new-audit')">Başlat →</button>
-        <button class="btn btn-outline btn-sm" onclick="atamaKapat('${a.id}')">✓ Tamamla</button>
-      </div>`).join('');
+        <div style="display:grid;grid-template-columns:1fr 1fr;border-top:1px solid ${urgencyBorder};">
+          <button class="btn btn-primary" style="border-radius:0;border:none;padding:12px;" onclick="denetimBaslat('${a.id}','${a.alanId}','${a.alanAd}')">
+            ▶ Denetimi Başlat
+          </button>
+          <button class="btn btn-outline" style="border-radius:0;border:none;border-left:1px solid ${urgencyBorder};padding:12px;" onclick="atamaKapat('${a.id}')">
+            ✓ Tamamlandı
+          </button>
+        </div>
+      </div>`;
+    }).join('');
   }
   
   // Son denetimlerim
   const recEl=document.getElementById('denetci-recent');
-  if(!myAudits.length){ recEl.innerHTML='<div style="color:var(--text3);font-size:12px;padding:12px;">Henüz denetim yok</div>'; }
+  if(!myAudits.length){ recEl.innerHTML='<div style="color:var(--text3);font-size:12px;padding:12px;text-align:center;">Henüz denetim yok</div>'; }
   else {
     recEl.innerHTML=myAudits.slice(0,5).map(a=>`
-      <div style="display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--border);">
-        <div style="width:30px;height:30px;border-radius:6px;background:${scoreColor(a.totalScore)};color:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;">${a.totalScore}</div>
-        <div style="flex:1;"><div style="font-size:12px;font-weight:500;">${a.area}</div><div style="font-size:10px;color:var(--text3);">${a.date}</div></div>
+      <div style="display:flex;align-items:center;gap:8px;padding:9px 0;border-bottom:1px solid var(--border);cursor:pointer;" onclick="showDetail('${a.id}')">
+        <div style="width:34px;height:34px;border-radius:7px;background:${scoreColor(a.totalScore)};color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0;">${a.totalScore}</div>
+        <div style="flex:1;">
+          <div style="font-size:12px;font-weight:600;">${a.area}</div>
+          <div style="font-size:10px;color:var(--text3);">${a.date}</div>
+        </div>
         <span class="badge ${scoreBadge(a.totalScore)}">${scoreLabel(a.totalScore)}</span>
       </div>`).join('');
   }
   
-  // Trend
+  // Performans
   const trendEl=document.getElementById('denetci-trend');
-  if(myAudits.length>=2){
+  if(myAudits.length){
+    const best=Math.max(...myAudits.map(a=>a.totalScore));
+    const worst=Math.min(...myAudits.map(a=>a.totalScore));
     const sorted=[...myAudits].sort((a,b)=>a.date.localeCompare(b.date));
-    const diff=sorted[sorted.length-1].totalScore-sorted[0].totalScore;
+    const diff=myAudits.length>=2?sorted[sorted.length-1].totalScore-sorted[0].totalScore:null;
     trendEl.innerHTML=`
-      <div style="font-size:36px;font-weight:700;font-family:var(--mono);color:${diff>=0?'var(--green)':'var(--red)'};">${diff>=0?'+':''}${diff}</div>
-      <div style="font-size:12px;color:var(--text3);">İlk denetimden bu yana</div>
-      <div style="margin-top:8px;font-size:12px;">En iyi: <b>${Math.max(...myAudits.map(a=>a.totalScore))}</b> · En düşük: <b>${Math.min(...myAudits.map(a=>a.totalScore))}</b></div>`;
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px;">
+        <div style="text-align:center;padding:10px;background:var(--green-light);border-radius:var(--rs);">
+          <div style="font-size:22px;font-weight:700;color:var(--green);">${best}</div>
+          <div style="font-size:10px;color:var(--green);">En İyi Skor</div>
+        </div>
+        <div style="text-align:center;padding:10px;background:var(--red-light);border-radius:var(--rs);">
+          <div style="font-size:22px;font-weight:700;color:var(--red);">${worst}</div>
+          <div style="font-size:10px;color:var(--red);">En Düşük Skor</div>
+        </div>
+      </div>
+      ${diff!==null?`<div style="text-align:center;font-size:13px;color:var(--text2);">İlk denetimden bu yana: <b style="color:${diff>=0?'var(--green)':'var(--red)'};">${diff>=0?'+':''}${diff} puan</b></div>`:''}`;
   } else {
-    trendEl.innerHTML='<div style="color:var(--text3);font-size:12px;padding:16px;">En az 2 denetim gerekli</div>';
+    trendEl.innerHTML='<div style="color:var(--text3);font-size:12px;padding:16px;text-align:center;">Henüz denetim yok</div>';
   }
 }
 
-function atamaKapat(id){
-  const a=(S.atamalar||[]).find(x=>x.id===id);
-  if(a){ a.durum='Tamamlandı'; saveS(); renderDenetciDashboard(); showToast('✓ Görev tamamlandı!'); }
+// Denetimi başlat — bölgeyi forma otomatik seç
+function denetimBaslat(atamaId, alanId, alanAd){
+  // Atama ID'sini sakla, form açılınca bölgeyi otomatik seç
+  window._aktifAtama = {atamaId, alanId, alanAd};
+  navigate('new-audit');
 }
+
+function atamaKapat(id){
+  if(!confirm('Bu görevi tamamlandı olarak işaretlemek istediğinizden emin misiniz?')) return;
+  const a=(S.atamalar||[]).find(x=>x.id===id);
+  if(a){ a.durum='Tamamlandı'; saveS(); renderDenetciDashboard(); updateBadges(); showToast('✓ Görev tamamlandı!'); }
+}
+
 
 // ===== DEPARTMAN DASHBOARD =====
 var DEPT_SELECTED_BOLUM = null;
@@ -3072,37 +3203,59 @@ function renderBeforeAfter(auditId){
 }
 
 // ======= ADMİN DENETİM OLUŞTUR =======
+function selectDenetci(id){
+  document.getElementById('admin-ata-denetci').value=id;
+  document.querySelectorAll('[id^="dcard-"]').forEach(el=>{ el.style.borderColor='var(--border)'; el.style.background=''; });
+  const sel=document.getElementById('dcard-'+id);
+  if(sel){ sel.style.borderColor='var(--brand)'; sel.style.background='var(--brand-light)'; }
+}
+
+function updateBolgeStyle(areaId){
+  const chk=document.getElementById('bchk-'+areaId);
+  const lbl=document.getElementById('blabel-'+areaId);
+  if(lbl){ lbl.style.borderColor=chk?.checked?'var(--brand)':'var(--border)'; lbl.style.background=chk?.checked?'var(--brand-light)':''; }
+}
+
 function adminDenetimOlustur(){
   const denetciId=document.getElementById('admin-ata-denetci')?.value;
-  const alanId=document.getElementById('admin-ata-alan')?.value;
   const tarih=document.getElementById('admin-ata-tarih')?.value;
+  const vardiya=document.getElementById('admin-ata-vardiya')?.value||'Sabah';
   const not=document.getElementById('admin-ata-not')?.value||'';
-  if(!denetciId||!alanId||!tarih){ showToast('⚠ Tüm zorunlu alanları doldurun!'); return; }
+  const seciliBolgeler=S.areas.filter(a=>document.getElementById('bchk-'+a.id)?.checked);
+  if(!denetciId){ showToast('⚠ Lütfen bir denetçi seçin!'); return; }
+  if(!seciliBolgeler.length){ showToast('⚠ En az bir bölge seçin!'); return; }
+  if(!tarih){ showToast('⚠ Tarih seçin!'); return; }
   if(!S.atamalar) S.atamalar=[];
   const denetci=(S.users||DEFAULT_USERS).find(u=>u.id===denetciId);
-  const alan=S.areas.find(a=>a.id===alanId);
-  S.atamalar.unshift({
-    id:'at'+Date.now(),
-    denetciId, denetciAd:denetci?.name||'',
-    alanId, alanAd:alan?.name||'',
-    tarih, not,
-    durum:'Bekliyor',
-    olusturanId:CURRENT_USER?.id,
-    olusturan:CURRENT_USER?.name,
-    olusturulma:new Date().toISOString()
+  seciliBolgeler.forEach((alan,i)=>{
+    S.atamalar.unshift({
+      id:'at'+(Date.now()+i),
+      denetciId, denetciAd:denetci?.name||'',
+      alanId:alan.id, alanAd:alan.name,
+      tarih, vardiya, not,
+      durum:'Bekliyor',
+      olusturanId:CURRENT_USER?.id,
+      olusturan:CURRENT_USER?.name,
+      olusturulma:new Date().toISOString()
+    });
   });
   saveS();
   const sonuc=document.getElementById('admin-atama-sonuc');
   if(sonuc){
+    const bolgeAdlari=seciliBolgeler.map(a=>a.name).join(', ');
     sonuc.innerHTML=`<div style="padding:12px;background:var(--green-light);border-radius:var(--rs);color:var(--green);font-size:13px;">
-      ✓ <b>${denetci?.name}</b> → <b>${alan?.name}</b> için denetim oluşturuldu! (${tarih})
+      ✓ <b>${denetci?.name}</b> — ${seciliBolgeler.length} bölge atandı: <b>${bolgeAdlari}</b> (${tarih} ${vardiya})
     </div>`;
-    setTimeout(()=>{ sonuc.innerHTML=''; },4000);
+    setTimeout(()=>{ sonuc.innerHTML=''; },5000);
   }
   document.getElementById('admin-ata-not').value='';
+  document.getElementById('admin-ata-denetci').value='';
+  document.querySelectorAll('[id^="dcard-"]').forEach(el=>{ el.style.borderColor='var(--border)'; el.style.background=''; });
+  document.querySelectorAll('[id^="bchk-"]').forEach(el=>{ el.checked=false; });
+  document.querySelectorAll('[id^="blabel-"]').forEach(el=>{ el.style.borderColor='var(--border)'; el.style.background=''; });
   renderAdminBekleyenList();
   updateBadges();
-  showToast(`✓ ${denetci?.name} → ${alan?.name} atandı!`);
+  showToast(`✓ ${denetci?.name} → ${seciliBolgeler.length} bölge atandı!`);
 }
 
 function renderAdminBekleyenList(){

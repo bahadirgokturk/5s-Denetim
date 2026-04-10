@@ -1161,7 +1161,7 @@ function applyRole(user){
 
   // Yeni Denetim butonu — takım liderinde gizle
   const newAuditBtn=document.querySelector('.topbar-right .btn-primary');
-  if(newAuditBtn) newAuditBtn.style.display=user.role==='takimlider'||role==='departman'?'none':'';
+  if(newAuditBtn) newAuditBtn.style.display=user.role==='takimlider'||user.role==='departman'?'none':'';
 
   renderDashboard();
   updateBadges();

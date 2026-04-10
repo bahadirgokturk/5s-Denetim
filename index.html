@@ -379,21 +379,56 @@ body.role-takimlider .hide-takimlider{display:none!important;}
 
   <!-- ===== ADMİN DASHBOARD ===== -->
   <div id="dash-admin" style="display:none;">
-    <!-- Departman/Bölüm filtre butonları -->
-    <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;flex-wrap:wrap;">
-      <span style="font-size:12px;font-weight:600;color:var(--text2);">Filtre:</span>
-      <button class="btn btn-primary btn-sm" id="filter-btn-all" onclick="setAdminFilter('all')">🏭 Tümü</button>
-      <button class="btn btn-outline btn-sm" id="filter-btn-Üretim" onclick="setAdminFilter('Üretim')">⚙ Üretim</button>
-      <button class="btn btn-outline btn-sm" id="filter-btn-Üretim-CFM" onclick="setAdminFilter('Üretim','CFM')">— CFM</button>
-      <button class="btn btn-outline btn-sm" id="filter-btn-Üretim-Gravür" onclick="setAdminFilter('Üretim','Gravür')">— Gravür</button>
-      <button class="btn btn-outline btn-sm" id="filter-btn-Kalite" onclick="setAdminFilter('Kalite')">✅ Kalite</button>
+    <!-- Kritik uyarı banner -->
+    <div id="kritik-banner" style="display:none;margin-bottom:12px;padding:10px 16px;background:#FCEBEB;border:1px solid #F09595;border-radius:var(--r);color:#A32D2D;font-size:12px;font-weight:500;"></div>
+
+    <!-- Üst kontroller: Departman filtresi + Zaman filtresi -->
+    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:14px;">
+      <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+        <span style="font-size:11px;font-weight:600;color:var(--text2);margin-right:2px;">BÖLGE:</span>
+        <button class="btn btn-primary btn-sm" id="filter-btn-all" onclick="setAdminFilter('all')">Tümü</button>
+        <button class="btn btn-outline btn-sm" id="filter-btn-Üretim" onclick="setAdminFilter('Üretim')">Üretim</button>
+        <button class="btn btn-outline btn-sm" id="filter-btn-Üretim-CFM" onclick="setAdminFilter('Üretim','CFM')">CFM</button>
+        <button class="btn btn-outline btn-sm" id="filter-btn-Üretim-Gravür" onclick="setAdminFilter('Üretim','Gravür')">Gravür</button>
+        <button class="btn btn-outline btn-sm" id="filter-btn-Kalite" onclick="setAdminFilter('Kalite')">Kalite</button>
+      </div>
+      <div style="display:flex;align-items:center;gap:6px;">
+        <span style="font-size:11px;font-weight:600;color:var(--text2);margin-right:2px;">DÖNEM:</span>
+        <button class="btn btn-outline btn-sm" id="time-btn-week" onclick="setTimeFilter('week')">Bu Hafta</button>
+        <button class="btn btn-primary btn-sm" id="time-btn-month" onclick="setTimeFilter('month')">Bu Ay</button>
+        <button class="btn btn-outline btn-sm" id="time-btn-year" onclick="setTimeFilter('year')">Bu Yıl</button>
+        <button class="btn btn-outline btn-sm" id="time-btn-all" onclick="setTimeFilter('all')">Tümü</button>
+      </div>
     </div>
-    <!-- Üst metrikler -->
+
+    <!-- Metrikler — trend oklarıyla -->
     <div class="metrics-grid" style="margin-bottom:14px;">
-      <div class="metric green"><div class="metric-label">Toplam Denetim</div><div class="metric-val" id="m-total">0</div><div class="metric-sub" id="m-total-sub">tüm zamanlar</div></div>
-      <div class="metric blue"><div class="metric-label">Bu Ay</div><div class="metric-val" id="m-month">0</div><div class="metric-sub">denetim</div></div>
-      <div class="metric amber"><div class="metric-label">Ort. Skor</div><div class="metric-val" id="m-avg">—</div><div class="metric-sub">/ 100 puan</div></div>
-      <div class="metric red"><div class="metric-label">Açık Aksiyon</div><div class="metric-val" id="m-actions">0</div><div class="metric-sub">bekleyen</div></div>
+      <div class="metric green">
+        <div class="metric-label">Toplam Denetim</div>
+        <div style="display:flex;align-items:baseline;gap:6px;">
+          <div class="metric-val" id="m-total">0</div>
+          <span id="m-total-trend" style="font-size:11px;font-weight:600;"></span>
+        </div>
+        <div class="metric-sub" id="m-total-sub">seçili dönem</div>
+      </div>
+      <div class="metric blue">
+        <div class="metric-label">Ort. Skor</div>
+        <div style="display:flex;align-items:baseline;gap:6px;">
+          <div class="metric-val" id="m-avg">—</div>
+          <span id="m-avg-trend" style="font-size:11px;font-weight:600;"></span>
+        </div>
+        <div class="metric-sub">/ 100 puan</div>
+      </div>
+      <div class="metric amber">
+        <div class="metric-label">En İyi Bölge</div>
+        <div class="metric-val" style="font-size:16px;" id="m-best">—</div>
+        <div class="metric-sub" id="m-best-score"></div>
+      </div>
+      <div class="metric red">
+        <div class="metric-label">Açık Aksiyon</div>
+        <div class="metric-val" id="m-actions">0</div>
+        <div class="metric-sub">bekleyen</div>
+      </div>
     </div>
     <!-- Isı haritası + Son denetimler -->
     <div class="dash-grid-2" style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px;">
@@ -578,7 +613,7 @@ body.role-takimlider .hide-takimlider{display:none!important;}
       <div class="form-grid" style="margin-bottom:16px;">
         <div class="fg">
           <label>Denetlenen Takım</label>
-          <select id="audit-area" onchange="onAreaChange(this.value)">
+          <select id="audit-area">
             <option value="">Takım seçiniz.</option>
           </select>
         </div>
@@ -1125,13 +1160,13 @@ function doLogin(){
   if(!user){ document.getElementById('login-err').style.display='block'; return; }
   document.getElementById('login-err').style.display='none';
   CURRENT_USER=user;
-  localStorage.setItem('5s-current-user', JSON.stringify(user));
+  sessionStorage.setItem('5s-current-user', JSON.stringify(user));
   applyRole(user);
 }
 
 function doLogout(){
   CURRENT_USER=null;
-  localStorage.removeItem('5s-current-user');
+  sessionStorage.removeItem('5s-current-user');
   document.getElementById('login-screen').style.display='flex';
   document.getElementById('main-app').style.display='none';
   document.getElementById('login-username').value='';
@@ -1192,7 +1227,7 @@ function saveS(){ if(!S.hedefler)S.hedefler={}; if(!S.auditors)S.auditors=[]; if
 // ======= NAVIGATION =======
 const TITLES={'dashboard':'Dashboard','new-audit':'Yeni Denetim','history':'Denetim Geçmişi','areas':'Bölge Yönetimi','actions':'Aksiyonlar','reports':'Raporlar','leaderboard':'🏆 Takım Sıralaması','qr':'⬛ QR Kodlar','hedefler':'🎯 Hedef Skorlar','takvim':'📅 Denetim Takvimi','denetciler':'👤 Denetçi Performansı','karsilastirma':'📊 Bölge Karşılaştırma','kullanicilar':'⚙ Kullanıcı Yönetimi'};
 function navigate(p){
-  document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));
+  document.querySelectorAll('.page').forEach(x=>{ x.classList.remove('active'); x.style.display=''; });
   document.querySelectorAll('.nav-btn').forEach(x=>x.classList.remove('active'));
   const targetPage=document.getElementById('page-'+p);
   if(targetPage){ targetPage.classList.add('active'); }
@@ -1214,23 +1249,11 @@ function navigate(p){
 }
 
 // ======= AUDIT FORM =======
-function onAreaChange(areaId){
-  const area=S.areas.find(a=>a.id===areaId);
-  if(area){
-    const deptEl=document.getElementById('audit-dept');
-    if(deptEl) deptEl.value=area.dept||'';
-  }
-}
-
 function initForm(){
   const sel=document.getElementById('audit-area');
   sel.innerHTML='<option value="">Takım seçiniz.</option>';
   S.areas.forEach(a=>{ sel.innerHTML+=`<option value="${a.id}">${a.name} (${a.dept})</option>`; });
   document.getElementById('audit-date').value=new Date().toISOString().split('T')[0];
-  // Denetçi giriş yapmışsa adını otomatik doldur
-  if(CURRENT_USER?.role==='denetci'){
-    document.getElementById('audit-auditor').value=CURRENT_USER.name||'';
-  }
   // Pre-fill with sample data
   document.getElementById('audit-form-code').value='5S-2026-' + String(S.audits.length+1).padStart(3,'0');
   document.getElementById('audit-location').value='Fabrika-1';
@@ -1490,20 +1513,14 @@ function resetAudit(){ if(confirm('Formu sıfırla?')) initForm(); }
 // ======= DASHBOARD =======
 function renderDashboard(){
   const role=CURRENT_USER?.role||'admin';
-  // Önce tüm dash bölümlerini gizle
+  // Önce hepsini gizle
   ['dash-admin','dash-denetci','dash-takimlider'].forEach(id=>{
     const el=document.getElementById(id);
     if(el) el.style.display='none';
   });
-  // page-dashboard'u aktif yap (diğer sayfalardan geri dönüşte de çalışsın)
-  document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));
+  // page-dashboard'u aktif yap
   const pd=document.getElementById('page-dashboard');
-  if(pd){ pd.classList.add('active'); }
-  // navbar'da dashboard aktif
-  document.querySelectorAll('.nav-btn').forEach(x=>{
-    if(x.getAttribute('onclick')?.includes("'dashboard'")) x.classList.add('active');
-    else x.classList.remove('active');
-  });
+  if(pd){ pd.style.display='block'; }
   
   if(role==='admin') renderAdminDashboard();
   else if(role==='denetci') renderDenetciDashboard();
@@ -1514,52 +1531,125 @@ function renderDashboard(){
 // ===== ADMİN DASHBOARD =====
 // Admin filtre state
 var ADMIN_FILTER = {dept: 'all', bolum: null};
+var TIME_FILTER = 'month';
 
 function setAdminFilter(dept, bolum=null){
   ADMIN_FILTER = {dept, bolum};
-  // Buton stillerini güncelle
-  document.querySelectorAll('[id^="filter-btn-"]').forEach(btn=>{
-    btn.className='btn btn-outline btn-sm';
-  });
-  const key = bolum ? `filter-btn-${dept}-${bolum}` : `filter-btn-${dept}`;
-  const activeBtn = document.getElementById(key);
-  if(activeBtn) activeBtn.className='btn btn-primary btn-sm';
+  document.querySelectorAll('[id^="filter-btn-"]').forEach(btn=>btn.className='btn btn-outline btn-sm');
+  const key=bolum?`filter-btn-${dept}-${bolum}`:`filter-btn-${dept}`;
+  const ab=document.getElementById(key); if(ab) ab.className='btn btn-primary btn-sm';
   renderAdminDashboard();
 }
 
+function setTimeFilter(period){
+  TIME_FILTER=period;
+  document.querySelectorAll('[id^="time-btn-"]').forEach(btn=>btn.className='btn btn-outline btn-sm');
+  const tb=document.getElementById('time-btn-'+period); if(tb) tb.className='btn btn-primary btn-sm';
+  renderAdminDashboard();
+}
+
+function getTimeRange(){
+  const now=new Date(); const start=new Date();
+  if(TIME_FILTER==='week'){ start.setDate(now.getDate()-7); }
+  else if(TIME_FILTER==='month'){ start.setMonth(now.getMonth()-1); }
+  else if(TIME_FILTER==='year'){ start.setFullYear(now.getFullYear()-1); }
+  else return null;
+  return start;
+}
+
 function getFilteredAudits(){
-  if(ADMIN_FILTER.dept==='all') return S.audits;
-  return S.audits.filter(a=>{
-    const area=S.areas.find(x=>x.id===a.areaId||x.name===a.area);
-    if(!area) return false;
-    if(ADMIN_FILTER.bolum) return area.dept===ADMIN_FILTER.dept && area.name===ADMIN_FILTER.bolum;
-    return area.dept===ADMIN_FILTER.dept;
-  });
+  let audits=S.audits;
+  // Departman filtresi
+  if(ADMIN_FILTER.dept!=='all'){
+    audits=audits.filter(a=>{
+      const area=S.areas.find(x=>x.id===a.areaId||x.name===a.area);
+      if(!area) return false;
+      if(ADMIN_FILTER.bolum) return area.dept===ADMIN_FILTER.dept&&area.name===ADMIN_FILTER.bolum;
+      return area.dept===ADMIN_FILTER.dept;
+    });
+  }
+  // Zaman filtresi
+  const start=getTimeRange();
+  if(start) audits=audits.filter(a=>new Date(a.date)>=start);
+  return audits;
+}
+
+function getPrevPeriodAudits(){
+  let audits=S.audits;
+  if(ADMIN_FILTER.dept!=='all'){
+    audits=audits.filter(a=>{
+      const area=S.areas.find(x=>x.id===a.areaId||x.name===a.area);
+      if(!area) return false;
+      return area.dept===ADMIN_FILTER.dept&&(ADMIN_FILTER.bolum?area.name===ADMIN_FILTER.bolum:true);
+    });
+  }
+  if(TIME_FILTER==='all') return [];
+  const now=new Date();
+  let s1=new Date(), s2=new Date();
+  if(TIME_FILTER==='week'){ s1.setDate(now.getDate()-14); s2.setDate(now.getDate()-7); }
+  else if(TIME_FILTER==='month'){ s1.setMonth(now.getMonth()-2); s2.setMonth(now.getMonth()-1); }
+  else if(TIME_FILTER==='year'){ s1.setFullYear(now.getFullYear()-2); s2.setFullYear(now.getFullYear()-1); }
+  return audits.filter(a=>{ const d=new Date(a.date); return d>=s1&&d<s2; });
+}
+
+function trendArrow(curr, prev){
+  if(!prev||prev===0) return '';
+  const diff=curr-prev;
+  if(diff>0) return `<span style="color:var(--green);">↑ +${diff}</span>`;
+  if(diff<0) return `<span style="color:var(--red);">↓ ${diff}</span>`;
+  return `<span style="color:var(--text3);">→ 0</span>`;
 }
 
 function renderAdminDashboard(){
   const el=document.getElementById('dash-admin'); if(el) el.style.display='block';
   const filtered=getFilteredAudits();
-  const now=new Date();
-  const monthAudits=filtered.filter(a=>{ const d=new Date(a.date); return d.getMonth()===now.getMonth()&&d.getFullYear()===now.getFullYear(); });
+  const prev=getPrevPeriodAudits();
   const avg=filtered.length>0?Math.round(filtered.reduce((s,a)=>s+a.totalScore,0)/filtered.length):null;
+  const prevAvg=prev.length>0?Math.round(prev.reduce((s,a)=>s+a.totalScore,0)/prev.length):null;
   const open=S.actions.filter(a=>a.status!=='Tamamlandı').length;
-  const filterLabel=ADMIN_FILTER.dept==='all'?'Tüm Fabrika':(ADMIN_FILTER.bolum?`${ADMIN_FILTER.dept} › ${ADMIN_FILTER.bolum}`:ADMIN_FILTER.dept);
   
+  // En iyi bölge
+  const areaMap={};
+  filtered.forEach(a=>{ if(!areaMap[a.area]) areaMap[a.area]=[]; areaMap[a.area].push(a.totalScore); });
+  const areaAvgs=Object.entries(areaMap).map(([n,s])=>({n,avg:Math.round(s.reduce((a,b)=>a+b,0)/s.length)}));
+  const bestArea=areaAvgs.sort((a,b)=>b.avg-a.avg)[0];
+  
+  // Metrik güncelle
   document.getElementById('m-total').textContent=filtered.length;
-  const subEl=document.getElementById('m-total-sub'); if(subEl) subEl.textContent=filterLabel;
-  document.getElementById('m-month').textContent=monthAudits.length;
+  const trendEl=document.getElementById('m-total-trend');
+  if(trendEl) trendEl.innerHTML=trendArrow(filtered.length,prev.length);
+  const subEl=document.getElementById('m-total-sub');
+  const periodLabels={week:'Bu hafta',month:'Bu ay',year:'Bu yıl',all:'Tüm zamanlar'};
+  if(subEl) subEl.textContent=periodLabels[TIME_FILTER]||'seçili dönem';
   document.getElementById('m-avg').textContent=avg!==null?avg:'—';
+  const avgTrend=document.getElementById('m-avg-trend');
+  if(avgTrend) avgTrend.innerHTML=avg&&prevAvg?trendArrow(avg,prevAvg):'';
   document.getElementById('m-actions').textContent=open;
+  const bestEl=document.getElementById('m-best'); if(bestEl) bestEl.textContent=bestArea?.n||'—';
+  const bestSc=document.getElementById('m-best-score'); if(bestSc) bestSc.textContent=bestArea?`Ort. ${bestArea.avg}`:'';
+  
+  // Kritik uyarı banner
+  const banner=document.getElementById('kritik-banner');
+  const kritikler=[];
+  if(filtered.length&&banner){
+    PILLARS.forEach(p=>{
+      const pavg=Math.round(filtered.reduce((s,a)=>s+(a.pillars[p.id]?.pct||0),0)/filtered.length);
+      if(pavg<50) kritikler.push(`${p.id} (${p.name.split('(')[0].trim()}): %${pavg}`);
+    });
+    if(kritikler.length){
+      banner.style.display='block';
+      banner.innerHTML=`⚠️ Kritik seviyede pillar tespit edildi: ${kritikler.join(' · ')} — Acil önlem gerekiyor!`;
+    } else { banner.style.display='none'; }
+  }
 
   // Isı haritası
   renderHeatmap();
   
   // Son denetimler
   const rl=document.getElementById('recent-list');
-  if(!S.audits.length){ rl.innerHTML='<div style="text-align:center;padding:26px;color:var(--text3);font-size:13px;">Denetim yok</div>'; }
+  if(!filtered.length){ rl.innerHTML='<div style="text-align:center;padding:26px;color:var(--text3);font-size:13px;">Bu dönemde denetim yok</div>'; }
   else {
-    rl.innerHTML=S.audits.slice(0,5).map(a=>`
+    rl.innerHTML=filtered.slice(0,5).map(a=>`
       <div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border);cursor:pointer;" onclick="showDetail('${a.id}')">
         <div style="width:34px;height:34px;border-radius:7px;background:${scoreColor(a.totalScore)};display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;flex-shrink:0;">${a.totalScore}</div>
         <div style="flex:1;"><div style="font-size:13px;font-weight:500;">${a.area}</div><div style="font-size:11px;color:var(--text3);">${a.date} · ${a.auditor}</div></div>
@@ -1595,9 +1685,10 @@ function renderAdminDashboard(){
 
 function renderHeatmap(){
   const el=document.getElementById('heatmap-widget'); if(!el) return;
-  if(!S.audits.length){ el.innerHTML='<div style="text-align:center;padding:20px;color:var(--text3);">Veri yok</div>'; return; }
+  const filtered=getFilteredAudits();
+  if(!filtered.length){ el.innerHTML='<div style="text-align:center;padding:20px;color:var(--text3);">Bu dönemde veri yok</div>'; return; }
   const areaMap={};
-  S.audits.forEach(a=>{
+  filtered.forEach(a=>{
     if(!areaMap[a.area]) areaMap[a.area]={scores:[],last:a.date};
     areaMap[a.area].scores.push(a.totalScore);
     if(a.date>areaMap[a.area].last) areaMap[a.area].last=a.date;
@@ -2195,7 +2286,10 @@ function openModal(id){
     const sel=document.getElementById('na-area'); sel.innerHTML='<option value="">-- Bölge --</option>';
     S.areas.forEach(a=>sel.innerHTML+=`<option value="${a.name}">${a.name}</option>`);
   }
-  // nu-area kaldırıldı, dept/bolum kullanılıyor
+  if(id==='modal-user-add'){
+    const sel=document.getElementById('nu-area'); sel.innerHTML='<option value="">— Seçin —</option>';
+    S.areas.forEach(a=>sel.innerHTML+=`<option value="${a.id}">${a.name}</option>`);
+  }
 }
 function closeModal(id){ document.getElementById(id).classList.remove('open'); }
 function addAction(){
@@ -2982,7 +3076,7 @@ function renderKullanicilar(){
   // Özet kartlar
   const adminCount=users.filter(u=>u.role==='admin').length;
   const denetciCount=users.filter(u=>u.role==='denetci').length;
-  const liderCount=users.filter(u=>u.role==='takimlider'||u.role==='departman').length;
+  const liderCount=users.filter(u=>u.role==='takimlider').length;
 
   el.innerHTML=`
     <div class="metrics-grid" style="margin-bottom:20px;">
@@ -2993,7 +3087,7 @@ function renderKullanicilar(){
     
     <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px;">
       ${users.map(u=>{
-        // dept/bolum kullanılıyor
+        const area=S.areas.find(a=>a.id===u.area);
         const myAudits=S.audits.filter(a=>a.auditor===u.name).length;
         const initials=u.name.split(' ').map(n=>n[0]).join('').substring(0,2);
         return `<div style="border:1px solid var(--border);border-radius:var(--r);padding:16px;background:var(--surface);">
@@ -3104,13 +3198,12 @@ document.getElementById('topbar-date').textContent=new Date().toLocaleDateString
 // Login buton event listener
 document.getElementById('login-btn').addEventListener('click', doLogin);
 
-// Aktif oturum kontrol et
-const savedUser=localStorage.getItem('5s-current-user');
+// Aktif oturum kontrol et — sadece aynı session'da devam et
+const savedUser=sessionStorage.getItem('5s-current-user');
 if(savedUser){
-  try{ 
+  try{
     const u=JSON.parse(savedUser);
-    // Güncel kullanıcı bilgisini bul
-    const freshUser=S.users.find(x=>x.id===u.id)||u;
+    const freshUser=(S.users||DEFAULT_USERS).find(x=>x.id===u.id)||u;
     CURRENT_USER=freshUser;
     applyRole(freshUser);
   }catch(e){ /* login ekranı göster */ }

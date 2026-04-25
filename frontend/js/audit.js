@@ -2,12 +2,20 @@
 // audit.js — Denetim formu, soru yapılandırma, kaydetme
 // ============================================================
 
+// ── Düzenleme modu state ─────────────────────────────────────
+let _editAuditId = null;
+
+function editAudit(id){
+  _editAuditId = id;
+  navigate('new-audit');
+}
+
 function initForm(){
   const role = CURRENT_USER?.role||'denetci';
   const adminView    = document.getElementById('admin-audit-view');
   const denetciView  = document.getElementById('denetci-audit-view');
 
-  if(role==='admin'){
+  if(role==='admin' && !_editAuditId){
     if(adminView)   adminView.style.display='block';
     if(denetciView) denetciView.style.display='none';
     const tarihEl = document.getElementById('admin-ata-tarih');
@@ -22,11 +30,13 @@ function initForm(){
   if(adminView)   adminView.style.display='none';
   if(denetciView) denetciView.style.display='block';
 
-  // Alan dropdown
+  // Alan dropdown — admin için de tüm alanları göster
+  const allAreas = _editAuditId ? S.areas : S.areas;
   const sel = document.getElementById('audit-area');
   sel.innerHTML = '<option value="">Takım seçiniz.</option>';
   const fabMap={};
-  S.areas.forEach(a=>{ const f=a.fabrika||'Genel'; if(!fabMap[f]) fabMap[f]={}; const ad=a.alt_dept||a.dept||'Diğer'; if(!fabMap[f][ad]) fabMap[f][ad]=[]; fabMap[f][ad].push(a); });
+  // Admin düzenleme modunda tüm alanları çek (backend admin için hepsini döner)
+  allAreas.forEach(a=>{ const f=a.fabrika||'Genel'; if(!fabMap[f]) fabMap[f]={}; const ad=a.alt_dept||a.dept||'Diğer'; if(!fabMap[f][ad]) fabMap[f][ad]=[]; fabMap[f][ad].push(a); });
   Object.entries(fabMap).forEach(([fab,adMap])=>{
     const og=document.createElement('optgroup'); og.label='🏭 '+fab; sel.appendChild(og);
     Object.entries(adMap).forEach(([ad,areas])=>{
@@ -34,34 +44,83 @@ function initForm(){
     });
   });
 
-  document.getElementById('audit-date').value = new Date().toISOString().split('T')[0];
-  document.getElementById('audit-form-code').value = '5S-'+new Date().getFullYear()+'-'+String(S.audits.length+1).padStart(3,'0');
+  // Düzenleme modu banner'ı
+  const editBanner = document.getElementById('audit-edit-banner');
 
-  // Atama varsa otomatik doldur
-  if(window._aktifAtama){
-    const {alanId, alanAd} = window._aktifAtama;
-    if(sel) sel.value = alanId;
+  // Mevcut denetimi yükle (düzenleme modu)
+  if(_editAuditId){
+    const existingAudit = S.audits.find(a=>a.id===_editAuditId);
+    if(!existingAudit){ showToast('⚠ Denetim bulunamadı'); _editAuditId=null; return; }
+
+    if(editBanner){
+      editBanner.style.display='flex';
+      editBanner.innerHTML=`<span>✏️ <b>Düzenleme Modu</b> — ${existingAudit.area_name} · ${existingAudit.date}</span><button class="btn btn-sm btn-outline" onclick="_editAuditId=null;initForm()">✕ İptal</button>`;
+    }
+
+    // Başlık alanlarını doldur
+    document.getElementById('audit-form-code').value = existingAudit.form_code||'';
+    document.getElementById('audit-date').value = existingAudit.date||'';
+    const shiftEl=document.getElementById('audit-shift'); if(shiftEl) shiftEl.value=existingAudit.shift||'Sabah';
+    const locEl=document.getElementById('audit-location'); if(locEl) locEl.value=existingAudit.location||'';
+    const tlEl=document.getElementById('audit-team-leader'); if(tlEl) tlEl.value=existingAudit.team_leader||'';
+
+    // Alan seç
+    if(existingAudit.area_id) sel.value=existingAudit.area_id;
+
+    // Denetçi
     const auditorInput=document.getElementById('audit-auditor');
     const auditorDisplay=document.getElementById('auditor-display');
-    if(auditorInput) auditorInput.value = CURRENT_USER?.name||'';
-    if(auditorDisplay) auditorDisplay.textContent = CURRENT_USER?.name||'';
-    showToast('📋 '+alanAd+' denetimi yüklendi');
-    window._aktifAtama=null;
+    if(auditorInput) auditorInput.value=existingAudit.auditor_name||'';
+    if(auditorDisplay){ auditorDisplay.textContent=existingAudit.auditor_name||''; auditorDisplay.style.fontWeight='500'; auditorDisplay.style.color='var(--accent)'; }
+
+    // Cevapları yükle (varsa)
+    const rawAnswers = existingAudit.answers_json;
+    const savedAnswers = (typeof rawAnswers==='string') ? JSON.parse(rawAnswers||'{}') : (rawAnswers||{});
+    S.answers={}; S.photos={}; S.notes={}; S.typeOverrides={};
+    PILLARS.forEach((_,pi)=>{
+      S.answers[pi] = savedAnswers[pi] || savedAnswers[String(pi)] || [];
+      S.photos[pi]={};
+      S.notes[pi]=[];
+      PILLARS[pi].questions.forEach((_,qi)=>{ S.answers[pi][qi]=S.answers[pi][qi]??null; S.notes[pi][qi]=''; S.photos[pi][qi]=[]; });
+      S.typeOverrides[pi]={};
+    });
+    showToast('✏️ Denetim düzenleme modunda açıldı');
+
   } else {
-    // Default denetçi = current user
-    const auditorInput=document.getElementById('audit-auditor');
-    const auditorDisplay=document.getElementById('auditor-display');
-    if(auditorInput&&CURRENT_USER){ auditorInput.value=CURRENT_USER.name; }
-    if(auditorDisplay&&CURRENT_USER){ auditorDisplay.textContent=CURRENT_USER.name; auditorDisplay.style.fontWeight='500'; auditorDisplay.style.color='var(--accent)'; }
+    // Yeni denetim modu
+    if(editBanner) editBanner.style.display='none';
+    document.getElementById('audit-date').value = new Date().toISOString().split('T')[0];
+    document.getElementById('audit-form-code').value = '5S-'+new Date().getFullYear()+'-'+String(S.audits.length+1).padStart(3,'0');
+
+    // Atama varsa otomatik doldur
+    if(window._aktifAtama){
+      const {alanId, alanAd} = window._aktifAtama;
+      if(sel) sel.value = alanId;
+      const auditorInput=document.getElementById('audit-auditor');
+      const auditorDisplay=document.getElementById('auditor-display');
+      if(auditorInput) auditorInput.value = CURRENT_USER?.name||'';
+      if(auditorDisplay) auditorDisplay.textContent = CURRENT_USER?.name||'';
+      showToast('📋 '+alanAd+' denetimi yüklendi');
+      window._aktifAtama=null;
+    } else {
+      const auditorInput=document.getElementById('audit-auditor');
+      const auditorDisplay=document.getElementById('auditor-display');
+      if(auditorInput&&CURRENT_USER){ auditorInput.value=CURRENT_USER.name; }
+      if(auditorDisplay&&CURRENT_USER){ auditorDisplay.textContent=CURRENT_USER.name; auditorDisplay.style.fontWeight='500'; auditorDisplay.style.color='var(--accent)'; }
+    }
+
+    S.answers={}; S.photos={}; S.notes={}; S.typeOverrides={};
   }
 
-  S.answers={}; S.photos={}; S.notes={}; S.typeOverrides={};
   const c = document.getElementById('pillars-container');
   c.innerHTML='';
+  const isEdit = !!_editAuditId;
   PILLARS.forEach((p,pi)=>{
-    S.answers[pi]=[]; S.photos[pi]={}; S.notes[pi]=[];
-    p.questions.forEach((_,qi)=>{ S.answers[pi][qi]=null; S.notes[pi][qi]=''; S.photos[pi][qi]=[]; });
-    S.typeOverrides[pi]={};
+    if(!isEdit){
+      S.answers[pi]=[]; S.photos[pi]={}; S.notes[pi]=[];
+      p.questions.forEach((_,qi)=>{ S.answers[pi][qi]=null; S.notes[pi][qi]=''; S.photos[pi][qi]=[]; });
+      S.typeOverrides[pi]={};
+    }
     const div=document.createElement('div'); div.className='pillar-sec';
     div.innerHTML=`
       <div class="pillar-hdr" onclick="togglePillar(${pi})">
@@ -380,18 +439,28 @@ async function submitAudit(withReport=false){
   if(btn){ btn.disabled=true; btn.innerHTML='<span class="spinner"></span>Kaydediliyor...'; }
 
   try {
-    const result = await apiFetch('/audits', { method:'POST', body:JSON.stringify(body) });
-    if(!result) return;
-    S.audits.unshift(result);
-    updateBadges();
-    showToast('✓ Denetim başarıyla kaydedildi!');
-
-    // Atama varsa kapat
-    if(window._aktifAtamaId){
-      await atamaKapat(window._aktifAtamaId, result.id);
-      window._aktifAtamaId=null;
+    let result;
+    if(_editAuditId){
+      // Güncelleme modu — PUT
+      result = await apiFetch('/audits/'+_editAuditId, { method:'PUT', body:JSON.stringify(body) });
+      if(!result) return;
+      const idx = S.audits.findIndex(a=>a.id===_editAuditId);
+      if(idx>-1) S.audits[idx]={...S.audits[idx],...result};
+      showToast('✓ Denetim güncellendi!');
+      _editAuditId=null;
+    } else {
+      // Yeni denetim — POST
+      result = await apiFetch('/audits', { method:'POST', body:JSON.stringify(body) });
+      if(!result) return;
+      S.audits.unshift(result);
+      showToast('✓ Denetim başarıyla kaydedildi!');
+      // Atama varsa kapat
+      if(window._aktifAtamaId){
+        await atamaKapat(window._aktifAtamaId, result.id);
+        window._aktifAtamaId=null;
+      }
     }
-
+    updateBadges();
     if(withReport) showDetail(result.id);
     else navigate('history');
   } catch(err){
@@ -452,9 +521,11 @@ function renderHistory(){
         <td>${a.shift||'—'}</td>
         <td><div class="sbar-wrap"><div class="sbar"><div class="sbar-fill ${(a.total_score||0)>=85?'hi':(a.total_score||0)>=50?'md':'lo'}" style="width:${a.total_score||0}%;"></div></div><span class="sbar-val">${a.total_score||0}</span></div></td>
         <td><span class="badge ${scoreBadge(a.total_score||0)}">${scoreLabel(a.total_score||0)}</span></td>
-        <td>
+        <td style="display:flex;gap:4px;flex-wrap:wrap;">
           <button class="btn btn-outline btn-sm" onclick="showDetail('${a.id}')">Detay</button>
-          ${CURRENT_USER?.role==='admin'?`<button class="btn btn-outline btn-sm" onclick="openEditModal('${a.id}')">Düzenle</button><button class="btn btn-sm" style="color:var(--red);" onclick="delAudit('${a.id}')">Sil</button>`:''}
+          ${CURRENT_USER?.role==='admin'||CURRENT_USER?.role==='denetci'
+            ?`<button class="btn btn-outline btn-sm" style="color:var(--brand);" onclick="editAudit('${a.id}')">✏️ Düzenle</button>`:''}
+          ${CURRENT_USER?.role==='admin'?`<button class="btn btn-sm" style="color:var(--red);" onclick="delAudit('${a.id}')">Sil</button>`:''}
         </td>
       </tr>`).join('');
 }

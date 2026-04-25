@@ -257,6 +257,13 @@ function renderDepartmanDashboard(){
     el.textContent=[myAuditsFull.length, monthAudits.length, maxScore||'—', openActs.length][i];
   });
 
+  // Skor badge + audit count sub
+  const skorBadgeEl=document.getElementById('dept-skor-badge');
+  if(skorBadgeEl) skorBadgeEl.innerHTML=avg?`<span class="badge ${scoreBadge(avg)}" style="font-size:13px;">${scoreLabel(avg)}</span>`:'';
+  const auditCountEl=document.getElementById('dept-audit-count');
+  if(auditCountEl) auditCountEl.textContent=myAuditsFull.length+' denetim toplam';
+
+  // Son denetimler
   const recentEl=document.getElementById('dept-recent'); if(recentEl){
     recentEl.innerHTML=myAuditsFull.slice(0,5).map(a=>`
       <div style="display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid var(--border);">
@@ -265,10 +272,58 @@ function renderDepartmanDashboard(){
       </div>`).join('')||'<div style="font-size:12px;color:var(--text3);">Henüz denetim yok</div>';
   }
 
+  // 5S Pillar barları
+  const pillarBarsEl=document.getElementById('dept-pillar-bars');
+  if(pillarBarsEl){
+    const pillarAvgs=PILLARS.map((p,pi)=>{
+      const vals=myAuditsFull.map(a=>{
+        const pjs=Array.isArray(a.pillars_json)?a.pillars_json:(a.pillars_json?Object.values(a.pillars_json):[]);
+        const pData=pjs[pi]; return pData?.pct??pData?.score??null;
+      }).filter(v=>v!=null);
+      return vals.length?Math.round(vals.reduce((s,v)=>s+Number(v),0)/vals.length):null;
+    });
+    pillarBarsEl.innerHTML=PILLARS.map((p,pi)=>{
+      const sc=pillarAvgs[pi];
+      return `<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+        <div style="width:18px;height:18px;border-radius:4px;background:${p.color};display:flex;align-items:center;justify-content:center;color:#fff;font-size:8px;font-weight:700;flex-shrink:0;">${p.id}</div>
+        <div style="flex:1;height:7px;background:var(--surface2);border-radius:4px;overflow:hidden;">
+          <div style="height:100%;width:${sc||0}%;background:${sc!=null&&sc>=75?'var(--green)':sc!=null&&sc>=50?'var(--amber)':'var(--red)'};border-radius:4px;transition:width .4s;"></div>
+        </div>
+        <span style="font-size:11px;font-weight:600;min-width:28px;text-align:right;color:${sc!=null?scoreColor(sc):'var(--text3)'};">${sc!=null?sc:'—'}</span>
+      </div>`;
+    }).join('');
+  }
+
+  // Açık aksiyonlar
   const aksEl=document.getElementById('dept-aksiyonlar');
   const aksCount=document.getElementById('dept-aksiyon-count');
-  if(aksEl){ aksEl.innerHTML=openActs.slice(0,4).map(a=>`<div style="padding:7px 0;border-bottom:1px solid var(--border);font-size:12px;">${(a.description||'').substring(0,50)}<span class="badge badge-amber" style="margin-left:6px;">${a.priority}</span></div>`).join('')||'<div style="font-size:12px;color:var(--text3);">Açık aksiyon yok ✓</div>'; }
+  if(aksEl){ aksEl.innerHTML=openActs.slice(0,4).map(a=>`
+    <div style="padding:7px 0;border-bottom:1px solid var(--border);font-size:12px;display:flex;align-items:center;gap:6px;">
+      <span class="badge ${a.priority==='Kritik'?'badge-red':a.priority==='Yüksek'?'badge-amber':'badge-blue'}">${a.priority}</span>
+      <span style="flex:1;">${(a.description||'').substring(0,50)}</span>
+    </div>`).join('')||'<div style="font-size:12px;color:var(--text3);">Açık aksiyon yok ✓</div>'; }
   if(aksCount) aksCount.textContent=openActs.length;
+
+  // Sonraki denetim (en uzun süredir denetlenmeyen alan)
+  const sonrakiEl=document.getElementById('dept-sonraki');
+  if(sonrakiEl){
+    const areaLastAudit=myAreas.map(a=>{
+      const lastAudit=myAuditsFull.filter(au=>au.area_id===a.id).sort((x,y)=>y.date?.localeCompare(x.date))[0];
+      return { area:a, lastDate:lastAudit?.date||null };
+    }).sort((a,b)=>{
+      if(!a.lastDate) return -1; if(!b.lastDate) return 1;
+      return a.lastDate.localeCompare(b.lastDate);
+    });
+    sonrakiEl.innerHTML=areaLastAudit.slice(0,3).map(({area,lastDate})=>{
+      const days=lastDate?Math.floor((new Date()-new Date(lastDate))/86400000):null;
+      const urgency=days===null?'Hiç denetlenmedi':days===0?'Bugün denetlendi':days+' gün önce';
+      const color=days===null||days>30?'var(--red)':days>14?'var(--amber)':'var(--green)';
+      return `<div style="display:flex;align-items:center;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--border);">
+        <div style="font-size:12px;font-weight:500;">${area.name}</div>
+        <span style="font-size:11px;color:${color};font-weight:600;">${urgency}</span>
+      </div>`;
+    }).join('')||'<div style="font-size:12px;color:var(--text3);">Alan bulunamadı</div>';
+  }
 }
 
 // ─────────────────────────────────────────────────────────────

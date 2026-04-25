@@ -16,10 +16,14 @@ router.get('/', async (req, res, next) => {
     const params = [];
 
     if (req.user.role === 'departman' || req.user.role === 'takimlider') {
-      // Fabrika bazlı — tüm departmanları görebilir
+      // Fabrika + dept bazlı (dept boşsa sadece fabrika)
       if (req.user.fabrika) {
         sql += ` AND ar.fabrika = $${params.length + 1}`;
         params.push(req.user.fabrika);
+      }
+      if (req.user.dept) {
+        sql += ` AND ar.dept = $${params.length + 1}`;
+        params.push(req.user.dept);
       }
     } else if (req.user.role === 'denetci') {
       // Denetçi: kendi denetimlerinden doğan aksiyonlar

@@ -11,11 +11,8 @@ function renderQRPage(){
   // Temizle
   _qrInstances = {};
 
-  let areas = [...S.areas];
-  const user = CURRENT_USER;
-  if(user?.role==='departman'){
-    areas = areas.filter(a=>a.fabrika===user.fabrika);
-  }
+  // Backend zaten fabrika+dept filtreli veri gönderiyor
+  const areas = [...S.areas];
 
   // Fabrika filtresi
   const fabrikaSet = [...new Set(areas.map(a=>a.fabrika).filter(Boolean))];
@@ -96,11 +93,8 @@ function downloadQR(areaId, areaName){
 
 function printAllQR(){
   const baseUrl = window.location.origin + window.location.pathname;
-  let areas = [...S.areas];
-  const user = CURRENT_USER;
-  if(user?.role==='departman'){
-    areas = areas.filter(a=>a.fabrika===user.fabrika);
-  }
+  // Backend zaten fabrika+dept filtreli veri gönderiyor
+  const areas = [...S.areas];
 
   const printWin = window.open('', '_blank', 'width=900,height=700');
   printWin.document.write(`<!DOCTYPE html><html><head>

@@ -11,10 +11,15 @@ router.get('/', async (req, res, next) => {
     let query = 'SELECT * FROM areas ORDER BY fabrika, dept, alt_dept, name';
     const params = [];
 
-    // Departman rolü: sadece kendi fabrikasını görebilir
+    // Departman rolü: kendi fabrikası + departmanı (dept boşsa sadece fabrika)
     if (req.user.role === 'departman' || req.user.role === 'takimlider') {
-      query = 'SELECT * FROM areas WHERE fabrika = $1 ORDER BY dept, alt_dept, name';
-      params.push(req.user.fabrika);
+      if (req.user.fabrika && req.user.dept) {
+        query = 'SELECT * FROM areas WHERE fabrika = $1 AND dept = $2 ORDER BY alt_dept, name';
+        params.push(req.user.fabrika, req.user.dept);
+      } else if (req.user.fabrika) {
+        query = 'SELECT * FROM areas WHERE fabrika = $1 ORDER BY dept, alt_dept, name';
+        params.push(req.user.fabrika);
+      }
     }
 
     const { rows } = await db.query(query, params);

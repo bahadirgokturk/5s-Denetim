@@ -6,13 +6,8 @@ let _trendChart  = null;
 let _pillarChart = null;
 
 function renderReports(){
-  const user = CURRENT_USER;
+  // Backend zaten fabrika+dept filtreli veri gönderiyor — S.audits ve S.areas doğru
   let audits = [...S.audits];
-
-  if(user?.role==='departman'||user?.role==='takimlider'){
-    const fabAreas = S.areas.filter(a=>a.fabrika===user.fabrika).map(a=>a.id);
-    audits = audits.filter(a=>fabAreas.includes(a.area_id));
-  }
 
   _renderReportTopStats(audits);
   _renderTrendChart(audits);
@@ -136,12 +131,8 @@ function _renderPillarChart(audits){
 }
 
 function exportCSV(){
+  // Backend zaten fabrika+dept filtreli veri gönderiyor
   let audits = [...S.audits];
-  const user = CURRENT_USER;
-  if(user?.role==='departman'||user?.role==='takimlider'){
-    const fabAreas = S.areas.filter(a=>a.fabrika===user.fabrika).map(a=>a.id);
-    audits = audits.filter(a=>fabAreas.includes(a.area_id));
-  }
 
   const rows = [
     ['Tarih','Alan','Fabrika','Denetçi','Vardiya','Toplam Puan',...PILLARS.map(p=>p.name)]

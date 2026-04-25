@@ -8,11 +8,8 @@ function renderAreas(){
   const grid = document.getElementById('area-grid');
   if(!grid) return;
 
-  const user = CURRENT_USER;
-  let areas = [...S.areas];
-  if(user?.role==='departman'){
-    areas = areas.filter(a=>a.fabrika===user.fabrika);
-  }
+  // Backend zaten fabrika+dept filtreli veri gönderiyor — S.areas doğru
+  const areas = [...S.areas];
 
   // Özet satırı
   _renderAreasSummary(areas);

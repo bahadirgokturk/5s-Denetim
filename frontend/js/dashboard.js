@@ -231,14 +231,18 @@ async function atamaKapat(id, auditId){
 // ─────────────────────────────────────────────────────────────
 function renderDepartmanDashboard(){
   if(!CURRENT_USER) return;
-  const fabrika=CURRENT_USER.fabrika||'';
+  const fabrika = CURRENT_USER.fabrika||'';
+  const dept    = CURRENT_USER.dept||'';
 
-  // Backend zaten fabrika filtresi uyguluyor, S.areas tüm fabrika alanlarını içeriyor
+  // Backend zaten fabrika+dept filtresini uyguluyor — S.areas ve S.audits zaten doğru veri
   const myAreas = S.areas;
-  const myAuditsFull = S.audits.filter(a=>myAreas.some(ar=>ar.id===a.area_id)||myAreas.some(ar=>ar.name===a.area_name));
+  const myAreaIds = new Set(myAreas.map(a=>a.id));
+  const myAuditsFull = S.audits.filter(a=>myAreaIds.has(a.area_id));
 
-  const adiEl=document.getElementById('dept-adi'); if(adiEl) adiEl.textContent=fabrika||(CURRENT_USER.name||'—');
-  const bolumAdiEl=document.getElementById('dept-bolum-adi'); if(bolumAdiEl) bolumAdiEl.textContent=CURRENT_USER?.dept||'Tüm Bölümler';
+  const adiEl=document.getElementById('dept-adi');
+  if(adiEl) adiEl.textContent=(dept ? dept+' – ' : '')+fabrika||(CURRENT_USER.name||'—');
+  const bolumAdiEl=document.getElementById('dept-bolum-adi');
+  if(bolumAdiEl) bolumAdiEl.textContent=dept||fabrika||'Departman';
 
   const avg=myAuditsFull.length?Math.round(myAuditsFull.reduce((s,a)=>s+(a.total_score||0),0)/myAuditsFull.length):0;
   const skorBig=document.getElementById('dept-skor-big'); if(skorBig) skorBig.textContent=avg||'—';

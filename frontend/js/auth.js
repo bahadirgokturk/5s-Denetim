@@ -67,7 +67,7 @@ function applyRole(user){
 
   document.getElementById('topbar-date').textContent=new Date().toLocaleDateString('tr-TR',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
 
-  renderDashboard();
+  navigate('dashboard');
   updateBadges();
 }
 

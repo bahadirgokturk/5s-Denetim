@@ -257,6 +257,29 @@ function renderDepartmanDashboard(){
     el.textContent=[myAuditsFull.length, monthAudits.length, maxScore||'—', openActs.length][i];
   });
 
+  // ── Alan kartları ────────────────────────────────────────────
+  const alanGrid=document.getElementById('dept-alan-grid');
+  if(alanGrid){
+    alanGrid.innerHTML=myAreas.map(area=>{
+      const areaAudits=myAuditsFull.filter(a=>a.area_id===area.id).sort((a,b)=>b.date?.localeCompare(a.date));
+      const last=areaAudits[0];
+      const score=last?Number(last.total_score):null;
+      const openAct=S.actions.filter(ac=>ac.area_id===area.id&&ac.status!=='Tamamlandı').length;
+      const days=last?Math.floor((new Date()-new Date(last.date))/86400000):null;
+      const urgencyColor=days===null||days>30?'var(--red)':days>14?'var(--amber)':'var(--green)';
+      const urgencyTxt=days===null?'Denetim yok':days===0?'Bugün':days+' gün önce';
+      return `
+        <div onclick="openAreaDetail('${area.id}')" style="cursor:pointer;padding:12px;border:2px solid ${score!==null?(score>=75?'rgba(34,197,94,.3)':score>=50?'rgba(251,191,36,.3)':'rgba(239,68,68,.3)'):'var(--border)'};border-radius:var(--r);background:var(--surface);transition:all .15s;position:relative;"
+          onmouseover="this.style.borderColor='var(--brand)';this.style.background='var(--brand-light)'"
+          onmouseout="this.style.borderColor='${score!==null?(score>=75?'rgba(34,197,94,.3)':score>=50?'rgba(251,191,36,.3)':'rgba(239,68,68,.3)'):'var(--border)'}';this.style.background='var(--surface)'">
+          ${score!==null?`<div style="position:absolute;top:8px;right:8px;font-size:16px;font-weight:700;font-family:var(--mono);color:${scoreColor(score)};">${score}</div>`:'<div style="position:absolute;top:8px;right:8px;font-size:11px;color:var(--text3);">—</div>'}
+          <div style="font-size:12px;font-weight:600;margin-bottom:6px;padding-right:32px;line-height:1.3;">${area.name}</div>
+          <div style="font-size:10px;color:${urgencyColor};font-weight:600;">${urgencyTxt}</div>
+          <div style="font-size:10px;color:var(--text3);margin-top:2px;">${areaAudits.length} denetim${openAct>0?` · <span style="color:var(--amber)">⚡${openAct}</span>`:''}</div>
+        </div>`;
+    }).join('')||'<div style="color:var(--text3);font-size:12px;">Alan bulunamadı</div>';
+  }
+
   // Skor badge + audit count sub
   const skorBadgeEl=document.getElementById('dept-skor-badge');
   if(skorBadgeEl) skorBadgeEl.innerHTML=avg?`<span class="badge ${scoreBadge(avg)}" style="font-size:13px;">${scoreLabel(avg)}</span>`:'';

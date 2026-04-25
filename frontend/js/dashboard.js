@@ -18,6 +18,9 @@ function renderDashboard(){
 // ADMIN DASHBOARD
 // ─────────────────────────────────────────────────────────────
 function renderAdminDashboard(){
+  // Dept filtre satırını her zaman güncelle
+  renderDeptFilterRow(S.fabrikaFilter||'all');
+
   const filtered = getFilteredAudits();
 
   // Metrikler
@@ -131,9 +134,10 @@ function renderRadarChart(audits){
   if(_radarChart){ _radarChart.destroy(); _radarChart=null; }
   const pillarAvgs=PILLARS.map((p,pi)=>{
     const vals=audits.map(a=>{
-      const pjs=a.pillars_json||{};
-      const pData=pjs[p.id]||pjs[pi];
-      return pData?.pct||0;
+      // pillars_json array veya object olabilir
+      const pjs = Array.isArray(a.pillars_json) ? a.pillars_json : (a.pillars_json ? Object.values(a.pillars_json) : []);
+      const pData = pjs[pi];
+      return pData?.score || pData?.pct || 0;
     }).filter(v=>v>0);
     return vals.length?Math.round(vals.reduce((s,x)=>s+x,0)/vals.length):0;
   });
@@ -228,13 +232,13 @@ async function atamaKapat(id, auditId){
 function renderDepartmanDashboard(){
   if(!CURRENT_USER) return;
   const fabrika=CURRENT_USER.fabrika||'';
-  const dept=CURRENT_USER.dept||'';
 
-  const myAreas=S.areas.filter(a=>(!fabrika||a.fabrika===fabrika)&&(!dept||a.dept===dept));
-  const myAuditsFull=S.audits.filter(a=>myAreas.some(ar=>ar.id===a.area_id||ar.name===a.area_name));
+  // Backend zaten fabrika filtresi uyguluyor, S.areas tüm fabrika alanlarını içeriyor
+  const myAreas = S.areas;
+  const myAuditsFull = S.audits.filter(a=>myAreas.some(ar=>ar.id===a.area_id)||myAreas.some(ar=>ar.name===a.area_name));
 
   const adiEl=document.getElementById('dept-adi'); if(adiEl) adiEl.textContent=fabrika||(CURRENT_USER.name||'—');
-  const bolumAdiEl=document.getElementById('dept-bolum-adi'); if(bolumAdiEl) bolumAdiEl.textContent=dept||'Tüm Bölümler';
+  const bolumAdiEl=document.getElementById('dept-bolum-adi'); if(bolumAdiEl) bolumAdiEl.textContent=CURRENT_USER?.dept||'Tüm Bölümler';
 
   const avg=myAuditsFull.length?Math.round(myAuditsFull.reduce((s,a)=>s+(a.total_score||0),0)/myAuditsFull.length):0;
   const skorBig=document.getElementById('dept-skor-big'); if(skorBig) skorBig.textContent=avg||'—';

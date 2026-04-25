@@ -108,9 +108,10 @@ function _renderPillarChart(audits){
   if(!ctx || !window.Chart) return;
 
   const pillarAvgs = PILLARS.map((p,pi)=>{
-    const vals = audits
-      .map(a=>{ const pils=a.pillars_json||a.pillars||[]; return pils[pi]?.score; })
-      .filter(v=>v!=null);
+    const vals = audits.map(a=>{
+      const pils = Array.isArray(a.pillars_json) ? a.pillars_json : (a.pillars_json ? Object.values(a.pillars_json) : []);
+      return pils[pi]?.score ?? pils[pi]?.pct ?? null;
+    }).filter(v=>v!=null);
     return vals.length ? Math.round(vals.reduce((s,v)=>s+Number(v),0)/vals.length) : 0;
   });
 

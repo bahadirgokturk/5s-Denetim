@@ -38,7 +38,7 @@ function renderAreas(){
             <div class="area-card-fab" style="font-size:11px;color:var(--text3);">${area.fabrika||''} ${area.dept?'· '+area.dept:''}</div>
           </div>
           ${score!==null
-            ? `<div class="score-badge ${scoreColor(score)}">${score}</div>`
+            ? `<div class="badge ${scoreBadge(score)}" style="font-size:13px;padding:4px 10px;">${score}</div>`
             : '<div style="font-size:13px;color:var(--text3);">—</div>'}
         </div>
         <div class="area-card-meta" style="display:flex;gap:12px;font-size:11px;color:var(--text2);margin-top:8px;flex-wrap:wrap;">
@@ -88,7 +88,13 @@ function openAreaDetail(areaId){
   // Pillar ortalamaları
   const pillarBars = PILLARS.map((p,pi)=>{
     const vals = areaAudits
-      .map(a=>{ const pil=a.pillars_json||a.pillars||[]; return pil[pi]?.score; })
+      .map(a=>{
+        const pils = Array.isArray(a.pillars_json)
+          ? a.pillars_json
+          : (a.pillars_json ? Object.values(a.pillars_json) : []);
+        const pData = pils[pi];
+        return pData?.pct ?? pData?.score ?? null;
+      })
       .filter(v=>v!=null);
     const sc = vals.length ? Math.round(vals.reduce((s,v)=>s+Number(v),0)/vals.length) : null;
     return `
@@ -106,7 +112,7 @@ function openAreaDetail(areaId){
     <div style="display:flex;align-items:center;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border);">
       <span style="font-size:12px;">${new Date(a.date).toLocaleDateString('tr-TR')} · ${a.auditor_name||'—'}</span>
       <div style="display:flex;gap:6px;align-items:center;">
-        <span class="score-badge ${scoreColor(a.total_score)}" style="font-size:11px;">${a.total_score}</span>
+        <span class="badge ${scoreBadge(a.total_score||0)}" style="font-size:11px;">${a.total_score}</span>
         <button class="btn btn-sm btn-outline" style="padding:2px 8px;font-size:10px;" onclick="showDetail('${a.id}')">Detay</button>
       </div>
     </div>

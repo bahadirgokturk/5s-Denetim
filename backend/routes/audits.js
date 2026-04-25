@@ -24,11 +24,10 @@ router.get('/', async (req, res, next) => {
       where.push(`a.auditor_id = $${pidx++}`);
       params.push(req.user.id);
     } else if (req.user.role === 'departman' || req.user.role === 'takimlider') {
-      where.push(`ar.fabrika = $${pidx++}`);
-      params.push(req.user.fabrika);
-      if (req.user.dept) {
-        where.push(`ar.dept = $${pidx++}`);
-        params.push(req.user.dept);
+      // Fabrika bazlı — tüm departmanları görebilir
+      if (req.user.fabrika) {
+        where.push(`ar.fabrika = $${pidx++}`);
+        params.push(req.user.fabrika);
       }
     }
 

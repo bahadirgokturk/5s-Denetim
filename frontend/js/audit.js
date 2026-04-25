@@ -512,7 +512,12 @@ function showDetail(id){
   const detDenetBtn=document.getElementById('det-denetlenen-btn');
   if(detDenetBtn) detDenetBtn.onclick=()=>{ denetlenenRaporu(a.id); };
 
-  const pjs=a.pillars_json||{};
+  const pjsRaw=a.pillars_json||{};
+  // pillars_json can be {S1:{pct,contribution},...} or array [{pct,contribution},...]
+  const pjsByKey = Array.isArray(pjsRaw)
+    ? PILLARS.reduce((m,p,i)=>{ m[p.id]=pjsRaw[i]||{}; return m; }, {})
+    : pjsRaw;
+  const pjs = pjsByKey;
   const pillarHtml=PILLARS.map(p=>{
     const d=pjs[p.id]||{}; const pct=d.pct||0;
     return `<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
@@ -536,7 +541,10 @@ function buildOfflineReport(audit){
   document.getElementById('ai-title').textContent='Denetim Raporu — '+(audit.area_name||'');
   document.getElementById('ai-sub').textContent=(audit.date||'')+(audit.auditor_name?' · '+audit.auditor_name:'');
   document.getElementById('ai-loading').style.display='none';
-  const pjs=audit.pillars_json||{};
+  const pjsRaw2=audit.pillars_json||{};
+  const pjs=Array.isArray(pjsRaw2)
+    ? PILLARS.reduce((m,p,i)=>{ m[p.id]=pjsRaw2[i]||{}; return m; }, {})
+    : pjsRaw2;
   let html='<div style="font-size:13px;">';
   html+=`<div style="text-align:center;margin-bottom:16px;"><div style="font-size:56px;font-weight:700;font-family:var(--mono);color:${scoreColor(audit.total_score||0)};">${audit.total_score||0}</div><div class="badge ${scoreBadge(audit.total_score||0)}" style="font-size:13px;">${scoreLabel(audit.total_score||0)}</div></div>`;
   PILLARS.forEach(p=>{ const d=pjs[p.id]||{}; const pct=d.pct||0; html+=`<div style="margin-bottom:10px;"><div style="font-weight:600;margin-bottom:4px;">${p.id} · ${p.name}: <span style="color:${scoreColor(pct)};">${pct}%</span></div><div class="sbar"><div class="sbar-fill ${pct>=85?'hi':pct>=50?'md':'lo'}" style="width:${pct}%;"></div></div></div>`; });

@@ -16,11 +16,10 @@ router.get('/', async (req, res, next) => {
     const params = [];
 
     if (req.user.role === 'departman' || req.user.role === 'takimlider') {
-      sql += ` AND ar.fabrika = $${params.length + 1}`;
-      params.push(req.user.fabrika);
-      if (req.user.dept) {
-        sql += ` AND ar.dept = $${params.length + 1}`;
-        params.push(req.user.dept);
+      // Fabrika bazlı — tüm departmanları görebilir
+      if (req.user.fabrika) {
+        sql += ` AND ar.fabrika = $${params.length + 1}`;
+        params.push(req.user.fabrika);
       }
     } else if (req.user.role === 'denetci') {
       // Denetçi: kendi denetimlerinden doğan aksiyonlar
@@ -68,11 +67,13 @@ router.post('/', requireRole('admin', 'denetci'), async (req, res, next) => {
 // PUT /api/actions/:id — Aksiyon güncelle
 router.put('/:id', async (req, res, next) => {
   try {
-    const { description, assigned_to, due_date, status, priority } = req.body;
+    const { description, assigned_to, due_date, status, priority, area_id, area_name } = req.body;
     const { rows } = await db.query(
-      `UPDATE actions SET description=$1, assigned_to=$2, due_date=$3, status=$4, priority=$5
-       WHERE id=$6 RETURNING *`,
-      [description, assigned_to || '', due_date || null, status || 'Açık', priority || 'Orta', req.params.id]
+      `UPDATE actions SET description=$1, assigned_to=$2, due_date=$3, status=$4, priority=$5,
+         area_id=COALESCE($6, area_id), area_name=COALESCE($7, area_name)
+       WHERE id=$8 RETURNING *`,
+      [description, assigned_to || '', due_date || null, status || 'Açık', priority || 'Orta',
+       area_id || null, area_name || null, req.params.id]
     );
     if (!rows[0]) return res.status(404).json({ error: 'Aksiyon bulunamadı' });
     res.json(rows[0]);

@@ -14,7 +14,7 @@ document.addEventListener('DOMContentLoaded', async ()=>{
   // ── Escape tuşu ile modal kapatma ──────────────────────────
   document.addEventListener('keydown', e=>{
     if(e.key==='Escape'){
-      const open = document.querySelector('.modal-ov[style*="flex"]');
+      const open = document.querySelector('.modal-ov.open');
       if(open) closeModal(open.id);
     }
   });

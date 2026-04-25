@@ -1,0 +1,22 @@
+# Bağımlılıklar
+node_modules/
+backend/node_modules/
+
+# Ortam değişkenleri (GİZLİ — asla commitlenme!)
+backend/.env
+.env
+
+# Log dosyaları
+*.log
+npm-debug.log*
+
+# OS dosyaları
+.DS_Store
+Thumbs.db
+
+# Editör
+.vscode/
+.idea/
+
+# Claude Code
+.claude/

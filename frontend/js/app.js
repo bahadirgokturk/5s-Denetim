@@ -1,0 +1,266 @@
+// ============================================================
+// app.js — Sabit veriler, state, API katmanı, navigation, utils
+// ============================================================
+
+const API_BASE = '/api';
+
+// ── API yardımcısı — otomatik 401 yönlendirme ────────────────
+async function apiFetch(path, opts = {}) {
+  const res = await fetch(API_BASE + path, {
+    credentials: 'include',
+    headers: { 'Content-Type': 'application/json', ...(opts.headers || {}) },
+    ...opts,
+  });
+  if (res.status === 401) {
+    doLogout();
+    return null;
+  }
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ error: res.statusText }));
+    throw new Error(err.error || 'API hatası');
+  }
+  if (res.status === 204) return null;
+  return res.json();
+}
+
+// ── Pillar ağırlıkları ──────────────────────────────────────
+const PW = { S1:20, S2:20, S3:20, S4:20, S5:20 };
+
+// ── Pillar soruları ─────────────────────────────────────────
+const PILLARS = [
+  {
+    id:'S1', name:'Seiri (Ayıklama)', desc:'Gereksiz malzemeleri tespit et ve uzaklaştır', color:'#c0392b',
+    questions:[
+      { text:'Makine üstü, çekmeceler ve prosesteki kullanım alanlarında kaç adet prosesle ilgisi olmayan malzeme, ekipman, kişisel eşya vb. bulunmaktadır?', type:'count', countLabel:'adet', w:5, photo:true },
+      { text:'Sahada kaç adet arızalı, kırık veya kalibrasyonu kaçmış, kullanılmaması gereken ekipman/aparat bulunmaktadır?', type:'count', countLabel:'adet', w:5, photo:true },
+      { text:'Panolarda veya makine üzerlerinde kaç tane güncelliğini yitirmiş talimat, duyuru, form ya da teknik çizim bulunmaktadır?', type:'count', countLabel:'adet', w:3, photo:true },
+      { text:'Aynı iş için kullanılan gereksiz, fazla sayıda ekipman bulunuyor mu? (Pense, tornavida, alyan vb. el aletleri)', type:'yn3', mcOptions:['Hiç yok','1-2 adet fazla','3+ adet fazla / ciddi sorun'], w:3, photo:true }
+    ]
+  },
+  {
+    id:'S2', name:'Seiton (Düzenleme)', desc:'Her şeyin yerini belirle ve görünür kıl', color:'#2980b9',
+    questions:[
+      { text:'Makina üzeri ve çevresinde alan tanımı yapılmamış kaç adet malzeme bulunmaktadır? (El aletleri, aparatlar, sarf malzemeler vb.)', type:'count', countLabel:'adet', w:5, photo:true },
+      { text:'Tanımlandığı alanda bulunmayan (kullanımda olanlar hariç) kaç adet aparat, ekipman, ölçü aleti, malzeme, evrak vb. bulunmaktadır?', type:'count', countLabel:'adet', w:5, photo:true },
+      { text:'Belirlenmiş alan tanımına uymayan kaç adet araç (silindir arabası, aparat arabası vb.) bulunmaktadır?', type:'count', countLabel:'adet', w:3, photo:true },
+      { text:'Acil durum butonu, yangın tüpleri, ilk yardım dolabı veya göz duşu vb. erişilebilir midir?', type:'yn3', mcOptions:['Tümü erişilebilir','Kısmen erişilebilir','Erişilemiyor / Yok'], w:1, photo:true },
+      { text:'Saklama ve stok alanlarında malzeme/ekipmanlar için min/maks seviyeleri belirlenmiş mi?', type:'yn3', mcOptions:['Belirlenmiş ve uyuluyor','Belirlenmiş ama uyulmuyor','Belirlenmemiş'], w:3, photo:false }
+    ]
+  },
+  {
+    id:'S3', name:'Seiso (Temizlik)', desc:'Çalışma alanını temiz ve sağlıklı tut', color:'#27ae60',
+    questions:[
+      { text:'Makine üstü, çekmece veya raf gibi kullanım alanlarında yüzeyler düzenli olarak temizleniyor mu?', type:'count', countLabel:'uygunsuz alan', w:5, photo:true },
+      { text:'Üretim alanı ve çevresi temiz mi?', type:'yn3', mcOptions:['Tamamen temiz','Kısmen temiz (küçük sorunlar)','Kirli / temizlenmemiş'], w:1, photo:true },
+      { text:'Kaç tane paslı, boya lekeli, kaynak çapaklı makine parçası, aparat, el aleti vb. bulunmaktadır?', type:'count', countLabel:'adet', w:5, photo:true },
+      { text:'Çalışma ortamındaki fiziksel koşullar (aydınlatma, havalandırma, gürültü seviyesi) sağlıklı ve ergonomik bir çalışma düzeni sağlıyor mu?', type:'yn3', mcOptions:['Tümü uygun','Çoğu uygun / küçük eksik','Yetersiz / uygun değil'], w:3, photo:true },
+      { text:'Erişilebilir temizlik istasyonu var mı? Varsa malzemeler yeterli mi?', type:'mc', options:['Var ve tam','Var ama eksik','Yok'], w:1, photo:true }
+    ]
+  },
+  {
+    id:'S4', name:'Seiketsu (Standartlaştırma)', desc:'Standartları belgele ve görünür kıl', color:'#8e44ad',
+    questions:[
+      { text:'Standart Operasyon Formu (SOF) prosesteki operatörlerce biliniyor mu?', type:'mc', options:['Tümü biliyor','Çoğu biliyor','Az kişi biliyor','Kimse bilmiyor'], w:5, photo:false },
+      { text:'Etiketleme ve işaretlemeler firma standartlarına uygun mu?', type:'yn3', mcOptions:['Tümü uygun','Kısmen uygun (bazı eksikler)','Uygun değil / hiç yok'], w:1, photo:true },
+      { text:'Otonom bakım formları güncel olarak kullanılıyor mu?', type:'yn3', mcOptions:['Güncel ve aktif kullanımda','Var ama güncel değil','Kullanılmıyor / yok'], w:3, photo:false },
+      { text:'Saha genelinde "Bir Fikrim Var" ve "Ramakkala" sistemi aktif olarak kullanılıyor mu?', type:'yn3', mcOptions:['Aktif kullanımda','Zaman zaman kullanılıyor','Kullanılmıyor'], w:1, photo:false },
+      { text:'Alana dışarıdan bakan biri, standart dışı durumları ve anormallikleri 30 saniye içinde fark edebiliyor mu?', type:'yn3', mcOptions:['Kolayca fark eder','Kısmen fark eder','Fark edemez / standart yok'], w:3, photo:false }
+    ]
+  },
+  {
+    id:'S5', name:'Shitsuke (Eğitim-Disiplin)', desc:'Disiplini koru ve sürekli iyileştir', color:'#d35400',
+    questions:[
+      { text:"Takım üyeleri 5S'in ne olduğunu biliyor mu?", type:'mc', options:['Tümü biliyor','Çoğu biliyor','Az kişi biliyor','Kimse bilmiyor'], w:3, photo:false },
+      { text:'Çalışma alanındaki standart düzen biliniyor mu?', type:'mc', options:['Tümü biliyor','Çoğu biliyor','Az kişi biliyor','Kimse bilmiyor'], w:3, photo:false },
+      { text:'Vardiya başlangıcında 5S uygunsuzlukları tespit edilerek gerekli aksiyonlar alınıyor mu?', type:'yn3', mcOptions:['Her vardiya yapılıyor','Zaman zaman yapılıyor','Yapılmıyor'], w:5, photo:false },
+      { text:'Bir önceki denetimden bu yana belirlenen uygunsuzluklar 5S planına aktarılmış ve aksiyonlar alınmış mı?', type:'yn3', mcOptions:['Tümü aktarılmış ve çözülmüş','Kısmen aktarılmış','Aktarılmamış / aksiyon yok'], w:1, photo:false }
+    ]
+  }
+];
+
+// Fabrika yapısı
+const FABRIKA_YAPI = {
+  'İzmir': { renk:'#c0392b', deptler: { 'Üretim':{ renk:'#2980b9', altDeptler:{'Tobacco':['1. Grup','2. Grup','3. Grup','Prova'],'Flexible':['Dekrom','CFM','Bakır Kaplama/Finish','Lazer/Etching','Gravür','Krom Kaplama/Finish'],'Destek':['Polish/Finish','Otomatik Hat','Prova']} },'Operasyon':{ renk:'#16a085', altDeptler:{'Bakım':['Mekanik Bakım','Elektrik Bakım'],'Planlama':['Giriş Depo','Sevkiyat','Hammadde Depo'],'Kalite':['Kalite Kontrol','Kalite Ofisi']} },'Ofis':{ renk:'#8e44ad', altDeptler:{'Ofis':['OPEX','Üretim Ofisi','Planlama','İnsan Kaynakları','Domestic Satış','Tobacco Satış','Export Satış','Muhasebe']} } } },
+  'Esbaş': { renk:'#2980b9', deptler: { 'Üretim':{ renk:'#27ae60', altDeptler:{'Çelik Üretim':['Kaba Balans','Taşlama','Kaynak Alanı','CNC','Kalite Kontrol']} } } },
+  'İspak': { renk:'#8e44ad', deptler: { 'Üretim':{ renk:'#d35400', altDeptler:{'Genel Üretim':['CFM-Dekrom','Otomatik Hat','Prova']} } } },
+  'Karaman': { renk:'#27ae60', deptler: { 'Üretim':{ renk:'#2980b9', altDeptler:{'Flex/Tob':['Dekrom','CFM','Bakır Kaplama','Polish/Finish','Gravür','Krom Kaplama/Finish','Prova'],'Çelik Üretim':['Kaba Balans','Taşlama','Kaynak Alanı','CNC','Freze','Kalite Kontrol']} } } },
+};
+
+// ── Uygulama state'i ─────────────────────────────────────────
+let S = {
+  audits: [], areas: [], users: [], actions: [],
+  auditors: [], atamalar: [], hedefler: {},
+  answers: {}, photos: {}, notes: {}, typeOverrides: {},
+  fabrikaFilter: 'all', adminFilter: 'all', timeFilter: 'month',
+};
+
+let CURRENT_USER = null;
+
+// ── Scoring ──────────────────────────────────────────────────
+function countToScore(n){ return n===0?4:n<=2?3:n<=4?2:n<=6?1:0; }
+function ynToScore(v){ return v==='evet'?4:v==='hayır'?0:null; }
+function yn3ToScore(v){ return v==='evet'?4:v==='kısmen'?2:v==='hayır'?0:null; }
+function mcToScore(idx, optCount){ return idx===null||idx===undefined?null: Math.round(4*(1-idx/(optCount-1))); }
+
+function getAnswerScore(q, ans, pi, qi){
+  if(ans===null||ans===undefined) return null;
+  const eff = (pi!==undefined&&qi!==undefined&&S.typeOverrides&&S.typeOverrides[pi]&&S.typeOverrides[pi][qi]) ? S.typeOverrides[pi][qi] : q.type;
+  if(eff==='yn') return ynToScore(ans);
+  if(eff==='yn3') return yn3ToScore(ans);
+  if(eff==='count') return countToScore(typeof ans==='number'?ans:parseInt(ans)||0);
+  if(eff==='score') return typeof ans==='number'?ans:null;
+  if(eff==='mc'){ const optLen=(q.mcOptions||q.options||[]).length||3; return mcToScore(ans, optLen); }
+  return null;
+}
+
+function calcPillar(pi, answers){
+  const p = PILLARS[pi]; let wSum=0, wTot=0;
+  p.questions.forEach((q,qi)=>{
+    const s = getAnswerScore(q, (answers||[])[qi], pi, qi);
+    if(s!==null){ wSum+=s*q.w; wTot+=4*q.w; }
+  });
+  if(wTot===0) return { pct:0, contribution:0 };
+  const pct = (wSum/wTot)*100;
+  return { pct: Math.round(pct*10)/10, contribution: Math.round((pct/100)*PW[p.id]*10)/10 };
+}
+
+function calcTotal(allAnswers){
+  return Math.round(PILLARS.reduce((t,p,pi)=>t+calcPillar(pi,allAnswers[pi]||[]).contribution,0));
+}
+
+// ── Yardımcı fonksiyonlar ────────────────────────────────────
+function scoreColor(s){ return s>=85?'var(--green)':s>=70?'var(--blue)':s>=50?'var(--amber)':'var(--red)'; }
+function scoreLabel(s){ return s>=85?'Mükemmel':s>=70?'İyi':s>=50?'Orta':'Geliştirilmeli'; }
+function scoreBadge(s){ return s>=85?'badge-green':s>=70?'badge-blue':s>=50?'badge-amber':'badge-red'; }
+
+function showToast(m){
+  const t=document.getElementById('toast');
+  t.textContent=m; t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'), 2600);
+}
+
+function openModal(id){ document.getElementById(id).classList.add('open'); }
+function closeModal(id){ document.getElementById(id).classList.remove('open'); }
+
+function toggleSidebar(){
+  const sb=document.querySelector('.sidebar'), ov=document.getElementById('sb-overlay');
+  sb.classList.toggle('mob-open'); ov.classList.toggle('mob-open');
+}
+function closeSidebar(){
+  document.querySelector('.sidebar').classList.remove('mob-open');
+  document.getElementById('sb-overlay').classList.remove('mob-open');
+}
+
+// ── Navigasyon ────────────────────────────────────────────────
+const TITLES = {
+  'dashboard':'Dashboard','new-audit':'Yeni Denetim','history':'Denetim Geçmişi',
+  'areas':'Bölge Yönetimi','actions':'Aksiyonlar','reports':'Raporlar',
+  'leaderboard':'🏆 Takım Sıralaması','qr':'⬛ QR Kodlar','hedefler':'🎯 Hedef Skorlar',
+  'takvim':'📅 Denetim Takvimi','denetciler':'👤 Denetçi Performansı',
+  'karsilastirma':'📊 Bölge Karşılaştırma','kullanicilar':'⚙ Kullanıcı Yönetimi',
+  'formlar':'📝 Form Şablonları',
+};
+
+function navigate(p){
+  document.querySelectorAll('.page').forEach(x=>{ x.classList.remove('active'); });
+  document.querySelectorAll('.nav-btn').forEach(x=>x.classList.remove('active'));
+  const target = document.getElementById('page-'+p);
+  if(target) target.classList.add('active');
+  document.querySelectorAll('.nav-btn').forEach(x=>{ if(x.getAttribute('onclick')?.includes("'"+p+"'")) x.classList.add('active'); });
+  const titleEl = document.getElementById('topbar-title');
+  if(titleEl) titleEl.textContent = TITLES[p]||'';
+  closeSidebar();
+  if(p==='dashboard') renderDashboard();
+  if(p==='history')   renderHistory();
+  if(p==='areas')     renderAreas();
+  if(p==='actions')   renderActions();
+  if(p==='reports')   renderReports();
+  if(p==='new-audit') initForm();
+  if(p==='leaderboard') renderLeaderboard();
+  if(p==='qr')        renderQRPage();
+  if(p==='hedefler')  renderHedefler();
+  if(p==='takvim')    renderTakvim();
+  if(p==='denetciler') renderDenetciler();
+  if(p==='karsilastirma') renderKarsilastirma();
+  if(p==='kullanicilar')  renderKullanicilar();
+  if(p==='formlar')   renderFormSablonlari();
+}
+
+// ── Badge güncelleme ──────────────────────────────────────────
+function updateBadges(){
+  const open = S.actions.filter(a=>a.status==='Açık').length;
+  ['action-badge','action-badge-d'].forEach(id=>{ const el=document.getElementById(id); if(el) el.textContent=open; });
+  ['hist-badge','hist-badge-d'].forEach(id=>{ const el=document.getElementById(id); if(el) el.textContent=S.audits.length; });
+  const bb=document.getElementById('bnav-act-badge');
+  if(bb){ bb.textContent=open; bb.style.display=open>0?'block':'none'; }
+}
+
+// ── Dashboard filtre yardımcıları ─────────────────────────────
+function setFabrikaFilter(f){
+  S.fabrikaFilter=f;
+  document.querySelectorAll('[id^="fabrika-btn-"]').forEach(b=>b.className='btn btn-outline btn-sm');
+  const active=document.getElementById('fabrika-btn-'+f);
+  if(active) active.className='btn btn-primary btn-sm';
+  renderDeptFilterRow(f);
+  renderAdminDashboard();
+}
+
+function setAdminFilter(dept, bolum=null){
+  S.adminFilter=dept; S.adminBolum=bolum||null;
+  renderAdminDashboard();
+}
+
+function setTimeFilter(period){
+  S.timeFilter=period;
+  ['year','lastmonth','month'].forEach(p=>{ const b=document.getElementById('time-btn-'+p); if(b) b.className='btn btn-outline btn-sm'; });
+  const ab=document.getElementById('time-btn-'+period);
+  if(ab) ab.className='btn btn-primary btn-sm';
+  renderAdminDashboard();
+}
+
+function getTimeRange(){
+  const now=new Date(), y=now.getFullYear(), m=now.getMonth();
+  if(S.timeFilter==='month')     return { from:new Date(y,m,1), to:new Date(y,m+1,0) };
+  if(S.timeFilter==='lastmonth') return { from:new Date(y,m-1,1), to:new Date(y,m,0) };
+  return { from:new Date(y,0,1), to:new Date(y,11,31) };
+}
+
+function getFilteredAudits(){
+  const { from, to } = getTimeRange();
+  return S.audits.filter(a=>{
+    const d=new Date(a.date);
+    if(d<from||d>to) return false;
+    if(S.fabrikaFilter!=='all'){
+      const area=S.areas.find(ar=>ar.id===a.area_id||ar.name===a.area_name);
+      if(!area||area.fabrika!==S.fabrikaFilter) return false;
+    }
+    if(S.adminFilter!=='all'){
+      const area=S.areas.find(ar=>ar.id===a.area_id||ar.name===a.area_name);
+      if(!area||area.dept!==S.adminFilter) return false;
+    }
+    return true;
+  });
+}
+
+function renderDeptFilterRow(fabrika){
+  const row=document.getElementById('dept-filter-row'); if(!row) return;
+  row.innerHTML='<span style="font-size:11px;font-weight:600;color:var(--text2);margin-right:2px;">DEPARTMAN:</span>';
+  const allBtn=document.createElement('button');
+  allBtn.className='btn btn-primary btn-sm'; allBtn.id='filter-btn-all';
+  allBtn.textContent='Tümü'; allBtn.onclick=()=>setAdminFilter('all');
+  row.appendChild(allBtn);
+  const deptler = fabrika==='all' ? [...new Set(S.areas.map(a=>a.dept).filter(Boolean))] : Object.keys(FABRIKA_YAPI[fabrika]?.deptler||{});
+  deptler.forEach(d=>{
+    const b=document.createElement('button');
+    b.className='btn btn-outline btn-sm';
+    b.textContent=d; b.onclick=()=>setAdminFilter(d);
+    row.appendChild(b);
+  });
+}
+
+// ── Modal backdrop kapatma ────────────────────────────────────
+document.addEventListener('DOMContentLoaded', ()=>{
+  document.querySelectorAll('.modal-ov').forEach(o=>{
+    o.addEventListener('click', e=>{ if(e.target===o) o.classList.remove('open'); });
+  });
+});

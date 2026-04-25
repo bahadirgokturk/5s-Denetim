@@ -17,16 +17,7 @@ const PORT = process.env.PORT || 3001;
 
 // ── Güvenlik başlıkları ──────────────────────────────────────────
 app.use(helmet({
-  contentSecurityPolicy: {
-    directives: {
-      defaultSrc: ["'self'"],
-      scriptSrc: ["'self'", "'unsafe-inline'", "cdnjs.cloudflare.com", "fonts.googleapis.com"],
-      styleSrc: ["'self'", "'unsafe-inline'", "fonts.googleapis.com"],
-      fontSrc: ["'self'", "fonts.gstatic.com"],
-      imgSrc: ["'self'", "data:", "blob:"],
-      connectSrc: ["'self'"],
-    },
-  },
+  contentSecurityPolicy: false, // Geliştirme aşamasında kapalı
 }));
 
 // ── CORS ─────────────────────────────────────────────────────────

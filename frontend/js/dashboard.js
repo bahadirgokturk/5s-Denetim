@@ -357,26 +357,127 @@ function renderKarsilastirma(){
 
 function exportKarsilastirmaPDF(){ window.print(); }
 
+// Varsayılan şablon — PILLARS'tan otomatik üretilir
+function _getVarsayilanSablon(){
+  return {
+    id:'default',
+    adi:'Standart 5S Formu',
+    aciklama:'Tüm fabrikalar için genel 5S denetim formu',
+    readonly:true,
+    pillarlar: PILLARS.map(p=>({ id:p.id, name:p.name, sorular:p.questions.map(q=>q.text) }))
+  };
+}
+
 function renderFormSablonlari(){
   const el=document.getElementById('form-sablon-listesi'); if(!el) return;
-  const sablonlar=S.formSablonlari||[];
-  if(!sablonlar.length){
-    el.innerHTML=`<div class="card" style="text-align:center;padding:30px;color:var(--text3);"><div style="font-size:32px;margin-bottom:10px;">📝</div><div style="font-weight:600;margin-bottom:5px;">Henüz form şablonu yok</div><div style="font-size:12px;">Varsayılan 5S formu her zaman kullanılabilir.</div></div>`;
-    return;
-  }
-  el.innerHTML=sablonlar.map(f=>`
+  if(!S.formSablonlari) S.formSablonlari=[];
+
+  // Varsayılan + kullanıcı şablonları
+  const tumSablonlar = [_getVarsayilanSablon(), ...S.formSablonlari];
+
+  el.innerHTML = tumSablonlar.map(f=>`
     <div class="card" style="margin-bottom:12px;">
-      <div style="display:flex;align-items:center;justify-content:space-between;">
-        <div><div style="font-size:14px;font-weight:600;">${f.adi}</div><div style="font-size:11px;color:var(--text3);">${f.aciklama||''}</div></div>
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;">
+        <div>
+          <div style="font-size:14px;font-weight:600;">${f.adi} ${f.readonly?'<span style="font-size:10px;color:var(--brand);background:var(--brand-light);padding:2px 7px;border-radius:10px;margin-left:6px;">Varsayılan</span>':''}</div>
+          <div style="font-size:11px;color:var(--text3);margin-top:2px;">${f.aciklama||''}</div>
+          <div style="font-size:11px;color:var(--text2);margin-top:4px;">${(f.pillarlar||[]).length} pillar · ${(f.pillarlar||[]).reduce((s,p)=>s+(p.sorular||[]).length,0)} soru</div>
+        </div>
         <div style="display:flex;gap:8px;">
-          <button class="btn btn-outline btn-sm" onclick="formOnizle('${f.id}')">Önizle</button>
-          <button class="btn btn-sm" style="color:var(--red);" onclick="formSablonuSil('${f.id}')">Sil</button>
+          <button class="btn btn-outline btn-sm" onclick="formOnizle('${f.id}')">👁 Önizle</button>
+          ${!f.readonly?`<button class="btn btn-sm" style="color:var(--red);border:1px solid var(--red);background:var(--red-light);" onclick="formSablonuSil('${f.id}')">🗑️ Sil</button>`:''}
         </div>
       </div>
     </div>`).join('');
 }
 
-function openFormModal(form, pillarlar){ openModal('modal-form-yeni'); }
-function formSablonuKaydet(){ closeModal('modal-form-yeni'); showToast('Form şablonu kaydedildi'); }
-function formSablonuSil(id){ if(!confirm('Silinsin mi?')) return; S.formSablonlari=(S.formSablonlari||[]).filter(f=>f.id!==id); renderFormSablonlari(); }
-function formOnizle(id){ openModal('modal-form-onizleme'); }
+function openFormModal(form, pillarlar){
+  // Pillar editörünü PILLARS'tan doldur
+  const editor = document.getElementById('fm-pillar-editor');
+  if(editor){
+    editor.innerHTML = PILLARS.map((p,pi)=>`
+      <div class="card" style="margin-bottom:12px;">
+        <div style="font-size:13px;font-weight:600;margin-bottom:10px;color:${p.color||'var(--brand)'};">${p.name}</div>
+        ${p.questions.map((q,qi)=>`
+          <div style="display:flex;align-items:flex-start;gap:8px;margin-bottom:8px;padding:8px;background:var(--surface2);border-radius:var(--rs);">
+            <input type="checkbox" id="fm-q-${pi}-${qi}" checked style="margin-top:3px;flex-shrink:0;">
+            <label for="fm-q-${pi}-${qi}" style="font-size:12px;line-height:1.4;cursor:pointer;">${q.text}</label>
+          </div>
+        `).join('')}
+      </div>
+    `).join('');
+  }
+
+  // Form alanlarını temizle
+  document.getElementById('fm-adi').value = form?.adi||'';
+  document.getElementById('fm-aciklama').value = form?.aciklama||'';
+  document.getElementById('fm-edit-id').value = form?.id||'';
+
+  // Bölge dropdown doldur
+  const bolge = document.getElementById('fm-bolge');
+  if(bolge){
+    bolge.innerHTML = '<option value="">— Seçin —</option>' +
+      S.areas.map(a=>`<option value="${a.id}">${a.name} (${a.fabrika||''})</option>`).join('');
+  }
+
+  openModal('modal-form-yeni');
+}
+
+function formSablonuKaydet(){
+  const adi = document.getElementById('fm-adi')?.value.trim();
+  if(!adi){ showToast('Form adı zorunlu.'); return; }
+
+  const id = document.getElementById('fm-edit-id')?.value || 'form-'+Date.now();
+  const aciklama = document.getElementById('fm-aciklama')?.value.trim();
+
+  // Seçili soruları topla
+  const pillarlar = PILLARS.map((p,pi)=>({
+    id: p.id,
+    name: p.name,
+    sorular: p.questions
+      .filter((_,qi)=>document.getElementById(`fm-q-${pi}-${qi}`)?.checked)
+      .map(q=>q.text)
+  })).filter(p=>p.sorular.length>0);
+
+  if(!S.formSablonlari) S.formSablonlari=[];
+  const existing = S.formSablonlari.findIndex(f=>f.id===id);
+  const sablon = { id, adi, aciklama, pillarlar };
+  if(existing>=0) S.formSablonlari[existing]=sablon;
+  else S.formSablonlari.push(sablon);
+
+  closeModal('modal-form-yeni');
+  renderFormSablonlari();
+  showToast('✅ Form şablonu kaydedildi.');
+}
+
+function formSablonuSil(id){
+  if(!confirm('Bu şablonu silmek istediğinizden emin misiniz?')) return;
+  S.formSablonlari=(S.formSablonlari||[]).filter(f=>f.id!==id);
+  renderFormSablonlari();
+  showToast('Form şablonu silindi.');
+}
+
+function formOnizle(id){
+  const sablon = id==='default' ? _getVarsayilanSablon() : (S.formSablonlari||[]).find(f=>f.id===id);
+  if(!sablon) return;
+
+  const baslik = document.getElementById('onizleme-baslik');
+  if(baslik) baslik.textContent = sablon.adi;
+
+  const icerik = document.getElementById('onizleme-icerik');
+  if(icerik){
+    icerik.innerHTML = (sablon.pillarlar||[]).map(p=>`
+      <div style="margin-bottom:16px;">
+        <div style="font-weight:600;font-size:13px;margin-bottom:8px;padding:8px;background:var(--surface2);border-radius:var(--rs);">${p.name}</div>
+        ${(p.sorular||[]).map((s,i)=>`
+          <div style="display:flex;gap:8px;padding:6px 0;border-bottom:1px solid var(--border);font-size:12px;">
+            <span style="color:var(--text3);flex-shrink:0;">${i+1}.</span>
+            <span>${s}</span>
+          </div>
+        `).join('')}
+      </div>
+    `).join('') || '<div style="color:var(--text3);">Soru bulunamadı.</div>';
+  }
+
+  openModal('modal-form-onizleme');
+}

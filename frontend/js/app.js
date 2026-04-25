@@ -198,6 +198,7 @@ function updateBadges(){
 // ── Dashboard filtre yardımcıları ─────────────────────────────
 function setFabrikaFilter(f){
   S.fabrikaFilter=f;
+  S.adminFilter='all';  // fabrika değişince dept filtreyi sıfırla
   document.querySelectorAll('[id^="fabrika-btn-"]').forEach(b=>b.className='btn btn-outline btn-sm');
   const active=document.getElementById('fabrika-btn-'+f);
   if(active) active.className='btn btn-primary btn-sm';
@@ -245,15 +246,19 @@ function getFilteredAudits(){
 function renderDeptFilterRow(fabrika){
   const row=document.getElementById('dept-filter-row'); if(!row) return;
   row.innerHTML='<span style="font-size:11px;font-weight:600;color:var(--text2);margin-right:2px;">DEPARTMAN:</span>';
+  const cur=S.adminFilter||'all';
   const allBtn=document.createElement('button');
-  allBtn.className='btn btn-primary btn-sm'; allBtn.id='filter-btn-all';
-  allBtn.textContent='Tümü'; allBtn.onclick=()=>setAdminFilter('all');
+  allBtn.className='btn btn-sm '+(cur==='all'?'btn-primary':'btn-outline');
+  allBtn.id='filter-btn-all';
+  allBtn.textContent='Tümü';
+  allBtn.onclick=()=>setAdminFilter('all');
   row.appendChild(allBtn);
   const deptler = fabrika==='all' ? [...new Set(S.areas.map(a=>a.dept).filter(Boolean))] : Object.keys(FABRIKA_YAPI[fabrika]?.deptler||{});
   deptler.forEach(d=>{
     const b=document.createElement('button');
-    b.className='btn btn-outline btn-sm';
-    b.textContent=d; b.onclick=()=>setAdminFilter(d);
+    b.className='btn btn-sm '+(cur===d?'btn-primary':'btn-outline');
+    b.textContent=d;
+    b.onclick=()=>setAdminFilter(d);
     row.appendChild(b);
   });
 }

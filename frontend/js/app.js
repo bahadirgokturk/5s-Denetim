@@ -86,12 +86,15 @@ const FABRIKA_YAPI = {
   'Karaman': { renk:'#27ae60', deptler: { 'Üretim':{ renk:'#2980b9', altDeptler:{'Flex/Tob':['Dekrom','CFM','Bakır Kaplama','Polish/Finish','Gravür','Krom Kaplama/Finish','Prova'],'Çelik Üretim':['Kaba Balans','Taşlama','Kaynak Alanı','CNC','Freze','Kalite Kontrol']} } } },
 };
 
+// ── Düzenleme modu state (burada tanımlanır, audit.js'de kullanılır) ─────
+let _editAuditId = null;
+
 // ── Uygulama state'i ─────────────────────────────────────────
 let S = {
   audits: [], areas: [], users: [], actions: [],
   auditors: [], atamalar: [], hedefler: {},
   answers: {}, photos: {}, notes: {}, typeOverrides: {},
-  fabrikaFilter: 'all', adminFilter: 'all', timeFilter: 'month',
+  fabrikaFilter: 'all', adminFilter: 'all', timeFilter: 'year',
 };
 
 let CURRENT_USER = null;
@@ -161,6 +164,37 @@ const TITLES = {
   'formlar':'📝 Form Şablonları',
 };
 
+// ── Aktif sayfa yenileme (🔄 butonu) ─────────────────────────
+function refreshCurrentPage(){
+  const active = document.querySelector('.page.active');
+  if(!active) return;
+  const pageId = active.id?.replace('page-','');
+  const renderMap = {
+    'dashboard': renderDashboard, 'history': renderHistory,
+    'actions': renderActions, 'reports': renderReports,
+    'areas': renderAreas, 'leaderboard': renderLeaderboard,
+    'denetciler': renderDenetciler, 'karsilastirma': renderKarsilastirma,
+  };
+  const fn = renderMap[pageId];
+  if(fn) _refreshAndRender(fn).then(()=>showToast('🔄 Veriler güncellendi'));
+  else showToast('🔄 Güncellendi');
+}
+
+// ── Veri yenileme + yeniden render ───────────────────────────
+async function _refreshAndRender(renderFn){
+  renderFn(); // mevcut veriyle hemen göster
+  try {
+    const [audits, actions] = await Promise.all([
+      apiFetch('/audits?limit=1000'),
+      apiFetch('/actions?limit=500'),
+    ]);
+    if(audits)  S.audits  = audits;
+    if(actions) S.actions = actions;
+    updateBadges();
+    renderFn(); // taze veriyle yeniden render
+  } catch(e){ console.warn('Veri yenileme başarısız:', e); }
+}
+
 function navigate(p){
   document.querySelectorAll('.page').forEach(x=>{ x.classList.remove('active'); });
   document.querySelectorAll('.nav-btn').forEach(x=>x.classList.remove('active'));
@@ -170,12 +204,12 @@ function navigate(p){
   const titleEl = document.getElementById('topbar-title');
   if(titleEl) titleEl.textContent = TITLES[p]||'';
   closeSidebar();
-  if(p==='dashboard') renderDashboard();
-  if(p==='history')   renderHistory();
+  if(p==='dashboard') _refreshAndRender(renderDashboard);
+  if(p==='history')   _refreshAndRender(renderHistory);
   if(p==='areas')     renderAreas();
-  if(p==='actions')   renderActions();
-  if(p==='reports')   renderReports();
-  if(p==='new-audit') initForm();
+  if(p==='actions')   { _refreshAndRender(renderActions); }
+  if(p==='reports')   { _refreshAndRender(renderReports); }
+  if(p==='new-audit') { _editAuditId=null; initForm(); }
   if(p==='leaderboard') renderLeaderboard();
   if(p==='qr')        renderQRPage();
   if(p==='hedefler')  renderHedefler();

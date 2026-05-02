@@ -32,7 +32,8 @@ function renderAdminDashboard(){
   const bar = document.getElementById('m-5s-bar');
   if(bar) bar.style.width = (avgScore)+'%';
   const mSub = document.getElementById('m-total-sub');
-  if(mSub) mSub.textContent = `${filtered.length} denetim — ${TITLES[S.timeFilter]||S.timeFilter||''}`;
+  const TIME_LABELS={'year':'Bu Yıl','lastmonth':'Geçen Ay','month':'Bu Ay'};
+  if(mSub) mSub.textContent = `${filtered.length} denetim — ${TIME_LABELS[S.timeFilter]||S.timeFilter||''}`;
 
   // Tamamlanma oranı — atamalar vs gerçekleşen
   const planlanan = (S.atamalar||[]).length;
@@ -45,7 +46,11 @@ function renderAdminDashboard(){
 
   // En iyi bölge
   const areaScores = {};
-  filtered.forEach(a=>{ const k=a.area_name||a.area_id; if(!areaScores[k]) areaScores[k]=[]; areaScores[k].push(a.total_score||0); });
+  filtered.forEach(a=>{
+    const aObj=S.areas.find(ar=>ar.id===a.area_id);
+    const k=aObj?.name||(a.area_name||a.area_id||'').split('›').pop().trim();
+    if(!areaScores[k]) areaScores[k]=[]; areaScores[k].push(a.total_score||0);
+  });
   let bestArea='—', bestScore=0;
   Object.entries(areaScores).forEach(([k,v])=>{
     const avg=Math.round(v.reduce((s,x)=>s+x,0)/v.length);
@@ -154,7 +159,11 @@ function renderBolumBarChart(audits){
   const canvas=document.getElementById('bolumBarChart'); if(!canvas) return;
   if(_bolumBarChart){ _bolumBarChart.destroy(); _bolumBarChart=null; }
   const areaMap={};
-  audits.forEach(a=>{ const k=a.area_name||a.area_id; if(!areaMap[k]) areaMap[k]=[]; areaMap[k].push(a.total_score||0); });
+  audits.forEach(a=>{
+    const aObj=S.areas.find(ar=>ar.id===a.area_id);
+    const k=aObj?.name || (a.area_name||a.area_id||'').split('›').pop().trim();
+    if(!areaMap[k]) areaMap[k]=[]; areaMap[k].push(a.total_score||0);
+  });
   const labels=Object.keys(areaMap).slice(0,8);
   const data=labels.map(k=>Math.round(areaMap[k].reduce((s,x)=>s+x,0)/areaMap[k].length));
   _bolumBarChart=new Chart(canvas,{

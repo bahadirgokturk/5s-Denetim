@@ -104,7 +104,10 @@ async function seed() {
     for (let i = 0; i < count; i++) {
       const { pillars, total } = genPillars(seed);
       const auditor = seed % 2 === 0 ? AUDITOR_1 : AUDITOR_2;
-      const daysBack = 10 + (seed * 19 + i * 47) % 160; // 10-170 gün önce
+      // İlk audit'i güncel aya yakın, diğerlerini daha eski tarihlere koy
+      const daysBack = (i === 0)
+        ? ((seed - 1) * 7) % 31     // 0-30 gün önce (bazıları bu ay, bazıları geçen ay)
+        : 32 + (seed * 19 + i * 47) % 150;  // 32-181 gün önce
       const date = daysAgo(daysBack);
       const shift = SHIFTS[seed % 3];
 

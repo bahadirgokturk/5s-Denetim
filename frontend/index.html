@@ -104,6 +104,7 @@
       <span id="user-badge" class="role-badge role-admin"></span>
       <button class="btn btn-outline btn-sm" onclick="doLogout()" title="Çıkış">⬡ Çıkış</button>
     </div>
+    <button class="btn btn-outline btn-sm" id="refresh-btn" onclick="refreshCurrentPage()" title="Verileri yenile" style="font-size:16px;padding:4px 10px;">🔄</button>
     <button class="btn btn-primary btn-sm hide-takimlider" onclick="navigate('new-audit')">+ Yeni Denetim</button>
   </div>
 </div>
@@ -125,9 +126,9 @@
         </div>
         <div style="display:flex;align-items:center;gap:6px;">
           <span style="font-size:11px;font-weight:600;color:var(--text2);margin-right:2px;">DÖNEM:</span>
-          <button class="btn btn-outline btn-sm" id="time-btn-year" onclick="setTimeFilter('year')">Yıllık</button>
+          <button class="btn btn-primary btn-sm" id="time-btn-year" onclick="setTimeFilter('year')">Yıllık</button>
           <button class="btn btn-outline btn-sm" id="time-btn-lastmonth" onclick="setTimeFilter('lastmonth')">Son Ay</button>
-          <button class="btn btn-primary btn-sm" id="time-btn-month" onclick="setTimeFilter('month')">Bu Ay</button>
+          <button class="btn btn-outline btn-sm" id="time-btn-month" onclick="setTimeFilter('month')">Bu Ay</button>
         </div>
       </div>
       <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;" id="dept-filter-row">

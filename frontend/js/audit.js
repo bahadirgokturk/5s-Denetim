@@ -2,12 +2,20 @@
 // audit.js — Denetim formu, soru yapılandırma, kaydetme
 // ============================================================
 
-// ── Düzenleme modu state ─────────────────────────────────────
-let _editAuditId = null;
+// _editAuditId — app.js'de tanımlı (global state)
 
 function editAudit(id){
   _editAuditId = id;
-  navigate('new-audit');
+  // navigate() _editAuditId'yi null'a sıfırlar — onun yerine doğrudan sayfayı aktifleştir
+  document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(x=>x.classList.remove('active'));
+  const target = document.getElementById('page-new-audit');
+  if(target) target.classList.add('active');
+  document.querySelectorAll('.nav-btn').forEach(x=>{ if(x.getAttribute('onclick')?.includes("'new-audit'")) x.classList.add('active'); });
+  const titleEl = document.getElementById('topbar-title');
+  if(titleEl) titleEl.textContent = 'Denetim Düzenle';
+  closeSidebar();
+  initForm();
 }
 
 function initForm(){
@@ -135,6 +143,32 @@ function initForm(){
       </div>`;
     c.appendChild(div);
   });
+  // Düzenleme modunda kaydedilmiş cevapları UI'a yansıt
+  if(isEdit){
+    PILLARS.forEach((p,pi)=>{
+      p.questions.forEach((q,qi)=>{
+        const ans = S.answers[pi]?.[qi];
+        if(ans===null||ans===undefined) return;
+        const eff=(S.typeOverrides[pi]?.[qi])||q.type;
+        if(eff==='count'){
+          const cv=document.getElementById('cv-'+pi+'-'+qi); if(cv) cv.textContent=ans;
+          const ci=document.getElementById('ci-'+pi+'-'+qi); if(ci) ci.value=ans;
+        } else if(eff==='yn'){
+          const btn=document.getElementById('yn-'+(ans==='evet'?'e':'h')+'-'+pi+'-'+qi);
+          if(btn) btn.classList.add(ans==='evet'?'sel-yes':'sel-no');
+        } else if(eff==='yn3'){
+          const map={evet:'e',kısmen:'k',hayır:'h'};
+          const btn=document.getElementById('yn3-'+map[ans]+'-'+pi+'-'+qi);
+          if(btn) btn.classList.add(ans==='hayır'?'sel-no':'sel-yes');
+        } else if(eff==='mc'){
+          const b=document.getElementById('mc-'+pi+'-'+qi+'-'+ans); if(b) b.classList.add('sel');
+        } else if(eff==='score'){
+          [0,1,2,3,4].forEach(s=>{ const b=document.getElementById('sb-'+pi+'-'+qi+'-'+s); if(b) b.className='score-btn'+(s===ans?' s'+s:''); });
+        }
+      });
+    });
+  }
+
   updateSummary();
 }
 
@@ -412,7 +446,9 @@ function updateSummary(){
 // ── Denetim kaydet ────────────────────────────────────────────
 async function submitAudit(withReport=false){
   const areaId   = document.getElementById('audit-area')?.value;
-  const areaName = document.getElementById('audit-area')?.selectedOptions[0]?.text||'';
+  // Dropdown metni "dept › name" formatındadır; temiz ismi S.areas'dan al
+  const areaObj  = S.areas.find(a=>a.id===areaId);
+  const areaName = areaObj?.name || (document.getElementById('audit-area')?.selectedOptions[0]?.text||'').split('›').pop().trim();
   const date     = document.getElementById('audit-date')?.value;
   const shift    = document.getElementById('audit-shift')?.value;
   const formCode = document.getElementById('audit-form-code')?.value;

@@ -8,7 +8,10 @@ backend/.env
 
 # Log dosyaları
 *.log
+*.err
 npm-debug.log*
+backend/server.log
+backend/server.err
 
 # OS dosyaları
 .DS_Store

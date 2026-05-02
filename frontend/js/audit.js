@@ -78,10 +78,11 @@ function initForm(){
   if(adminView)   adminView.style.display='none';
   if(denetciView) denetciView.style.display='block';
 
-  // Alan dropdown — admin için de tüm alanları göster
-  const allAreas = _editAuditId ? S.areas : S.areas;
+  // Alan dropdown
+  const allAreas = S.areas;
   const sel = document.getElementById('audit-area');
-  sel.innerHTML = '<option value="">Takım seçiniz.</option>';
+  sel.innerHTML = '<option value="">Alan seçiniz...</option>';
+  sel.onchange = onAuditAreaChange;
   const fabMap={};
   // Admin düzenleme modunda tüm alanları çek (backend admin için hepsini döner)
   allAreas.forEach(a=>{ const f=a.fabrika||'Genel'; if(!fabMap[f]) fabMap[f]={}; const ad=a.alt_dept||a.dept||'Diğer'; if(!fabMap[f][ad]) fabMap[f][ad]=[]; fabMap[f][ad].push(a); });

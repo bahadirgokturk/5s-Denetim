@@ -68,8 +68,8 @@ router.post('/', requireRole('admin', 'denetci'), async (req, res, next) => {
   } catch (err) { next(err); }
 });
 
-// PUT /api/actions/:id — Aksiyon güncelle
-router.put('/:id', async (req, res, next) => {
+// PUT /api/actions/:id — Aksiyon güncelle (sadece admin ve denetci)
+router.put('/:id', requireRole('admin', 'denetci'), async (req, res, next) => {
   try {
     const { description, assigned_to, due_date, status, priority, area_id, area_name } = req.body;
     const { rows } = await db.query(

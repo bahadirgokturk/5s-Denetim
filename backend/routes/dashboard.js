@@ -41,15 +41,23 @@ router.get('/stats', async (req, res, next) => {
       ${whereClause}
     `, params);
 
-    // Açık aksiyon sayısı
+    // Açık aksiyon sayısı — parametre binding ile SQL injection koruması
+    const actParams = [];
+    const actWhere = ["ac.status = 'Açık'"];
+    if (req.user.role === 'departman') {
+      actParams.push(req.user.fabrika);
+      actWhere.push(`ar.fabrika = $${actParams.length}`);
+    }
+    if (req.user.role === 'denetci') {
+      actParams.push(req.user.id);
+      actWhere.push(`EXISTS (SELECT 1 FROM audits a WHERE a.id=ac.audit_id AND a.auditor_id=$${actParams.length})`);
+    }
     const actionsQ = await db.query(`
       SELECT COUNT(*)::int AS open_actions
       FROM actions ac
       LEFT JOIN areas ar ON ar.id = ac.area_id
-      WHERE ac.status = 'Açık'
-      ${req.user.role === 'departman' ? "AND ar.fabrika = '" + req.user.fabrika + "'" : ''}
-      ${req.user.role === 'denetci' ? "AND EXISTS (SELECT 1 FROM audits a WHERE a.id=ac.audit_id AND a.auditor_id='" + req.user.id + "')" : ''}
-    `);
+      WHERE ${actWhere.join(' AND ')}
+    `, actParams);
 
     // En iyi bölge
     const bestQ = await db.query(`

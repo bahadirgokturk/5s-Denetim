@@ -1,254 +1,222 @@
-# 5S Denetim Sistemi — Saueressig Türkiye
+# 5S Denetim Sistemi — Kurulum ve Kullanım Kılavuzu
 
-Fabrika 5S denetimleri için rol tabanlı tam yığın web uygulaması.  
-**Stack:** Node 18 · Express 4 · PostgreSQL 15 · JWT (httpOnly cookie) · Vanilla JS
-
----
-
-## Proje Yapısı
-
-```
-5S-Denetim/
-├── backend/
-│   ├── middleware/
-│   │   └── auth.js          # JWT doğrulama, rol kontrol
-│   ├── models/
-│   │   ├── db.js            # pg.Pool bağlantısı
-│   │   ├── schema.sql       # Tablo tanımları
-│   │   └── init-db.js       # Seed: kullanıcılar + alanlar
-│   ├── routes/
-│   │   ├── auth.js          # /api/auth/login|logout|me
-│   │   ├── areas.js         # /api/areas
-│   │   ├── audits.js        # /api/audits (+ /plans)
-│   │   ├── actions.js       # /api/actions
-│   │   ├── users.js         # /api/users
-│   │   └── dashboard.js     # /api/dashboard/stats
-│   ├── server.js
-│   ├── package.json
-│   └── .env.example
-└── frontend/
-    ├── css/
-    │   └── style.css
-    ├── js/
-    │   ├── app.js           # API yardımcısı, S state, scoring, navigate
-    │   ├── auth.js          # Login/logout, oturum kontrolü
-    │   ├── dashboard.js     # Tüm dashboard renderları + takvim/sıralama
-    │   ├── audit.js         # Denetim formu, geçmiş, PDF
-    │   ├── areas.js         # Bölge yönetimi
-    │   ├── actions.js       # Aksiyon takibi
-    │   ├── users.js         # Kullanıcı yönetimi
-    │   ├── qr.js            # QR kod oluşturma/yazdırma
-    │   ├── reports.js       # Raporlar, grafik, CSV export
-    │   └── init.js          # DOMContentLoaded — oturum kontrolü
-    └── index.html           # HTML iskeleti (script tag'leri sona yakın)
-```
+Fabrika sahalarında 5S denetimlerini dijital ortamda yönetmek için geliştirilmiş şirket içi web uygulaması.
 
 ---
 
-## Kurulum (Yerel Geliştirme)
+## Sistem Gereksinimleri
 
-### 1 — Gereksinimler
+| Bileşen | Minimum Sürüm |
+|---|---|
+| Node.js | v18+ |
+| PostgreSQL | v14+ |
+| İşletim Sistemi | Windows Server 2016+ / Ubuntu 20.04+ |
+| RAM | 1 GB (önerilen 2 GB) |
+| Disk | 500 MB |
 
-| Araç | Sürüm |
-|------|-------|
-| Node.js | ≥ 18 |
-| PostgreSQL | ≥ 15 |
-| npm | ≥ 9 |
+---
 
-### 2 — Bağımlılıkları yükle
+## Kurulum Adımları
+
+### 1. Projeyi sunucuya kopyalayın
+
+```bash
+git clone https://github.com/bahadirgokturk/5s-Denetim.git
+cd 5s-Denetim
+```
+
+veya ZIP olarak indirip sunucuya aktarın.
+
+---
+
+### 2. Bağımlılıkları yükleyin
 
 ```bash
 cd backend
 npm install
 ```
 
-### 3 — Ortam değişkenlerini ayarla
+---
 
-```bash
-cp .env.example .env
+### 3. Veritabanını oluşturun
+
+PostgreSQL'e bağlanıp yeni veritabanı oluşturun:
+
+```sql
+CREATE DATABASE s5_denetim;
 ```
 
-`.env` dosyasını düzenle:
+---
+
+### 4. `.env` dosyasını oluşturun
+
+`backend/` klasörüne `.env` adında bir dosya oluşturun ve aşağıdaki içeriği yazın:
 
 ```env
-DATABASE_URL=postgresql://KULLANICI:SIFRE@localhost:5432/5s_denetim
-JWT_SECRET=en-az-32-karakter-guclu-bir-anahtar
+# Veritabanı bağlantısı
+DATABASE_URL=postgresql://KULLANICI_ADI:SIFRE@localhost:5432/s5_denetim
+
+# Güvenlik anahtarı — MUTLAKA değiştirin (aşağıdaki komutla üretin)
+JWT_SECRET=BURAYA_URETILEN_DEGERI_YAZIN
 JWT_EXPIRES_IN=8h
+
+# Sunucu
 PORT=3001
-NODE_ENV=development
-FRONTEND_URL=http://localhost:5500
+NODE_ENV=production
+
+# Erişim adresi (sunucunun IP veya hostname'i)
+FRONTEND_URL=http://192.168.1.100:3001
+
+# HTTPS kullanılıyorsa true yapın, HTTP ise false bırakın
 COOKIE_SECURE=false
 ```
 
-### 4 — Veritabanını oluştur
+**JWT_SECRET üretmek için** (PowerShell veya terminal'de çalıştırın):
+```bash
+node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
+```
+Çıkan değeri kopyalayıp `JWT_SECRET=` satırına yapıştırın.
+
+---
+
+### 5. Veritabanı tablolarını ve başlangıç verilerini oluşturun
 
 ```bash
-# PostgreSQL'e bağlan ve veritabanı oluştur
-psql -U postgres -c "CREATE DATABASE 5s_denetim;"
-
-# Tabloları oluştur
-psql -U postgres -d 5s_denetim -f backend/models/schema.sql
-
-# Seed verisini yükle (kullanıcılar + 48 alan)
 cd backend
 node models/init-db.js
 ```
 
-### 5 — Backend'i başlat
+Bu komut tüm tabloları, kullanıcıları ve fabrika alanlarını otomatik oluşturur.
+
+---
+
+### 6. Sunucuyu başlatın
+
+**Test için (tek seferlik):**
+```bash
+node server.js
+```
+
+**Kalıcı çalıştırmak için pm2 kullanın:**
+```bash
+npm install -g pm2
+pm2 start server.js --name "5s-denetim"
+pm2 save
+pm2 startup
+```
+
+pm2 sayesinde sunucu yeniden başlatılsa bile uygulama otomatik ayağa kalkar.
+
+---
+
+### 7. Erişim ve test
+
+Kurulum tamamlandıktan sonra tarayıcıdan açın:
+
+```
+http://SUNUCU_IP_ADRESI:3001
+```
+
+Şirket ağındaki tüm bilgisayar ve telefonlar bu adrese erişebilir.
+
+---
+
+## İlk Giriş ve Şifre Değişikliği
+
+Kurulum sonrası sisteme **admin** kullanıcısıyla girin.
+
+> ⚠️ **Güvenlik:** İlk girişten sonra tüm kullanıcıların şifresini değiştirin.  
+> Admin Paneli → Kullanıcılar → Kullanıcı seç → Düzenle
+
+Varsayılan kullanıcı adları:
+
+| Kullanıcı Adı | Rol | Erişim |
+|---|---|---|
+| `admin` | Yönetici | Tüm sistem |
+| `bahadir` | Denetçi | Denetim yapma |
+| `furkan` | Denetçi | Denetim yapma |
+| `izmir` | Departman | İzmir Üretim |
+| `operasyon` | Departman | İzmir Operasyon |
+| `ofis` | Departman | İzmir Ofis |
+| `esbas` | Departman | Esbaş |
+| `ispak` | Departman | İspak |
+| `karaman` | Departman | Karaman |
+
+---
+
+## Güvenlik Duvarı / Port Ayarı
+
+Uygulama **3001** numaralı portta çalışır.  
+Şirket ağından erişim için bu portun açık olması gerekir.
+
+80 veya 443 portuna yönlendirmek istiyorsanız Nginx reverse proxy kurulabilir.
+
+---
+
+## Yedekleme
+
+Veritabanını yedeklemek için:
 
 ```bash
-# Geliştirme (nodemon ile hot-reload)
-npm run dev
-
-# Prodüksiyon
-npm start
+pg_dump s5_denetim > yedek_2026_01_01.sql
 ```
 
-Backend `http://localhost:3001` adresinde çalışır.  
-Frontend dosyaları Express tarafından statik olarak servis edilir → `http://localhost:3001`
+Otomatik günlük yedek için Windows Görev Zamanlayıcısı veya Linux cron kullanılabilir.
 
 ---
 
-## Demo Hesaplar
+## Güncelleme
 
-Seed verisi aşağıdaki hesapları oluşturur:
-
-| Kullanıcı Adı | Şifre | Rol |
-|---------------|-------|-----|
-| `admin` | `admin123` | 👑 Yönetici |
-| `bahadir` | `bah123` | 🔍 Denetçi |
-| `furkan` | `fur123` | 🔍 Denetçi |
-| `izmir` | `izm123` | 🏭 Departman (İzmir) |
-| `esbas` | `esb123` | 🏭 Departman (Esbaş) |
-| `ispak` | `isp123` | 🏭 Departman (İspak) |
-| `karaman` | `kar123` | 🏭 Departman (Karaman) |
-
----
-
-## API Rotaları
-
-### Auth
-```
-POST   /api/auth/login       { username, password }
-POST   /api/auth/logout
-GET    /api/auth/me
-```
-
-### Alanlar
-```
-GET    /api/areas             [rol bazlı filtre]
-GET    /api/areas/:id
-POST   /api/areas             [admin]
-PUT    /api/areas/:id         [admin]
-DELETE /api/areas/:id         [admin]
-```
-
-### Denetimler
-```
-GET    /api/audits            [?limit=500]
-GET    /api/audits/:id
-POST   /api/audits
-PUT    /api/audits/:id
-DELETE /api/audits/:id        [admin]
-
-GET    /api/audits/plans/list
-POST   /api/audits/plans      [admin]
-PUT    /api/audits/plans/:id
-DELETE /api/audits/plans/:id  [admin]
-```
-
-### Aksiyonlar
-```
-GET    /api/actions
-GET    /api/actions/:id
-POST   /api/actions           [admin, denetci]
-PUT    /api/actions/:id
-DELETE /api/actions/:id       [admin]
-```
-
-### Kullanıcılar
-```
-GET    /api/users             [admin]
-GET    /api/users/auditors
-GET    /api/users/:id         [admin]
-POST   /api/users             [admin]
-PUT    /api/users/:id         [admin]
-DELETE /api/users/:id         [admin]
-```
-
-### Dashboard
-```
-GET    /api/dashboard/stats   [rol bazlı]
-```
-
----
-
-## Railway Deployment
-
-### 1 — Railway'e bağlan
+Yeni sürüm geldiğinde:
 
 ```bash
-npm install -g @railway/cli
-railway login
-railway init
+git pull origin main
+cd backend
+npm install
+pm2 restart 5s-denetim
 ```
 
-### 2 — PostgreSQL ekle
+---
 
-Railway Dashboard → **New Service → Database → PostgreSQL**  
-`DATABASE_URL` otomatik olarak ortam değişkenine eklenir.
+## Sorun Giderme
 
-### 3 — Ortam değişkenlerini ayarla
-
-Railway Dashboard → **Variables**:
-
-```
-DATABASE_URL   = (Railway otomatik ekler)
-JWT_SECRET     = guclu-ve-uzun-gizli-anahtar-buraya
-JWT_EXPIRES_IN = 8h
-NODE_ENV       = production
-FRONTEND_URL   = https://SENIN-APP.up.railway.app
-COOKIE_SECURE  = true
-```
-
-### 4 — Deploy
-
+**Uygulama açılmıyor:**
 ```bash
-railway up
+pm2 logs 5s-denetim
+```
+Hata mesajını inceleyin.
+
+**Veritabanı bağlantı hatası:**
+- `.env` dosyasındaki `DATABASE_URL` bilgilerini kontrol edin
+- PostgreSQL servisinin çalıştığını doğrulayın
+- Kullanıcının `s5_denetim` veritabanına erişim yetkisi olduğunu kontrol edin
+
+**Port kullanımda hatası:**
+- `.env` dosyasında `PORT=3002` yaparak farklı port kullanabilirsiniz
+
+---
+
+## Proje Yapısı (Geliştirici Referansı)
+
+```
+5S-Denetim/
+├── backend/
+│   ├── middleware/auth.js       # JWT doğrulama, rol kontrolü
+│   ├── models/
+│   │   ├── db.js                # Veritabanı bağlantısı
+│   │   ├── schema.sql           # Tablo tanımları
+│   │   └── init-db.js           # İlk kurulum verisi
+│   ├── routes/                  # API endpoint'leri
+│   └── server.js                # Ana sunucu dosyası
+└── frontend/
+    ├── css/style.css
+    ├── js/                      # Uygulama modülleri
+    └── index.html               # Tek sayfa uygulama
 ```
 
-### 5 — Veritabanı şemasını yükle
-
-Railway Dashboard → PostgreSQL → **Query** veya:
-
-```bash
-railway run psql $DATABASE_URL -f backend/models/schema.sql
-railway run node backend/models/init-db.js
-```
-
 ---
 
-## Rol Sistemi
+## İletişim
 
-| Rol | Yetkiler |
-|-----|---------|
-| `admin` | Her şeyi görür/düzenler, kullanıcı/alan/plan yönetir |
-| `denetci` | Denetim yapar, kendi atamalarını görür |
-| `takimlider` | Kendi fabrikasının denetimlerini/aksiyonlarını görür |
-| `departman` | Takım lider ile aynı erişim; yeni denetim yapamaz |
-
----
-
-## Geliştirici Notları
-
-- **JWT** httpOnly cookie olarak saklanır (`token`). `credentials: true` ile CORS yapılandırılmıştır.
-- **Fotoğraflar** base64 olarak PostgreSQL JSONB sütununda tutulur (`photos_json`).
-- **Script yükleme sırası** `index.html`'de önemlidir: `app.js → auth.js → dashboard.js → audit.js → areas.js → actions.js → users.js → qr.js → reports.js → init.js`
-- **Yerel geliştirme:** Frontend'i ayrı bir sunucuda (VS Code Live Server, port 5500) çalıştırıyorsanız `FRONTEND_URL=http://localhost:5500` ayarlayın ve backend proxy değil doğrudan API kullanın.
-- **`S` state objesi** tüm verinin in-memory deposudur; her login'de `loadAllData()` ile API'den yeniden doldurulur.
-
----
-
-## Lisans
-
-Saueressig Türkiye · OPEX Departmanı — Dahili kullanım
+**Geliştirici:** Bahadır Göktürk — OPEX Departmanı  
+**GitHub:** [github.com/bahadirgokturk/5s-Denetim](https://github.com/bahadirgokturk/5s-Denetim)

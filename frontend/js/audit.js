@@ -4,6 +4,46 @@
 
 // _editAuditId — app.js'de tanımlı (global state)
 
+// ── Form yardımcıları ─────────────────────────────────────────
+function _setAuditorDisplay(name){
+  const av=document.getElementById('auditor-avatar');
+  const disp=document.getElementById('auditor-display');
+  if(av){ const ini=name.split(' ').map(n=>n[0]||'').join('').substring(0,2).toUpperCase(); av.textContent=ini; }
+  if(disp) disp.textContent=name;
+}
+
+function _showAreaQRCard(area){
+  const card=document.getElementById('area-qr-card');
+  const sel=document.getElementById('audit-area');
+  const nameEl=document.getElementById('area-qr-name');
+  const subEl=document.getElementById('area-qr-sub');
+  if(card){ card.style.display='flex'; }
+  if(sel)  sel.style.display='none';
+  if(nameEl) nameEl.textContent=area.name||'—';
+  if(subEl)  subEl.textContent=[area.fabrika, area.dept, area.alt_dept].filter(Boolean).join(' · ');
+}
+
+function _hideAreaQRCard(){
+  const card=document.getElementById('area-qr-card');
+  const sel=document.getElementById('audit-area');
+  if(card) card.style.display='none';
+  if(sel)  sel.style.display='block';
+}
+
+function clearAreaQR(){
+  _hideAreaQRCard();
+  const sel=document.getElementById('audit-area');
+  if(sel) sel.value='';
+}
+
+function onAuditAreaChange(){
+  const sel=document.getElementById('audit-area');
+  const areaId=sel?.value;
+  const area=S.areas.find(a=>a.id===areaId);
+  const locEl=document.getElementById('audit-location');
+  if(locEl) locEl.value=area?.fabrika||'';
+}
+
 function editAudit(id){
   _editAuditId = id;
   // navigate() _editAuditId'yi null'a sıfırlar — onun yerine doğrudan sayfayı aktifleştir
@@ -77,9 +117,11 @@ function initForm(){
 
     // Denetçi
     const auditorInput=document.getElementById('audit-auditor');
-    const auditorDisplay=document.getElementById('auditor-display');
     if(auditorInput) auditorInput.value=existingAudit.auditor_name||'';
-    if(auditorDisplay){ auditorDisplay.textContent=existingAudit.auditor_name||''; auditorDisplay.style.fontWeight='500'; auditorDisplay.style.color='var(--accent)'; }
+    _setAuditorDisplay(existingAudit.auditor_name||'');
+    // Form kodu etiketi
+    const lblEl=document.getElementById('audit-form-code-lbl');
+    if(lblEl) lblEl.textContent=existingAudit.form_code||'';
 
     // Cevapları yükle (varsa)
     const rawAnswers = existingAudit.answers_json;
@@ -98,23 +140,28 @@ function initForm(){
     // Yeni denetim modu
     if(editBanner) editBanner.style.display='none';
     document.getElementById('audit-date').value = new Date().toISOString().split('T')[0];
-    document.getElementById('audit-form-code').value = '5S-'+new Date().getFullYear()+'-'+String(S.audits.length+1).padStart(3,'0');
+    const formCode = '5S-'+new Date().getFullYear()+'-'+String(S.audits.length+1).padStart(3,'0');
+    document.getElementById('audit-form-code').value = formCode;
+    const lblEl = document.getElementById('audit-form-code-lbl');
+    if(lblEl) lblEl.textContent = formCode;
 
-    // Atama varsa otomatik doldur
+    // Denetçi avatar + isim
+    _setAuditorDisplay(CURRENT_USER?.name||'');
+    const auditorInput=document.getElementById('audit-auditor');
+    if(auditorInput&&CURRENT_USER) auditorInput.value=CURRENT_USER.name;
+
+    // QR ile açıldıysa alan kartı göster, dropdown gizle
     if(window._aktifAtama){
       const {alanId, alanAd} = window._aktifAtama;
+      const area = S.areas.find(a=>a.id===alanId);
+      _showAreaQRCard(area || {id:alanId, name:alanAd});
       if(sel) sel.value = alanId;
-      const auditorInput=document.getElementById('audit-auditor');
-      const auditorDisplay=document.getElementById('auditor-display');
-      if(auditorInput) auditorInput.value = CURRENT_USER?.name||'';
-      if(auditorDisplay) auditorDisplay.textContent = CURRENT_USER?.name||'';
-      showToast('📋 '+alanAd+' denetimi yüklendi');
+      const locEl=document.getElementById('audit-location');
+      if(locEl&&area) locEl.value=area.fabrika||'';
+      showToast('📍 '+alanAd+' — denetim başlatılıyor');
       window._aktifAtama=null;
     } else {
-      const auditorInput=document.getElementById('audit-auditor');
-      const auditorDisplay=document.getElementById('auditor-display');
-      if(auditorInput&&CURRENT_USER){ auditorInput.value=CURRENT_USER.name; }
-      if(auditorDisplay&&CURRENT_USER){ auditorDisplay.textContent=CURRENT_USER.name; auditorDisplay.style.fontWeight='500'; auditorDisplay.style.color='var(--accent)'; }
+      _hideAreaQRCard();
     }
 
     S.answers={}; S.photos={}; S.notes={}; S.typeOverrides={};

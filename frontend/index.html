@@ -275,42 +275,90 @@
   </div>
 
   <!-- Denetçi görünümü -->
-  <div id="denetci-audit-view" style="display:none;max-width:880px;">
+  <div id="denetci-audit-view" style="display:none;max-width:860px;">
     <!-- Düzenleme modu banner -->
     <div id="audit-edit-banner" style="display:none;align-items:center;justify-content:space-between;margin-bottom:12px;padding:10px 16px;background:#fff3cd;border:1px solid #ffc107;border-radius:var(--r);font-size:13px;color:#856404;"></div>
+
     <div class="card" style="margin-bottom:14px;">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
-        <div style="font-size:16px;font-weight:600;color:var(--accent);">5S Denetim Formu</div>
-        <button class="btn btn-outline btn-sm" onclick="navigate('history')">📋 Kayıtlı Formlar</button>
+      <!-- Başlık -->
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">
+        <div>
+          <div style="font-size:16px;font-weight:700;color:var(--accent);">5S Denetim Formu</div>
+          <div style="font-size:11px;color:var(--text3);margin-top:2px;" id="audit-form-code-lbl"></div>
+        </div>
+        <button class="btn btn-outline btn-sm" onclick="navigate('history')">📋 Geçmişim</button>
       </div>
-      <div class="fg" style="margin-bottom:16px;"><label>Form Kodu</label><input type="text" id="audit-form-code" placeholder="Form kodunu yazınız.."></div>
-      <div class="form-grid" style="margin-bottom:16px;">
-        <div class="fg"><label>Lokasyon</label><select id="audit-location"><option value="">Lokasyon seçiniz.</option><option value="Fabrika-1">Fabrika 1</option><option value="Fabrika-2">Fabrika 2</option><option value="Depo-A">Depo A</option><option value="Depo-B">Depo B</option><option value="Ofis">Ofis Katı</option></select></div>
-        <div class="fg"><label>Departman</label><select id="audit-dept"><option value="">Departman seçiniz.</option><option value="Üretim">Üretim</option><option value="Lojistik">Lojistik</option><option value="Kalite">Kalite</option><option value="Bakım">Bakım &amp; Onarım</option><option value="OPEX">OPEX</option></select></div>
+
+      <!-- Alan seçimi -->
+      <div style="margin-bottom:18px;">
+        <div style="font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.6px;margin-bottom:8px;">📍 Denetlenen Alan</div>
+
+        <!-- QR ile açıldığında gösterilir -->
+        <div id="area-qr-card" style="display:none;padding:14px 16px;background:linear-gradient(135deg,#f0fdf4,#dcfce7);border:2px solid #22c55e;border-radius:var(--r);display:flex;align-items:center;gap:14px;">
+          <div style="width:44px;height:44px;background:#22c55e;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;">📍</div>
+          <div style="flex:1;">
+            <div style="font-size:15px;font-weight:700;color:#15803d;" id="area-qr-name"></div>
+            <div style="font-size:12px;color:#16a34a;margin-top:2px;" id="area-qr-sub"></div>
+          </div>
+          <button class="btn btn-outline btn-sm" style="font-size:11px;flex-shrink:0;" onclick="clearAreaQR()">✎ Değiştir</button>
+        </div>
+
+        <!-- Manuel seçim (QR yoksa gösterilir) -->
+        <select id="audit-area" style="display:block;" onchange="onAuditAreaChange()">
+          <option value="">Alan seçiniz...</option>
+        </select>
       </div>
-      <div class="form-grid" style="margin-bottom:16px;">
-        <div class="fg"><label>Denetlenen Takım</label><select id="audit-area"><option value="">Takım seçiniz.</option></select></div>
-        <div class="fg"><label>Takım Lideri</label><input type="text" id="audit-team-leader" placeholder="Takım liderini yazınız."></div>
+
+      <!-- Denetçi + Tarih + Vardiya -->
+      <div style="display:grid;grid-template-columns:1fr 150px 150px;gap:12px;margin-bottom:14px;">
+        <div class="fg">
+          <label>Denetimi Yapan</label>
+          <div style="display:flex;align-items:center;gap:10px;padding:9px 12px;background:var(--surface);border:1px solid var(--border);border-radius:var(--rs);min-height:38px;">
+            <div id="auditor-avatar" style="width:26px;height:26px;border-radius:50%;background:var(--accent);color:#fff;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0;"></div>
+            <span id="auditor-display" style="font-size:13px;font-weight:500;color:var(--text1);"></span>
+          </div>
+          <input type="hidden" id="audit-auditor">
+        </div>
+        <div class="fg">
+          <label>Tarih</label>
+          <input type="date" id="audit-date">
+        </div>
+        <div class="fg">
+          <label>Vardiya</label>
+          <select id="audit-shift">
+            <option value="Sabah">☀️ Sabah</option>
+            <option value="Öğle">🌤 Öğle</option>
+            <option value="Gece">🌙 Gece</option>
+          </select>
+        </div>
       </div>
-      <div class="form-grid" style="margin-bottom:16px;">
-        <div class="fg"><label>Denetimi Yapan</label><div id="auditor-display" style="font-size:13px;color:var(--text2);padding:6px 0;">Henüz bir denetleyici yok.</div><input type="hidden" id="audit-auditor" value=""><button class="btn btn-outline btn-sm" style="margin-top:6px;" onclick="openAuditorModal()">+ Denetçi Seç</button></div>
-        <div class="fg"><label>Denetim Tarihi</label><input type="date" id="audit-date"></div>
+
+      <!-- Takım lideri -->
+      <div class="fg">
+        <label>Takım Lideri <span style="font-size:10px;color:var(--text3);font-weight:400;">(opsiyonel)</span></label>
+        <input type="text" id="audit-team-leader" placeholder="Adı soyadı yazınız...">
       </div>
-      <div class="form-grid" style="margin-bottom:8px;">
-        <div class="fg"><label>Vardiya</label><select id="audit-shift"><option value="Sabah">Sabah (06-14)</option><option value="Öğle">Öğle (14-22)</option><option value="Gece">Gece (22-06)</option></select></div>
-        <div class="fg"><label>Genel Notlar</label><textarea id="audit-notes" style="min-height:50px;"></textarea></div>
-      </div>
+
+      <!-- Gizli alanlar -->
+      <input type="hidden" id="audit-form-code">
+      <input type="hidden" id="audit-location">
     </div>
+
     <div id="pillars-container"></div>
+
     <div class="card" style="margin-top:14px;" id="score-card">
       <div style="font-size:14px;font-weight:600;margin-bottom:14px;">Denetim Özeti</div>
       <div class="summary-grid" id="score-summary"></div>
       <div class="divider"></div>
       <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
-        <div><div style="font-size:12px;color:var(--text2);">Ağırlıklı Toplam Puan</div><div style="font-size:30px;font-weight:700;font-family:var(--mono);" id="total-score-display">0 / 100</div></div>
+        <div>
+          <div style="font-size:12px;color:var(--text2);">Ağırlıklı Toplam Puan</div>
+          <div style="font-size:30px;font-weight:700;font-family:var(--mono);" id="total-score-display">0 / 100</div>
+        </div>
         <div id="score-badge-display"></div>
       </div>
     </div>
+
     <div style="display:flex;gap:9px;margin-top:14px;flex-wrap:wrap;">
       <button class="btn btn-primary" onclick="submitAudit()">✓ Denetimi Kaydet</button>
       <button class="btn btn-sm" style="border:1px solid var(--brand);color:var(--brand);background:var(--brand-light);" onclick="submitAndReport()">✦ Kaydet + AI Rapor</button>

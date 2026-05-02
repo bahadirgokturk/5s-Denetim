@@ -489,6 +489,23 @@ function updateSummary(){
     const pp=document.getElementById('pp-'+pi);
     if(pp){ pp.textContent=r.pct+'%'; pp.style.color=scoreColor(r.pct); }
   });
+
+  // İlerleme çubuğunu güncelle
+  let answered=0, totalQ=0;
+  PILLARS.forEach((p,pi)=>{
+    p.questions.forEach((_,qi)=>{
+      totalQ++;
+      const ans=S.answers[pi]?.[qi];
+      if(ans!==null&&ans!==undefined) answered++;
+    });
+  });
+  const pct=totalQ?Math.round(answered/totalQ*100):0;
+  const progBar=document.getElementById('audit-progress-bar');
+  const progTxt=document.getElementById('audit-progress-txt');
+  if(progBar) progBar.style.width=pct+'%';
+  if(progTxt) progTxt.textContent=`${answered} / ${totalQ} soru cevaplandı`;
+  const progWrap=document.getElementById('audit-progress-wrap');
+  if(progWrap) progWrap.style.display='block';
 }
 
 // ── Denetim kaydet ────────────────────────────────────────────
@@ -682,13 +699,43 @@ function showDetail(id){
     </div>`;
   }).join('');
 
+  // Fotoğrafları topla
+  const photosRaw = a.photos_json || {};
+  const allPhotos = [];
+  PILLARS.forEach((p, pi) => {
+    p.questions.forEach((q, qi) => {
+      const imgs = photosRaw[pi]?.[qi] || photosRaw[String(pi)]?.[String(qi)] || [];
+      imgs.forEach(src => allPhotos.push({ src, label: `${p.id} · S.${qi+1}` }));
+    });
+  });
+  const photoHtml = allPhotos.length ? `
+    <div style="margin-top:16px;">
+      <div style="font-size:12px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;">📷 Fotoğraflar (${allPhotos.length})</div>
+      <div style="display:flex;flex-wrap:wrap;gap:8px;">
+        ${allPhotos.map(p=>`
+          <div style="position:relative;">
+            <img src="${p.src}" style="width:90px;height:90px;object-fit:cover;border-radius:6px;border:1px solid var(--border);cursor:pointer;" onclick="openPhotoFull('${p.src}')" title="${p.label}">
+            <div style="position:absolute;bottom:0;left:0;right:0;background:rgba(0,0,0,.5);color:#fff;font-size:9px;text-align:center;border-radius:0 0 6px 6px;padding:2px;">${p.label}</div>
+          </div>`).join('')}
+      </div>
+    </div>` : '';
+
   document.getElementById('det-content').innerHTML=`
     <div style="text-align:center;margin-bottom:14px;">
       <div style="font-size:52px;font-weight:700;font-family:var(--mono);color:${scoreColor(a.total_score||0)};">${a.total_score||0}</div>
       <div class="badge ${scoreBadge(a.total_score||0)}" style="font-size:13px;margin-top:4px;">${scoreLabel(a.total_score||0)}</div>
     </div>
-    ${pillarHtml}`;
+    ${pillarHtml}
+    ${photoHtml}`;
   openModal('modal-detail');
+}
+
+function openPhotoFull(src){
+  const ov = document.createElement('div');
+  ov.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.85);display:flex;align-items:center;justify-content:center;z-index:9999;cursor:zoom-out;';
+  ov.innerHTML=`<img src="${src}" style="max-width:95vw;max-height:95vh;border-radius:8px;box-shadow:0 8px 40px rgba(0,0,0,.6);">`;
+  ov.onclick=()=>ov.remove();
+  document.body.appendChild(ov);
 }
 
 function buildOfflineReport(audit){

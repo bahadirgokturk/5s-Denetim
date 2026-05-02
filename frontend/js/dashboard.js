@@ -72,6 +72,26 @@ function renderAdminDashboard(){
     }
   }
 
+  // 30 gündür denetlenmemiş alanlar uyarısı
+  const thirtyDaysAgo = new Date(); thirtyDaysAgo.setDate(thirtyDaysAgo.getDate()-30);
+  const staleAreas = S.areas.filter(area=>{
+    if(S.fabrikaFilter!=='all' && area.fabrika!==S.fabrikaFilter) return false;
+    if(S.adminFilter!=='all' && area.dept!==S.adminFilter) return false;
+    const lastAudit = S.audits
+      .filter(a=>a.area_id===area.id)
+      .sort((a,b)=>b.date?.localeCompare(a.date))[0];
+    return !lastAudit || new Date(lastAudit.date) < thirtyDaysAgo;
+  });
+  const staleBanner=document.getElementById('stale-banner');
+  if(staleBanner){
+    if(staleAreas.length>0){
+      staleBanner.style.display='block';
+      staleBanner.innerHTML=`⏰ <b>${staleAreas.length} alan</b> son 30 günde denetlenmedi: ${staleAreas.slice(0,5).map(a=>a.name).join(', ')}${staleAreas.length>5?' ve diğerleri...':''}`;
+    } else {
+      staleBanner.style.display='none';
+    }
+  }
+
   // Denetçi plan/tamamlanan widget
   renderDenetciPlanTamamWidget();
   renderLeaderboardPreview();

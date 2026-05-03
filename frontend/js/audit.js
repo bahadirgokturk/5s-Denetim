@@ -924,6 +924,40 @@ function buildOfflineReport(audit){
       <div style="font-size:12px;color:var(--text1);">${conclusionMap[conclusionKey]}</div>
     </div>
 
+    <!-- Fotoğraflar -->
+    ${(()=>{
+      const photosRaw=audit.photos_json||{};
+      const sections=[];
+      PILLARS.forEach((p,pi)=>{
+        const pillarPhotos=[];
+        p.questions.forEach((q,qi)=>{
+          const imgs=photosRaw[pi]?.[qi]??photosRaw[String(pi)]?.[String(qi)]??[];
+          imgs.forEach(src=>pillarPhotos.push({src,qText:q.text,qi}));
+        });
+        if(pillarPhotos.length) sections.push({p,pillarPhotos});
+      });
+      if(!sections.length) return '';
+      const totalCount=sections.reduce((t,s)=>t+s.pillarPhotos.length,0);
+      return `<div style="margin-top:20px;">
+        <div style="font-size:12px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.5px;margin-bottom:12px;">📷 Denetim Fotoğrafları (${totalCount})</div>
+        ${sections.map(({p,pillarPhotos})=>`
+          <div style="margin-bottom:16px;">
+            <div style="display:flex;align-items:center;gap:6px;margin-bottom:8px;">
+              <div style="width:20px;height:20px;border-radius:4px;background:${p.color};display:flex;align-items:center;justify-content:center;color:#fff;font-size:9px;font-weight:700;">${p.id}</div>
+              <span style="font-size:12px;font-weight:600;color:var(--text1);">${p.name}</span>
+              <span style="font-size:11px;color:var(--text3);">(${pillarPhotos.length} fotoğraf)</span>
+            </div>
+            <div style="display:flex;flex-wrap:wrap;gap:8px;">
+              ${pillarPhotos.map(ph=>`
+                <div style="position:relative;flex-shrink:0;">
+                  <img src="${ph.src}" style="width:100px;height:100px;object-fit:cover;border-radius:8px;border:2px solid ${p.color};cursor:zoom-in;display:block;" onclick="openPhotoFull('${ph.src}')">
+                  <div style="position:absolute;bottom:0;left:0;right:0;background:rgba(0,0,0,.6);color:#fff;font-size:9px;text-align:center;border-radius:0 0 6px 6px;padding:2px 4px;line-height:1.3;">S${ph.qi+1}</div>
+                </div>`).join('')}
+            </div>
+          </div>`).join('')}
+      </div>`;
+    })()}
+
     <div style="margin-top:16px;font-size:10px;color:var(--text3);text-align:center;border-top:1px solid var(--border);padding-top:10px;">
       Rapor Tarihi: ${new Date().toLocaleDateString('tr-TR',{day:'numeric',month:'long',year:'numeric'})} · Denetim No: ${audit.form_code||'—'} · Denetçi: ${audit.auditor_name||'—'}
     </div>
@@ -934,5 +968,151 @@ function buildOfflineReport(audit){
   document.getElementById('pdf-btn').style.display='';
 }
 
-function denetlenenRaporu(auditId){ buildOfflineReport(S.audits.find(a=>a.id===auditId)||{}); }
+// ── Denetlenen Raporu — olumsuz bulgular + fotoğraflar ───────────────────────
+function _answerLabel(q, ans){
+  if(ans===null||ans===undefined) return '—';
+  if(q.type==='count') return `${ans} adet`;
+  if(q.type==='yn') return ans==='evet'?'Evet':'Hayır';
+  if(q.type==='yn3') return ans==='evet'?'Evet':ans==='kısmen'?'Kısmen':'Hayır';
+  if(q.type==='mc'||q.type==='score'){
+    const opts=q.options||q.mcOptions||[];
+    return opts[ans]!==undefined?opts[ans]:String(ans);
+  }
+  return String(ans);
+}
+
+function denetlenenRaporu(auditId){
+  const audit=S.audits.find(a=>a.id===auditId)||{};
+  openModal('modal-ai');
+  document.getElementById('ai-title').textContent='Bulgular Raporu — '+(audit.area_name||'');
+  const dateStr=(audit.date||'').slice(0,10);
+  document.getElementById('ai-sub').textContent=`${dateStr} · Denetçi: ${audit.auditor_name||''} · ${audit.shift||''}`;
+  document.getElementById('ai-loading').style.display='none';
+
+  const score=audit.total_score||0;
+  const answersRaw=audit.answers_json||{};
+  const photosRaw=audit.photos_json||{};
+  const notesRaw=audit.notes_json||{};
+
+  const getAnss=pi=>answersRaw[pi]??answersRaw[String(pi)]??[];
+  const getImgs=(pi,qi)=>photosRaw[pi]?.[qi]??photosRaw[String(pi)]?.[String(qi)]??[];
+  const getNote=(pi,qi)=>{
+    const n=notesRaw[pi]??notesRaw[String(pi)]??[];
+    return (Array.isArray(n)?n[qi]:n[qi])||'';
+  };
+
+  // Her pillar için olumsuz bulgular (puan < 4)
+  const findingGroups=[];
+  PILLARS.forEach((p,pi)=>{
+    const anss=getAnss(pi);
+    const items=[];
+    p.questions.forEach((q,qi)=>{
+      const ans=anss[qi];
+      const sc=getAnswerScore(q,ans,pi,qi);
+      if(sc===null) return; // cevaplanmamış
+      if(sc>=4) return;     // mükemmel → gösterme
+      const imgs=getImgs(pi,qi);
+      const note=getNote(pi,qi);
+      const severity=sc===0?'crit':sc<=2?'warn':'info';
+      items.push({q,qi,ans,sc,imgs,note,severity});
+    });
+    if(items.length) findingGroups.push({p,pi,items});
+  });
+
+  // Renk yardımcısı
+  const sevColor={crit:'#ef4444',warn:'#f97316',info:'#eab308'};
+  const sevBg={crit:'#fef2f2',warn:'#fff7ed',info:'#fefce8'};
+  const sevBorder={crit:'#fecaca',warn:'#fed7aa',info:'#fef08a'};
+  const sevLabel={crit:'Olumsuz',warn:'Geliştirilmeli',info:'Dikkat'};
+
+  const findingsHtml=findingGroups.length?findingGroups.map(({p,items})=>`
+    <div style="margin-bottom:20px;">
+      <!-- Pillar başlığı -->
+      <div style="display:flex;align-items:center;gap:8px;padding:10px 14px;background:${p.color}18;border:1px solid ${p.color}44;border-radius:var(--r);margin-bottom:10px;">
+        <div style="width:26px;height:26px;border-radius:6px;background:${p.color};display:flex;align-items:center;justify-content:center;color:#fff;font-size:10px;font-weight:700;">${p.id}</div>
+        <div style="font-size:13px;font-weight:700;color:var(--text1);">${p.name}</div>
+        <div style="margin-left:auto;font-size:11px;color:var(--text3);">${items.length} bulgu</div>
+      </div>
+      <!-- Bulgular -->
+      ${items.map(({q,qi,ans,sc,imgs,note,severity})=>`
+        <div style="margin-bottom:10px;border:1px solid ${sevBorder[severity]};border-left:4px solid ${sevColor[severity]};border-radius:0 var(--r) var(--r) 0;background:${sevBg[severity]};overflow:hidden;">
+          <div style="padding:10px 12px;">
+            <div style="display:flex;align-items:flex-start;gap:8px;margin-bottom:6px;">
+              <div style="width:20px;height:20px;border-radius:50%;background:${sevColor[severity]};color:#fff;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;flex-shrink:0;margin-top:1px;">${sc}</div>
+              <div style="flex:1;">
+                <div style="font-size:12px;font-weight:600;color:var(--text1);margin-bottom:3px;">S${qi+1}. ${q.text}</div>
+                <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+                  <span style="font-size:11px;background:${sevColor[severity]};color:#fff;border-radius:4px;padding:1px 7px;font-weight:600;">${sevLabel[severity]||'Dikkat'}</span>
+                  <span style="font-size:11px;color:var(--text2);">Cevap: <b>${_answerLabel(q,ans)}</b></span>
+                  <span style="font-size:11px;color:var(--text3);">Puan: ${sc}/4</span>
+                </div>
+                ${note?`<div style="margin-top:5px;font-size:11px;color:var(--text2);font-style:italic;">📝 ${note}</div>`:''}
+              </div>
+            </div>
+            ${imgs.length?`<div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;padding-top:8px;border-top:1px solid ${sevBorder[severity]};">
+              ${imgs.map(src=>`<div style="position:relative;flex-shrink:0;">
+                <img src="${src}" style="width:88px;height:88px;object-fit:cover;border-radius:6px;border:2px solid ${sevColor[severity]};cursor:zoom-in;display:block;" onclick="openPhotoFull('${src}')">
+              </div>`).join('')}
+            </div>`:''}
+          </div>
+        </div>`).join('')}
+    </div>`).join('')
+  :`<div style="text-align:center;padding:30px;background:#f0fdf4;border:1px solid #86efac;border-radius:var(--r);">
+      <div style="font-size:32px;margin-bottom:8px;">🎉</div>
+      <div style="font-size:14px;font-weight:700;color:#15803d;">Tüm sorular mükemmel puanla tamamlandı!</div>
+      <div style="font-size:12px;color:var(--text2);margin-top:4px;">Bu alanda herhangi bir olumsuz bulgu tespit edilmemiştir.</div>
+    </div>`;
+
+  // Özet sayaç
+  const critCount=findingGroups.reduce((t,g)=>t+g.items.filter(i=>i.severity==='crit').length,0);
+  const warnCount=findingGroups.reduce((t,g)=>t+g.items.filter(i=>i.severity==='warn').length,0);
+  const totalFindings=findingGroups.reduce((t,g)=>t+g.items.length,0);
+  const photoCount=findingGroups.reduce((t,g)=>t+g.items.reduce((tt,i)=>tt+i.imgs.length,0),0);
+
+  const html=`<div style="font-size:13px;line-height:1.6;">
+
+    <!-- Başlık -->
+    <div style="padding:16px;background:linear-gradient(135deg,#f8fafc,#f1f5f9);border-radius:var(--r);margin-bottom:16px;border:1px solid var(--border);text-align:center;">
+      <div style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;">GENEL PUAN</div>
+      <div style="font-size:56px;font-weight:800;font-family:var(--mono);color:${scoreColor(score)};line-height:1;">${score}</div>
+      <span class="badge ${scoreBadge(score)}" style="font-size:13px;padding:5px 16px;margin-top:6px;display:inline-block;">${scoreLabel(score)}</span>
+    </div>
+
+    <!-- Bilgi kartı -->
+    <div style="padding:10px 14px;background:#eff6ff;border:1px solid #bfdbfe;border-radius:var(--r);margin-bottom:16px;font-size:12px;color:#1e40af;">
+      ℹ️ Bu rapor <b>${audit.area_name||'ilgili alan'}</b> için hazırlanmış bulgular özetidir.
+      Toplam <b>${totalFindings}</b> iyileştirme noktası tespit edilmiş olup
+      ${photoCount>0?`<b>${photoCount}</b> fotoğraf eklenmiştir.`:'fotoğraf eklenmemiştir.'}
+    </div>
+
+    <!-- Özet sayaçlar -->
+    ${totalFindings>0?`<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:16px;">
+      <div style="text-align:center;padding:10px;background:#fef2f2;border:1px solid #fecaca;border-radius:var(--r);">
+        <div style="font-size:22px;font-weight:700;color:#ef4444;">${critCount}</div>
+        <div style="font-size:10px;color:#b91c1c;font-weight:600;">Olumsuz</div>
+      </div>
+      <div style="text-align:center;padding:10px;background:#fff7ed;border:1px solid #fed7aa;border-radius:var(--r);">
+        <div style="font-size:22px;font-weight:700;color:#f97316;">${warnCount}</div>
+        <div style="font-size:10px;color:#c2410c;font-weight:600;">Geliştirilmeli</div>
+      </div>
+      <div style="text-align:center;padding:10px;background:#f0fdf4;border:1px solid #86efac;border-radius:var(--r);">
+        <div style="font-size:22px;font-weight:700;color:#16a34a;">${photoCount}</div>
+        <div style="font-size:10px;color:#15803d;font-weight:600;">Fotoğraf</div>
+      </div>
+    </div>`:''}
+
+    <!-- Bulgular -->
+    <div style="font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.5px;margin-bottom:12px;">🔎 Tespit Edilen Bulgular</div>
+    ${findingsHtml}
+
+    <div style="margin-top:16px;font-size:10px;color:var(--text3);text-align:center;border-top:1px solid var(--border);padding-top:10px;">
+      Bulgular Raporu · ${new Date().toLocaleDateString('tr-TR',{day:'numeric',month:'long',year:'numeric'})} · Denetim No: ${audit.form_code||'—'}
+    </div>
+  </div>`;
+
+  document.getElementById('ai-content').innerHTML=html;
+  document.getElementById('ai-content').style.display='block';
+  document.getElementById('pdf-btn').style.display='';
+}
+
 function exportPDF(){ window.print(); }

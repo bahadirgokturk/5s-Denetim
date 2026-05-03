@@ -881,6 +881,53 @@ function buildOfflineReport(audit){
   };
   const conclusionKey=score>=85?'hi':score>=70?'ok':score>=50?'mid':'lo';
 
+  // Fotoğraf bölümü — template literal dışında hesapla (iç içe backtick riski yok)
+  const _photosRaw=audit.photos_json||{};
+  const _photoSections=[];
+  PILLARS.forEach(function(pp,pi){
+    var pPhotos=[];
+    pp.questions.forEach(function(qq,qi){
+      var imgs=(_photosRaw[pi]&&_photosRaw[pi][qi])||(_photosRaw[String(pi)]&&_photosRaw[String(pi)][String(qi)])||[];
+      imgs.forEach(function(src){ pPhotos.push({src:src,qi:qi,color:pp.color,id:pp.id,name:pp.name}); });
+    });
+    if(pPhotos.length) _photoSections.push(pPhotos);
+  });
+  var reportPhotosHtml='';
+  if(_photoSections.length){
+    var _totalPh=_photoSections.reduce(function(t,s){return t+s.length;},0);
+    var _secHtml='';
+    _photoSections.forEach(function(pArr){
+      var _thumbs='';
+      pArr.forEach(function(ph){
+        var _img=document.createElement('img');
+        _img.src=ph.src;
+        _img.style.cssText='width:96px;height:96px;object-fit:cover;border-radius:8px;border:2px solid '+ph.color+';cursor:zoom-in;display:block;';
+        _img.onclick=function(){ openPhotoFull(ph.src); };
+        var _wrap=document.createElement('div');
+        _wrap.style.cssText='position:relative;flex-shrink:0;';
+        var _lbl=document.createElement('div');
+        _lbl.style.cssText='position:absolute;bottom:0;left:0;right:0;background:rgba(0,0,0,.6);color:#fff;font-size:9px;text-align:center;border-radius:0 0 6px 6px;padding:2px;';
+        _lbl.textContent='S'+(ph.qi+1);
+        _wrap.appendChild(_img);
+        _wrap.appendChild(_lbl);
+        _thumbs+=_wrap.outerHTML;
+      });
+      var _color=pArr[0].color, _id=pArr[0].id, _name=pArr[0].name;
+      _secHtml+='<div style="margin-bottom:14px;">'
+        +'<div style="display:flex;align-items:center;gap:6px;margin-bottom:8px;">'
+        +'<div style="width:20px;height:20px;border-radius:4px;background:'+_color+';display:flex;align-items:center;justify-content:center;color:#fff;font-size:9px;font-weight:700;">'+_id+'</div>'
+        +'<span style="font-size:12px;font-weight:600;">'+_name+'</span>'
+        +'<span style="font-size:11px;color:var(--text3);">('+pArr.length+' fotoğraf)</span>'
+        +'</div>'
+        +'<div style="display:flex;flex-wrap:wrap;gap:8px;">'+_thumbs+'</div>'
+        +'</div>';
+    });
+    reportPhotosHtml='<div style="margin-top:20px;">'
+      +'<div style="font-size:12px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.5px;margin-bottom:12px;">📷 Denetim Fotoğrafları ('+_totalPh+')</div>'
+      +_secHtml
+      +'</div>';
+  }
+
   const html=`<div style="font-size:13px;line-height:1.6;">
 
     <!-- Başlık kartı -->
@@ -925,38 +972,7 @@ function buildOfflineReport(audit){
     </div>
 
     <!-- Fotoğraflar -->
-    ${(()=>{
-      const photosRaw=audit.photos_json||{};
-      const sections=[];
-      PILLARS.forEach((p,pi)=>{
-        const pillarPhotos=[];
-        p.questions.forEach((q,qi)=>{
-          const imgs=photosRaw[pi]?.[qi]??photosRaw[String(pi)]?.[String(qi)]??[];
-          imgs.forEach(src=>pillarPhotos.push({src,qText:q.text,qi}));
-        });
-        if(pillarPhotos.length) sections.push({p,pillarPhotos});
-      });
-      if(!sections.length) return '';
-      const totalCount=sections.reduce((t,s)=>t+s.pillarPhotos.length,0);
-      return `<div style="margin-top:20px;">
-        <div style="font-size:12px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.5px;margin-bottom:12px;">📷 Denetim Fotoğrafları (${totalCount})</div>
-        ${sections.map(({p,pillarPhotos})=>`
-          <div style="margin-bottom:16px;">
-            <div style="display:flex;align-items:center;gap:6px;margin-bottom:8px;">
-              <div style="width:20px;height:20px;border-radius:4px;background:${p.color};display:flex;align-items:center;justify-content:center;color:#fff;font-size:9px;font-weight:700;">${p.id}</div>
-              <span style="font-size:12px;font-weight:600;color:var(--text1);">${p.name}</span>
-              <span style="font-size:11px;color:var(--text3);">(${pillarPhotos.length} fotoğraf)</span>
-            </div>
-            <div style="display:flex;flex-wrap:wrap;gap:8px;">
-              ${pillarPhotos.map(ph=>`
-                <div style="position:relative;flex-shrink:0;">
-                  <img src="${ph.src}" style="width:100px;height:100px;object-fit:cover;border-radius:8px;border:2px solid ${p.color};cursor:zoom-in;display:block;" onclick="openPhotoFull('${ph.src}')">
-                  <div style="position:absolute;bottom:0;left:0;right:0;background:rgba(0,0,0,.6);color:#fff;font-size:9px;text-align:center;border-radius:0 0 6px 6px;padding:2px 4px;line-height:1.3;">S${ph.qi+1}</div>
-                </div>`).join('')}
-            </div>
-          </div>`).join('')}
-      </div>`;
-    })()}
+    ${reportPhotosHtml}
 
     <div style="margin-top:16px;font-size:10px;color:var(--text3);text-align:center;border-top:1px solid var(--border);padding-top:10px;">
       Rapor Tarihi: ${new Date().toLocaleDateString('tr-TR',{day:'numeric',month:'long',year:'numeric'})} · Denetim No: ${audit.form_code||'—'} · Denetçi: ${audit.auditor_name||'—'}
@@ -1025,43 +1041,62 @@ function denetlenenRaporu(auditId){
   const sevBorder={crit:'#fecaca',warn:'#fed7aa',info:'#fef08a'};
   const sevLabel={crit:'Olumsuz',warn:'Geliştirilmeli',info:'Dikkat'};
 
-  const findingsHtml=findingGroups.length?findingGroups.map(({p,items})=>`
-    <div style="margin-bottom:20px;">
-      <!-- Pillar başlığı -->
-      <div style="display:flex;align-items:center;gap:8px;padding:10px 14px;background:${p.color}18;border:1px solid ${p.color}44;border-radius:var(--r);margin-bottom:10px;">
-        <div style="width:26px;height:26px;border-radius:6px;background:${p.color};display:flex;align-items:center;justify-content:center;color:#fff;font-size:10px;font-weight:700;">${p.id}</div>
-        <div style="font-size:13px;font-weight:700;color:var(--text1);">${p.name}</div>
-        <div style="margin-left:auto;font-size:11px;color:var(--text3);">${items.length} bulgu</div>
-      </div>
-      <!-- Bulgular -->
-      ${items.map(({q,qi,ans,sc,imgs,note,severity})=>`
-        <div style="margin-bottom:10px;border:1px solid ${sevBorder[severity]};border-left:4px solid ${sevColor[severity]};border-radius:0 var(--r) var(--r) 0;background:${sevBg[severity]};overflow:hidden;">
-          <div style="padding:10px 12px;">
-            <div style="display:flex;align-items:flex-start;gap:8px;margin-bottom:6px;">
-              <div style="width:20px;height:20px;border-radius:50%;background:${sevColor[severity]};color:#fff;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;flex-shrink:0;margin-top:1px;">${sc}</div>
-              <div style="flex:1;">
-                <div style="font-size:12px;font-weight:600;color:var(--text1);margin-bottom:3px;">S${qi+1}. ${q.text}</div>
-                <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
-                  <span style="font-size:11px;background:${sevColor[severity]};color:#fff;border-radius:4px;padding:1px 7px;font-weight:600;">${sevLabel[severity]||'Dikkat'}</span>
-                  <span style="font-size:11px;color:var(--text2);">Cevap: <b>${_answerLabel(q,ans)}</b></span>
-                  <span style="font-size:11px;color:var(--text3);">Puan: ${sc}/4</span>
-                </div>
-                ${note?`<div style="margin-top:5px;font-size:11px;color:var(--text2);font-style:italic;">📝 ${note}</div>`:''}
-              </div>
-            </div>
-            ${imgs.length?`<div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;padding-top:8px;border-top:1px solid ${sevBorder[severity]};">
-              ${imgs.map(src=>`<div style="position:relative;flex-shrink:0;">
-                <img src="${src}" style="width:88px;height:88px;object-fit:cover;border-radius:6px;border:2px solid ${sevColor[severity]};cursor:zoom-in;display:block;" onclick="openPhotoFull('${src}')">
-              </div>`).join('')}
-            </div>`:''}
-          </div>
-        </div>`).join('')}
-    </div>`).join('')
-  :`<div style="text-align:center;padding:30px;background:#f0fdf4;border:1px solid #86efac;border-radius:var(--r);">
-      <div style="font-size:32px;margin-bottom:8px;">🎉</div>
-      <div style="font-size:14px;font-weight:700;color:#15803d;">Tüm sorular mükemmel puanla tamamlandı!</div>
-      <div style="font-size:12px;color:var(--text2);margin-top:4px;">Bu alanda herhangi bir olumsuz bulgu tespit edilmemiştir.</div>
-    </div>`;
+  // findingsHtml — iç içe backtick kullanmadan string birleştirme ile oluştur
+  var findingsHtml='';
+  if(!findingGroups.length){
+    findingsHtml='<div style="text-align:center;padding:30px;background:#f0fdf4;border:1px solid #86efac;border-radius:var(--r);">'
+      +'<div style="font-size:32px;margin-bottom:8px;">🎉</div>'
+      +'<div style="font-size:14px;font-weight:700;color:#15803d;">Tüm sorular mükemmel puanla tamamlandı!</div>'
+      +'<div style="font-size:12px;color:var(--text2);margin-top:4px;">Bu alanda herhangi bir olumsuz bulgu tespit edilmemiştir.</div>'
+      +'</div>';
+  } else {
+    findingGroups.forEach(function(fg){
+      var p=fg.p, items=fg.items;
+      var groupHtml='<div style="margin-bottom:20px;">'
+        +'<div style="display:flex;align-items:center;gap:8px;padding:10px 14px;background:'+p.color+'22;border:1px solid '+p.color+'66;border-radius:var(--r);margin-bottom:10px;">'
+        +'<div style="width:26px;height:26px;border-radius:6px;background:'+p.color+';display:flex;align-items:center;justify-content:center;color:#fff;font-size:10px;font-weight:700;">'+p.id+'</div>'
+        +'<div style="font-size:13px;font-weight:700;color:var(--text1);">'+p.name+'</div>'
+        +'<div style="margin-left:auto;font-size:11px;color:var(--text3);">'+items.length+' bulgu</div>'
+        +'</div>';
+      items.forEach(function(item){
+        var q=item.q, qi=item.qi, ans=item.ans, sc=item.sc, imgs=item.imgs, note=item.note, sev=item.severity;
+        var sc_=sevColor[sev], sb_=sevBg[sev], sbr_=sevBorder[sev], sl_=sevLabel[sev];
+        // Fotoğraf thumbnails — DOM oluşturma
+        var photoRowHtml='';
+        if(imgs.length){
+          var thumbs='';
+          imgs.forEach(function(src){
+            var el=document.createElement('div');
+            el.style.cssText='position:relative;flex-shrink:0;';
+            var img=document.createElement('img');
+            img.src=src;
+            img.style.cssText='width:88px;height:88px;object-fit:cover;border-radius:6px;border:2px solid '+sc_+';cursor:zoom-in;display:block;';
+            img.onclick=function(){ openPhotoFull(src); };
+            el.appendChild(img);
+            thumbs+=el.outerHTML;
+          });
+          photoRowHtml='<div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;padding-top:8px;border-top:1px solid '+sbr_+';">'+thumbs+'</div>';
+        }
+        var noteHtml=note?('<div style="margin-top:5px;font-size:11px;color:var(--text2);font-style:italic;">📝 '+note+'</div>'):'';
+        groupHtml+='<div style="margin-bottom:10px;border:1px solid '+sbr_+';border-left:4px solid '+sc_+';border-radius:0 var(--r) var(--r) 0;background:'+sb_+';overflow:hidden;">'
+          +'<div style="padding:10px 12px;">'
+          +'<div style="display:flex;align-items:flex-start;gap:8px;margin-bottom:6px;">'
+          +'<div style="width:20px;height:20px;border-radius:50%;background:'+sc_+';color:#fff;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;flex-shrink:0;margin-top:1px;">'+sc+'</div>'
+          +'<div style="flex:1;">'
+          +'<div style="font-size:12px;font-weight:600;color:var(--text1);margin-bottom:3px;">S'+(qi+1)+'. '+q.text+'</div>'
+          +'<div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">'
+          +'<span style="font-size:11px;background:'+sc_+';color:#fff;border-radius:4px;padding:1px 7px;font-weight:600;">'+sl_+'</span>'
+          +'<span style="font-size:11px;color:var(--text2);">Cevap: <b>'+_answerLabel(q,ans)+'</b></span>'
+          +'<span style="font-size:11px;color:var(--text3);">Puan: '+sc+'/4</span>'
+          +'</div>'
+          +noteHtml
+          +'</div></div>'
+          +photoRowHtml
+          +'</div></div>';
+      });
+      findingsHtml+=groupHtml+'</div>';
+    });
+  }
 
   // Özet sayaç
   const critCount=findingGroups.reduce((t,g)=>t+g.items.filter(i=>i.severity==='crit').length,0);

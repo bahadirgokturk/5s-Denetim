@@ -214,3 +214,35 @@ function initActionModal(){
   const mt = document.querySelector('#modal-action-add .modal-title');
   if(mt) mt.textContent = 'Yeni Aksiyon';
 }
+
+// Rapor içinden aksiyon ekle — modal-ai kapanır, aksiyon formu önceden dolu açılır
+function openActionFromReport(areaId, areaName, title, priority){
+  closeModal('modal-ai');
+  _editActionId = null;
+
+  // Başlık
+  const titleEl = document.getElementById('na-title');
+  if(titleEl) titleEl.value = title || '';
+
+  // Alan
+  const areaSel = document.getElementById('na-area');
+  if(areaSel) _fillActionAreaSelect(areaSel, areaId);
+
+  // Öncelik
+  const prioEl = document.getElementById('na-prio');
+  if(prioEl) prioEl.value = priority || 'Yüksek';
+
+  // Diğer alanları temizle
+  const ownerEl = document.getElementById('na-owner');
+  if(ownerEl) ownerEl.value = '';
+  const dueEl = document.getElementById('na-due');
+  if(dueEl) dueEl.value = '';
+  const descEl = document.getElementById('na-desc');
+  if(descEl) descEl.value = '';
+
+  // Modal başlığı
+  const mt = document.querySelector('#modal-action-add .modal-title');
+  if(mt) mt.textContent = 'Yeni Aksiyon';
+
+  openModal('modal-action-add');
+}

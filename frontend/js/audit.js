@@ -858,12 +858,19 @@ function buildOfflineReport(audit){
     </div>`:'';
 
   // Öncelikli aksiyonlar
+  const _auditAreaId=audit.area_id||'';
+  const _auditAreaName=audit.area_name||'';
   const actionItems=badPillars.map(p=>{
     const rec=_getPillarText(p.id,p.pct,'rec');
-    return rec?`<div style="display:flex;align-items:flex-start;gap:10px;margin-bottom:10px;padding:10px 12px;background:#fff7ed;border:1px solid #fed7aa;border-radius:var(--rs);">
+    if(!rec) return '';
+    const prio=p.pct<50?'Kritik':'Yüksek';
+    const titleText=p.id+' · '+p.name.split('(')[0].trim()+': '+rec;
+    const safeTitle=titleText.replace(/'/g,'&#39;');
+    return `<div style="display:flex;align-items:flex-start;gap:10px;margin-bottom:10px;padding:10px 12px;background:#fff7ed;border:1px solid #fed7aa;border-radius:var(--rs);">
       <div style="width:20px;height:20px;border-radius:50%;background:${p.pct<50?'#ef4444':'#f97316'};color:#fff;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;flex-shrink:0;margin-top:1px;">${p.pct<50?'!':'▲'}</div>
-      <div style="font-size:12px;"><b style="color:${p.color};">${p.id} · ${p.name.split('(')[0].trim()}:</b> ${rec}</div>
-    </div>`:'';
+      <div style="flex:1;font-size:12px;"><b style="color:${p.color};">${p.id} · ${p.name.split('(')[0].trim()}:</b> ${rec}</div>
+      <button onclick="openActionFromReport('${_auditAreaId}','${_auditAreaName}','${safeTitle}','${prio}')" style="flex-shrink:0;font-size:10px;padding:3px 8px;border-radius:4px;border:1px solid #f97316;background:#fff7ed;color:#c2410c;cursor:pointer;font-weight:600;white-space:nowrap;">➕ Aksiyon Ekle</button>
+    </div>`;
   }).filter(Boolean);
 
   const actionsHtml=actionItems.length?`
@@ -1078,6 +1085,15 @@ function denetlenenRaporu(auditId){
           photoRowHtml='<div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;padding-top:8px;border-top:1px solid '+sbr_+';">'+thumbs+'</div>';
         }
         var noteHtml=note?('<div style="margin-top:5px;font-size:11px;color:var(--text2);font-style:italic;">📝 '+note+'</div>'):'';
+        // Aksiyon ekle butonu
+        var _dAreaId=audit.area_id||'';
+        var _dAreaName=(audit.area_name||'').replace(/'/g,'&#39;');
+        var _dTitle=(p.id+' · S'+(qi+1)+' — '+q.text+' (Cevap: '+_answerLabel(q,ans)+')').replace(/'/g,'&#39;');
+        var _dPrio=sev==='crit'?'Kritik':sev==='warn'?'Yüksek':'Orta';
+        var addBtnHtml='<div style="margin-top:8px;text-align:right;">'
+          +'<button onclick="openActionFromReport(\''+_dAreaId+'\',\''+_dAreaName+'\',\''+_dTitle+'\',\''+_dPrio+'\')" '
+          +'style="font-size:10px;padding:3px 10px;border-radius:4px;border:1px solid '+sc_+';background:white;color:'+sc_+';cursor:pointer;font-weight:600;">➕ Aksiyon Ekle</button>'
+          +'</div>';
         groupHtml+='<div style="margin-bottom:10px;border:1px solid '+sbr_+';border-left:4px solid '+sc_+';border-radius:0 var(--r) var(--r) 0;background:'+sb_+';overflow:hidden;">'
           +'<div style="padding:10px 12px;">'
           +'<div style="display:flex;align-items:flex-start;gap:8px;margin-bottom:6px;">'
@@ -1092,6 +1108,7 @@ function denetlenenRaporu(auditId){
           +noteHtml
           +'</div></div>'
           +photoRowHtml
+          +addBtnHtml
           +'</div></div>';
       });
       findingsHtml+=groupHtml+'</div>';

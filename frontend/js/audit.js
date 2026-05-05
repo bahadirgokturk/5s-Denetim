@@ -741,152 +741,418 @@ function openPhotoFull(src){
 // ── Pillar analiz metinleri ───────────────────────────────────
 const PILLAR_ANALYSIS = {
   S1: {
-    hi:  'Ayıklama faaliyetleri mükemmel düzeyde yürütülmektedir. Gereksiz malzeme, ekipman ve doküman birikimi etkin biçimde önlenmekte; çalışma alanı yalnızca ihtiyaç duyulan öğelerle düzenli şekilde korunmaktadır.',
-    ok:  'Ayıklama çalışmaları genel olarak yeterli düzeydedir. Bununla birlikte bazı noktalarda gereksiz malzeme ya da ekipman birikimi gözlemlenmektedir. Periyodik kırmızı etiket kampanyaları ile bu durum kontrol altına alınabilir.',
-    mid: 'Çalışma alanında gereksiz malzeme ve ekipman birikimi dikkat çekmektedir. Kullanılmayan, arızalı veya süresi geçmiş öğeler bir an önce ayrıştırılmalı; kırmızı etiket uygulaması sistematik hale getirilmelidir.',
-    lo:  'Ayıklama pillarında ciddi eksikler tespit edilmiştir. Prosesle ilgisi olmayan malzeme, kişisel eşya ve güncelliğini yitirmiş dokümanların yoğun birikimi gözlemlenmektedir. Acil kırmızı etiket kampanyası ve ekip eğitimi zorunludur.',
-    rec_mid: 'Kırmızı etiket kampanyası planlanarak gereksiz öğeler sahadan uzaklaştırılmalı.',
-    rec_lo:  'Tüm çalışma noktaları için kapsamlı kırmızı etiket uygulaması acilen başlatılmalı; arızalı ekipmanlar kayıt altına alınarak ilgili birime devredilmeli.',
+    hi:  'Ayıklama faaliyetleri mükemmel düzeyde yürütülmektedir. Çalışma alanında yalnızca prosese doğrudan katkı sağlayan malzeme, ekipman ve dokümanlar bulunmakta; gereksiz öğelerin birikmesi sistematik biçimde engellenmektedir. Kırmızı etiket uygulaması rutin hale gelmiş, operatörler neyin kullanılıp neyin atılacağına bağımsız karar verebilecek düzeye ulaşmıştır. Bu olgunluk düzeyi, iş güvenliği risklerini ve arama kaynaklı zaman kayıplarını minimuma indirmektedir.',
+    ok:  'Ayıklama çalışmaları genel olarak yeterli düzeydedir. Çalışma noktalarının büyük çoğunluğu düzenli tutulmakla birlikte bazı noktalarda prosesle ilişkisiz malzeme, kişisel eşya veya eskimiş doküman birikimi dikkat çekmektedir. Bu durumun operasyonel verimliliği ve ergonomiyi kısmen olumsuz etkileme potansiyeli mevcuttur. Periyodik kırmızı etiket kampanyaları ile mevcut iyilik hali pekiştirilebilir.',
+    mid: 'Çalışma alanında anlamlı düzeyde gereksiz malzeme, ekipman ve doküman birikimi gözlemlenmektedir. Prosesle doğrudan ilişkisi olmayan öğeler tezgâh üzerlerini, çekmeceleri ve geçiş alanlarını işgal etmekte; bu durum hem iş güvenliği hem de üretim verimliliği açısından risk oluşturmaktadır. Arızalı ve kalibrasyonu geçmiş ekipmanların sahada bulunması, yanlış ekipman kullanımına ve kalite sorunlarına zemin hazırlayabilir. Sistematik bir kırmızı etiket kampanyasının acilen planlanması önerilmektedir.',
+    lo:  'Ayıklama pillarında kritik düzeyde eksiklikler tespit edilmiştir. Prosesle ilgisi olmayan malzeme, kişisel eşya ve güncelliğini yitirmiş talimatların yoğun birikimi; çalışma alanının kullanılabilir yüzeyini önemli ölçüde daraltmaktadır. Arızalı ve kullanım dışı ekipmanların saha genelinde dağınık biçimde bulunması hem iş kazası riskini hem de üretim verimsizliğini artırmaktadır. Acil eylem planı hazırlanmadan herhangi bir diğer 5S pillarında sürdürülebilir iyileşme sağlamak mümkün değildir.',
+    risk:   'Bloke geçiş yolları → yangın/tahliye riski · Arızalı ekipman kullanımı → kalite hatası ve iş kazası riski · Arama kaynaklı zaman kaybı → OEE düşüşü',
+    impact: 'Ergonomi, İSG uyumu, ekipman güvenilirliği, üretim hızı',
+    quick_win: 'Bu hafta: Tüm tezgâh üstleri ve geçiş koridorları için 30 dakikalık acil kırmızı etiket turu yapın.',
+    rec_mid: 'Aylık kırmızı etiket kampanyası takvime alınmalı; her çalışma noktası için "İzin verilen maksimum öğe sayısı" fotoğraflı standart hazırlanmalı.',
+    rec_lo:  'Tüm çalışma noktaları için acil kırmızı etiket seferberliği başlatılmalı. Arızalı ekipmanlar CMMS\'e kaydedilerek karantinaya alınmalı. Kırmızı etiket kararı için net kriter listesi oluşturulmalı ve ekibe dağıtılmalı.',
+    road_urgent: 'Acil geçiş yollarını temizle · Arızalı ekipmanları etiketle ve karantinaya al',
+    road_30: 'Tüm alan için kırmızı etiket kampanyası yap · "Bir yerde bir kez" standardı oluştur',
+    road_90: 'Aylık ayıklama rutinini sisteme al · Operatörlere kırmızı etiket karar yetkisi ver',
   },
   S2: {
-    hi:  'Her malzeme ve ekipmanın tanımlı, işaretlenmiş ve görünür bir yeri mevcuttur. "Bir yeri var, her zaman orada" prensibi tam anlamıyla hayata geçirilmiş; görsel yönetim araçları etkin biçimde kullanılmaktadır.',
-    ok:  'Alan tanımları büyük ölçüde belirlenmiş ve uygulanmaktadır. Ancak bazı ekipman ve malzemelerin belirsiz konumlarda bulunduğu ya da tanımlı alanlarının dışına taştığı görülmektedir.',
-    mid: 'Düzenleme çalışmaları kısmen uygulanmış olmakla birlikte tutarsızlıklar devam etmektedir. Alet, aparat ve sarf malzemeleri için net alan tanımları oluşturulmalı; zemin ve raf işaretlemeleri yenilenmelidir.',
-    lo:  'Alan tanımları yetersiz ya da mevcut değildir. Malzeme ve ekipmanlar belirsiz konumlarda bulunmakta; acil durum erişim yolları ve emniyet ekipmanlarına ulaşım olumsuz etkilenmektedir. Görsel yönetim altyapısı acilen kurulmalıdır.',
-    rec_mid: 'Tüm el aletleri, aparatlar ve sarf malzemeleri için gölge panolar ve raf etiketleri oluşturulmalı.',
-    rec_lo:  'Öncelikli olarak acil durum erişim yolları serbest bırakılmalı; ardından kapsamlı alan tanımlama ve işaretleme çalışması başlatılmalı.',
+    hi:  'Düzenleme pilları, "Her şeyin bir yeri var ve her şey yerinde" prensibinin tam anlamıyla hayata geçirildiğini göstermektedir. Tüm el aletleri, aparatlar, ölçü aletleri ve sarf malzemeler için görsel alan tanımları yapılmış; gölge panolar, zemin çizgileri ve renk kodlaması etkin biçimde kullanılmaktadır. Acil durum ekipmanlarına (yangın tüpü, ilk yardım dolabı, göz duşu) erişim hiçbir engel olmaksızın sağlanmaktadır. Min/maks seviyeleri belirlenmiş stok yönetimi, aşırı stok ve eksiklik problemlerinin önüne geçmektedir.',
+    ok:  'Alan tanımları genel olarak oluşturulmuş ve büyük ölçüde uygulanmaktadır. Bununla birlikte bazı ekipman ve malzemelerin zaman zaman tanımlı alanların dışına taştığı ya da tanımsız noktalarda bırakıldığı görülmektedir. Görsel yönetim altyapısı temel düzeyde mevcut olmakla birlikte bazı etiket ve zemin işaretlerinin yenilenmesi gerekmektedir. Min/maks seviyeleri konusunda tutarsızlıklar dikkat çekmektedir.',
+    mid: 'Düzenleme çalışmaları kısmen uygulanmış ancak tutarlılık sağlanamamıştır. Bir kısım ekipman ve malzeme için alan tanımı yapılmışken diğerleri hâlâ belirsiz konumlarda bulunmaktadır. Bu durum operatörlerin ihtiyaç duydukları aletleri bulmak için harcadıkları süreyi artırmakta, prosesteki akışkanlığı olumsuz etkilemektedir. Acil durum ekipmanlarına erişimin kısmen kısıtlı olması önemli bir İSG bulgusudur.',
+    lo:  'Alan tanımları büyük ölçüde yetersiz ya da tamamen yok düzeyindedir. Malzeme ve ekipmanlar belirsiz noktalarda bulunmakta; operatörler çalışma süresinin önemli bir bölümünü arama ve bekleme ile geçirmektedir. Acil durum ekipmanlarına erişimin engellenmiş olması derhal müdahale gerektiren kritik bir İSG bulgusudur. Görsel yönetim altyapısının sıfırdan kurulması zorunludur.',
+    risk:   'Acil durum erişim engeli → yangın ve iş kazasında hayati risk · Arama kaybı → operatör başına günlük 15-30 dk verimlilik kaybı · Yanlış ekipman kullanımı → kalite hatası',
+    impact: 'İSG uyumu, operatör verimliliği, kalite güvenilirliği, set-up süreleri',
+    quick_win: 'Bu hafta: Yangın tüpü, ilk yardım dolabı ve acil çıkışların önündeki tüm engelleri kaldırın.',
+    rec_mid: 'Her çalışma noktası için fotoğraflı "standart yerleşim haritası" hazırlanmalı; gölge pano eksiklikleri tamamlanmalı.',
+    rec_lo:  'Önce acil durum yolları açılmalı. Ardından tüm ekipman için alan tanımı çalışması (makine başına 1 saat) yapılmalı. Zemin bant çalışması ve raf etiketleme standart hale getirilmeli.',
+    road_urgent: 'Acil durum erişimini aç · En sık kullanılan 10 ekipman için alan belirle',
+    road_30: 'Tüm ekipman için gölge pano ve zemin çizgisi tamamla · Min/maks seviyelerini belirle',
+    road_90: 'Görsel yönetim denetim checklistini oluştur · 5S turu ile aylık doğrulama yap',
   },
   S3: {
-    hi:  'Temizlik mükemmel düzeyde sürdürülmektedir. Makine, ekipman ve çalışma yüzeyleri düzenli olarak temizlenmekte; temizlik sorumlulukları net şekilde belirlenmiş ve otonom bakım rutinlerine entegre edilmiştir.',
-    ok:  'Temizlik genel olarak iyi düzeyde sağlanmaktadır. Bazı noktalarda yüzey kirliliği, pas veya boya lekesi gözlemlenmektedir; periyodik denetimler ile bu durumun önüne geçilebilir.',
-    mid: 'Temizlik çalışmaları kısmen yürütülmekte, ancak sürdürülebilirlik sağlanamamaktadır. Temizlik sorumluluk matrisi oluşturulmalı ve her vardiya başında kısa temizlik kontrolü rutin haline getirilmelidir.',
-    lo:  'Temizlik standartları ciddi ölçüde yetersiz kalmaktadır. Yüzey kirlilikleri, paslı parçalar, sıvı sızıntıları ve birikmeler sağlık, güvenlik ve ekipman ömrü açısından risk oluşturmaktadır. Acil temizlik planı ve sorumluluk dağılımı zorunludur.',
-    rec_mid: 'Vardiya başı 5 dakikalık "5S turu" uygulaması başlatılarak temizlik sürekliliği sağlanmalı.',
-    rec_lo:  'Kapsamlı bir temizlik seferberliği planlanmalı; temizlik sorumlulukları bölge bazında atanmalı ve günlük kontrol formu oluşturulmalı.',
+    hi:  'Temizlik standartları mükemmel düzeyde sürdürülmektedir. Makine gövdeleri, tezgâh yüzeyleri, zemin ve çevre alanlar düzenli ve titiz biçimde temizlenmektedir. Temizlik sorumlulukları operatör bazında bölge matrisine göre net şekilde tanımlanmış; her vardiya temizlik kontrolü rutin hale gelmiştir. Otonom bakım faaliyetleri kapsamında operatörler anormallikleri (sızıntı, pas, çap) erken tespit edebilmekte ve raporlayabilmektedir. Bu durum bakım maliyetlerini düşürmekte ve ekipman ömrünü uzatmaktadır.',
+    ok:  'Temizlik genel olarak iyi düzeyde sağlanmaktadır. Çalışma alanının büyük bölümü temiz tutulmakla birlikte bazı noktalarda yüzey kirliliği, toz birikimi, pas veya boya lekesi dikkat çekmektedir. Temizlik sorumlulukları çoğunlukla belirlenmiş olmakla birlikte tatil veya vardiya değişimlerinde sürekliliğin korunması güçleşmektedir. Daha sistematik bir sorumluluk matrisi ve periyodik doğrulama ile mevcut performans üst seviyelere taşınabilir.',
+    mid: 'Temizlik çalışmaları sporadik olarak yapılmakta, ancak sürdürülebilirlik henüz sağlanamamaktadır. Yüzey kirlilikleri, pas izleri veya sıvı birikintileri pek çok noktada görülmektedir. Temizlik sorumluluklarının net dağılımı yapılmamış ya da operatörler tarafından bilinmemektedir. Bu durum makine arıza sıklığını artırma ve yüzey kaynaklı kalite sorunlarına zemin hazırlama potansiyeli taşımaktadır.',
+    lo:  'Temizlik standartları kritik düzeyde yetersizdir. Yüzey kirlilikleri, paslı parçalar, sıvı sızıntıları ve talaş/çap birikintileri yaygın biçimde gözlemlenmektedir. Bu durum üç temel risk oluşturmaktadır: (1) İSG riski — kayma, düşme ve sağlık tehlikesi; (2) Ekipman riski — korozyon ve mekanik hasar ile erken arıza; (3) Kalite riski — kirlilik kaynaklı ürün hatası. Acil müdahale yapılmadan bu alan, hem iç denetim hem de müşteri ziyaretleri açısından ciddi risk barındırmaktadır.',
+    risk:   'Zemin kirliliği → kayma ve düşme kazası · Sıvı sızıntısı → yangın/elektrik riski · Yüzey kirliliği → ürün kontaminasyonu · Pas/çap → ekipman arızası',
+    impact: 'İSG skoru, ekipman OEE, ürün kalitesi, müşteri denetim sonucu',
+    quick_win: 'Bu hafta: Her operatöre 2 m² sorumluluk alanı ata ve günlük 5 dakika temizlik rutini başlat.',
+    rec_mid: 'Temizlik bölge matrisi oluşturulmalı ve görünür yere asılmalı. Vardiya başı 5 dakikalık "temizlik turu" standardize edilmeli.',
+    rec_lo:  'Önce sıvı sızıntıları ve yangın riski oluşturan kirlilikler giderilmeli. Ardından tüm alan için kapsamlı temizlik seferberliği planlanmalı. Günlük kontrol formu ve haftalık lider doğrulaması sisteme alınmalı.',
+    road_urgent: 'Sızıntı ve kayma tehlikelerini gider · Temizlik malzemesi istasyonu kur',
+    road_30: 'Bölge matrisi oluştur · Vardiya başı rutin başlat · Otonom bakım kontrol listesi hazırla',
+    road_90: 'Görsel temizlik standardı (fotoğraflı) oluştur · Aylık temizlik denetim puanlaması yap',
   },
   S4: {
-    hi:  'Standartlaştırma çalışmaları üst düzeyde hayata geçirilmiştir. SOF formları güncel ve operatörler tarafından bilinmekte; etiketleme, işaretleme ve görsel standartlar firma gerekliliklerine tam uyum sağlamaktadır.',
-    ok:  'Standartlar büyük ölçüde belirlenmiş ve uygulanmaktadır. Bazı alanlarda SOF güncelliği veya etiketleme tutarsızlıkları dikkat çekmektedir; düzenli revizyon döngüsü kurulması önerilir.',
-    mid: 'Bazı standartlar belirlenmiş olmakla birlikte tutarlı uygulamada eksiklikler görülmektedir. SOF formları güncel değil ya da operatörler tarafından yeterince bilinmiyor olabilir; görsel standartların sahaya yansıtılması için aksiyon alınmalıdır.',
-    lo:  'Standartlaştırma çalışmaları yetersiz kalmaktadır. SOF formları ya mevcut değil ya da güncelliğini yitirmiş; etiketleme ve işaretlemeler firma standartlarına uygun değildir. Bu durum operasyon tutarlılığını ve anormallik tespitini olumsuz etkilemektedir.',
-    rec_mid: 'Mevcut SOF formları gözden geçirilerek güncellenmeli; operatörlere kısa bilgilendirme seansları düzenlenmeli.',
-    rec_lo:  'SOF hazırlama atölyesi düzenlenerek tüm prosesler için güncel talimatlar oluşturulmalı; etiketleme standartları baştan uygulanmalı.',
+    hi:  'Standartlaştırma çalışmaları üst düzeyde hayata geçirilmiş ve sürdürülmektedir. Standart Operasyon Formları (SOF) güncel tutulmakta ve tüm operatörler tarafından bilinmektedir. Etiketleme, renk kodlama ve işaretleme uygulamaları firma standartlarıyla tam uyum içindedir. Görsel yönetim araçları sayesinde herhangi bir çalışan ya da ziyaretçi, alandaki anormal durumları kısa sürede fark edebilmektedir. Otonom bakım formları düzenli güncellenmekte; "Bir Fikrim Var" ve Ramakkala sistemleri aktif kullanılmaktadır.',
+    ok:  'Standartlar büyük ölçüde belirlenmiş ve uygulanmaktadır. SOF formlarının büyük çoğunluğu güncel olmakla birlikte bazı proseslerde güncelleme gecikmesi ya da operatör bilgi eksikliği dikkat çekmektedir. Etiketleme tutarsızlıkları ve bazı görsel standartların eskimesi performansı kısmen sınırlamaktadır. Düzenli revizyon döngüsü ve operatör bilgilendirme seanslarıyla bu boşluklar kapatılabilir.',
+    mid: 'Standartlar kısmen oluşturulmuş olmakla birlikte tutarlı uygulama sağlanamamaktadır. SOF formları ya güncel değil ya da operatörlerin büyük çoğunluğu tarafından bilinmemektedir. Görsel standartlar (etiket, işaret, renk kodu) yeterli düzeyde uygulanmadığından anormallik tespiti güçleşmektedir. Bu durum hem eğitim süresini uzatmakta hem de yeni operatörlerin sürece adaptasyonunu yavaşlatmaktadır.',
+    lo:  'Standartlaştırma çalışmaları yetersiz kalmaktadır. SOF formları ya mevcut değil ya da uzun süredir güncellenmemiştir. Etiketleme ve işaretlemeler firma standartlarına uygun değil ya da büyük ölçüde eksiktir. Bu durumun doğrudan sonuçları; operasyon tutarsızlığı, eğitim verimsizliği ve anormallik görünürlüğünün olmamasıdır. Müşteri veya sertifikasyon denetimleri açısından ciddi uyumsuzluk riski barındırmaktadır.',
+    risk:   'Güncel olmayan SOF → hatalı üretim ve kalite kaçağı · Standartsız alan → yeni operatör adaptasyon süresi artışı · Görsel yönetim eksikliği → anormallik fark edilemez',
+    impact: 'Kalite tutarlılığı, eğitim süresi, denetim uyumu, operasyonel risk',
+    quick_win: 'Bu hafta: Mevcut SOF formlarını yazdırıp her iş istasyonuna asın; operatörlere 10 dakikalık özet hatırlatma yapın.',
+    rec_mid: 'SOF formları tüm prosesler için gözden geçirilmeli ve güncel fotoğraflarla zenginleştirilmeli. "Bir Fikrim Var" panosu aktive edilmeli.',
+    rec_lo:  'Önce en kritik 3 proses için SOF hazırlanmalı. Tüm etiketler firma standardına göre yenilenmeli. Operatör bilgi testi ile eksiklikler ölçülmeli ve eğitim planı hazırlanmalı.',
+    road_urgent: 'Kritik prosesler için SOF bas ve as · En çok hata yapılan noktalara görsel uyarı koy',
+    road_30: 'Tüm SOF\'ları güncelle · Etiketleme ve renk kodlamayı standartlaştır · Operatör bilgi testi yap',
+    road_90: 'SOF revizyon takvimi oluştur · Ramakkala ve "Bir Fikrim Var" sistemini aktive et · Yıllık standart güncelleme döngüsü kur',
   },
   S5: {
-    hi:  'Ekip 5S kültürünü tam anlamıyla benimsemiştir. Disiplin içselleştirilmiş; vardiya devir teslimlerinde 5S kontrolü rutin olarak yapılmakta, önceki denetimlerin aksiyonları takip edilmektedir.',
-    ok:  '5S disiplini genel olarak sürdürülmektedir. Ekip 5S prensiplerine büyük ölçüde hakimdir; ancak bazı süreçlerde sürekliliğin güçlendirilmesi gerekmektedir.',
-    mid: 'Disiplin kısmen sağlanmakta, ancak süreklilik henüz tam olarak kazanılamamaktadır. Bazı ekip üyeleri 5S gerekliliklerini yeterince içselleştirememiş olabilir; eğitim ve sahiplenme artırılmalıdır.',
-    lo:  '5S kültürünün içselleştirilmesi için kapsamlı çalışmalar gerekmektedir. Ekip 5S prensiplerine yeterince hakim değil; vardiya kontrolü, "Bir Fikrim Var" ve Ramakkala sistemleri aktif kullanılmıyor. Eğitim planı ve yönetici sahiplenme zorunludur.',
-    rec_mid: '"Bir Fikrim Var" panosu aktif hale getirilmeli; 5S uyarı farkındalık eğitimi planlanmalı.',
-    rec_lo:  'Tüm ekip için zorunlu 5S temel eğitimi düzenlenmeli; liderler tarafından haftalık saha turu başlatılmalı.',
+    hi:  '5S kültürü ekip tarafından tam anlamıyla benimsenmiş ve içselleştirilmiştir. Vardiya devir-teslimlerinde 5S kontrol formu rutin olarak uygulanmakta; operatörler kendi sorumluluk alanlarının sahiplenme bilinci ile hareket etmektedir. Önceki denetim aksiyonlarının takip oranı yüksek, "Bir Fikrim Var" sistemi aktif kullanımdadır. Bu olgunluk düzeyi, 5S\'in bir "denetim hazırlığı" değil, gerçek bir çalışma kültürü haline geldiğini göstermekte ve sürekli iyileştirme faaliyetlerine zemin oluşturmaktadır.',
+    ok:  '5S disiplini genel olarak sürdürülmektedir. Ekibin büyük çoğunluğu 5S prensiplerine hâkimdir ve günlük rutinlerine yansıtmaktadır. Bununla birlikte bazı üyelerin katılım düzeyi ve bazı proseslerdeki süreklilik hâlâ güçlendirilmeye ihtiyaç duymaktadır. Önceki denetim aksiyonlarının bir bölümü gerçekleştirilmemiş ya da takip edilmemiştir. Liderlik desteğinin artırılması ve ödüllendirici bir geri bildirim sistemiyle disiplin üst seviyelere taşınabilir.',
+    mid: '5S disiplini kısmen sağlanmaktadır; ancak süreklilik henüz kazanılamamıştır. Ekip üyelerinin önemli bir bölümü 5S gerekliliklerini tam olarak içselleştirememiştir. Vardiya kontrolü ve önceki aksiyon takibi düzensiz yapılmakta, "Bir Fikrim Var" sistemi aktif kullanılmamaktadır. Bu durumun temel nedeni yönetimsel sahiplenme ve görünür liderlik eksikliği olabilir. Kapsamlı bir bilinçlendirme ve eğitim planı olmadan diğer pillarlardaki iyileştirmelerin sürdürülmesi güçleşecektir.',
+    lo:  '5S kültürü henüz ekip tarafından benimsenmemiştir. Operatörlerin büyük çoğunluğu 5S\'in amacını ve günlük çalışmalarına yansımasını tam olarak bilmemektedir. Vardiya kontrolü yapılmamakta, aksiyon takip sistemi işletilmemekte, sürekli iyileştirme mekanizmaları pasif durmaktadır. Bu durum diğer tüm pillarlardaki iyileştirmelerin uzun vadede geri gitmesine yol açacaktır. Kültürel dönüşüm için üst yönetim taahhüdü, yapılandırılmış eğitim ve görünür liderlik zorunludur.',
+    risk:   'Disiplin eksikliği → diğer 4 pillardaki kazanımlar kalıcılaşmaz · Aksiyon takipsizliği → tekrar eden sorunlar · Kültür boşluğu → yeni çalışan uyumu zorlaşır',
+    impact: 'Tüm 5S pillarlarının sürdürülebilirliği, sürekli iyileştirme kapasitesi, çalışan bağlılığı',
+    quick_win: 'Bu hafta: Her vardiya başında 5 dakikalık 5S kontrol turu rutinini başlatın ve sonucu pano üzerinde işaretleyin.',
+    rec_mid: '"Bir Fikrim Var" panosu aktive edilmeli ve aylık değerlendirme toplantısına alınmalı. Vardiya kontrol formu standartlaştırılmalı.',
+    rec_lo:  'Tüm ekip için zorunlu 5S temel eğitimi planlanmalı (min. 2 saat). Liderler tarafından günlük görünür saha turu başlatılmalı. Aksiyon takip panosu kurulmalı ve haftalık güncellenmeli.',
+    road_urgent: 'Vardiya kontrol formunu bas ve kullanıma al · Aksiyon takip panosunu kur',
+    road_30: 'Tüm ekibe 5S temel eğitimi ver · "Bir Fikrim Var" sistemini aktive et · İlk aksiyon kapanışlarını gerçekleştir',
+    road_90: 'Aylık 5S değerlendirme döngüsü kur · En iyi uygulama örneklerini diğer alanlara aktar · Ödüllendirme sistemi tasarla',
   },
 };
 
 function _getPillarText(id, pct, field){
   const t=PILLAR_ANALYSIS[id]; if(!t) return '';
-  if(field==='desc') return pct>=85?t.hi:pct>=70?t.ok:pct>=50?t.mid:t.lo;
-  if(field==='rec')  return pct<70?(pct<50?t.rec_lo:t.rec_mid):'';
+  if(field==='desc')   return pct>=85?t.hi:pct>=70?t.ok:pct>=50?t.mid:t.lo;
+  if(field==='rec')    return pct<70?(pct<50?t.rec_lo:t.rec_mid):'';
+  if(field==='risk')   return t.risk||'';
+  if(field==='impact') return t.impact||'';
+  if(field==='quick')  return t.quick_win||'';
   return '';
 }
 
-function _execSummary(score, areaName, weakest, strongest){
+// Bir pillar içindeki düşük puanlı soruları döndür
+function _getWeakQuestions(audit, pi, threshold){
+  threshold = threshold||3;
+  const answersRaw = audit.answers_json||{};
+  const anss = answersRaw[pi]||answersRaw[String(pi)]||[];
+  const p = PILLARS[pi];
+  const results = [];
+  p.questions.forEach(function(q,qi){
+    const ans = anss[qi];
+    const sc = getAnswerScore(q, ans, pi, qi);
+    if(sc!==null && sc<threshold){
+      results.push({q:q, qi:qi, ans:ans, sc:sc});
+    }
+  });
+  return results;
+}
+
+function _execSummary(score, areaName, weakest, strongest, badCount, prevDiff){
   const area = areaName||'denetlenen alan';
-  if(score>=85) return `<b>${area}</b> alanı bu denetimde <b>${score} puan</b> ile mükemmel bir performans sergilemiştir. 5S uygulamaları sistematik ve sürdürülebilir biçimde yürütülmekte; ${strongest.name.split('(')[0].trim()} başta olmak üzere tüm pillarlarda üst düzey başarı görülmektedir.`;
-  if(score>=70) return `<b>${area}</b> alanı bu denetimde <b>${score} puan</b> ile iyi bir performans ortaya koymuştur. Genel olarak olumlu bir tablo olmakla birlikte, özellikle <b>${weakest.name.split('(')[0].trim()}</b> pillarında tespit edilen eksiklikler giderildiğinde üst düzey performansa ulaşmak mümkündür.`;
-  if(score>=50) return `<b>${area}</b> alanı bu denetimde <b>${score} puan</b> ile orta düzey bir performans sergilemiştir. <b>${weakest.name.split('(')[0].trim()}</b> ve <b>${strongest.name.split('(')[0].trim()}</b> pillarları arasındaki dengesizlik dikkat çekmektedir. Öncelikli iyileştirme alanlarına odaklanılması önerilmektedir.`;
-  return `<b>${area}</b> alanı bu denetimde <b>${score} puan</b> almış olup ciddi iyileştirme gerektiren bir tablo ortaya çıkmıştır. Birden fazla pillarda tespit edilen eksiklikler sistematik ve acil müdahale gerektirmektedir. Yönetim desteğiyle kapsamlı bir 5S aksiyon planı oluşturulması zorunludur.`;
+  const trendNote = prevDiff!==null ? (prevDiff>0?' Bir önceki denetime göre <b>'+prevDiff+' puan artış</b> kaydedilmiştir.':prevDiff<0?' Bir önceki denetime göre <b>'+Math.abs(prevDiff)+' puan düşüş</b> gözlemlenmektedir.':' Puan önceki dönemle aynı düzeyde seyretmektedir.'):'';
+  if(score>=85) return '<b>'+area+'</b> alanı bu denetimde <b>'+score+' puan</b> ile mükemmel bir performans sergilemiştir. 5S uygulamaları sistematik ve sürdürülebilir biçimde yürütülmekte; <b>'+strongest.name.split('(')[0].trim()+'</b> başta olmak üzere tüm pillarlarda üst düzey başarı görülmektedir. Bu alan, iyi uygulama örneği olarak diğer alanlara referans gösterilebilir.'+trendNote;
+  if(score>=70) return '<b>'+area+'</b> alanı bu denetimde <b>'+score+' puan</b> ile iyi bir performans ortaya koymuştur. Genel tablo olumlu olmakla birlikte <b>'+weakest.name.split('(')[0].trim()+'</b> pillarındaki eksiklikler giderildiğinde üst düzey performansa ulaşmak mümkündür. Tespit edilen <b>'+badCount+' iyileştirme noktasının</b> aksiyona bağlanması önerilmektedir.'+trendNote;
+  if(score>=50) return '<b>'+area+'</b> alanı bu denetimde <b>'+score+' puan</b> ile orta düzey bir performans sergilemiştir. <b>'+weakest.name.split('(')[0].trim()+'</b> pillarındaki ciddi eksiklikler genel puanı aşağıya çekmektedir. En güçlü pillar olan <b>'+strongest.name.split('(')[0].trim()+'</b> iyi bir başlangıç noktası oluşturmaktadır; bu alandaki başarı modelinin diğer pillarlara aktarılması önerilmektedir.'+trendNote;
+  return '<b>'+area+'</b> alanı bu denetimde <b>'+score+' puan</b> almış olup kapsamlı iyileştirme gerektiren bir tablo ortaya çıkmıştır. Birden fazla pillarda kritik eksiklikler tespit edilmiş olup anlık iş güvenliği ve kalite riskleri barındırmaktadır. Yönetim taahhüdü ve kaynak desteğiyle hazırlanacak acil aksiyon planı hayata geçirilmeden sürdürülebilir iyileşme sağlanamayacaktır.'+trendNote;
 }
 
 function buildOfflineReport(audit){
   openModal('modal-ai');
   document.getElementById('ai-title').textContent='5S Denetim Raporu — '+(audit.area_name||'');
-  const dateStr = (audit.date||'').slice(0,10);
-  document.getElementById('ai-sub').textContent=`${dateStr} · ${audit.auditor_name||''} · ${audit.shift||''}`;
+  const dateStr=(audit.date||'').slice(0,10);
+  document.getElementById('ai-sub').textContent=dateStr+' · '+(audit.auditor_name||'')+' · '+(audit.shift||'');
   document.getElementById('ai-loading').style.display='none';
 
   const pjsRaw=audit.pillars_json||{};
   const pjs=Array.isArray(pjsRaw)
-    ? PILLARS.reduce((m,p,i)=>{ m[p.id]=pjsRaw[i]||{}; return m; }, {})
-    : pjsRaw;
+    ?PILLARS.reduce((m,p,i)=>{m[p.id]=pjsRaw[i]||{};return m;},{})
+    :pjsRaw;
 
   const score=audit.total_score||0;
-  const pillarData=PILLARS.map(p=>({ ...p, pct: Math.round(pjs[p.id]?.pct||0), contrib: pjs[p.id]?.contribution||0 }));
+  const pillarData=PILLARS.map(p=>({...p,pct:Math.round(pjs[p.id]?.pct||0),contrib:pjs[p.id]?.contribution||0}));
   const sorted=[...pillarData].sort((a,b)=>b.pct-a.pct);
   const strongest=sorted[0], weakest=sorted[sorted.length-1];
   const goodPillars=pillarData.filter(p=>p.pct>=70);
   const badPillars=pillarData.filter(p=>p.pct<70).sort((a,b)=>a.pct-b.pct);
 
-  // Trend — aynı alanın önceki denetimi
-  const prevAudits=S.audits
-    .filter(a=>a.area_id===audit.area_id && a.id!==audit.id && a.date<(audit.date||'9'))
-    .sort((a,b)=>b.date?.localeCompare(a.date));
-  const prev=prevAudits[0];
+  // ── Trend tarihi (son 6 denetim)
+  const sameAreaAudits=S.audits
+    .filter(a=>a.area_id===audit.area_id && a.id!==audit.id)
+    .sort((a,b)=>(a.date||'').localeCompare(b.date||''));
+  const prev=sameAreaAudits.filter(a=>a.date<=(audit.date||'9')).slice(-1)[0]||null;
   const trendDiff=prev?score-(prev.total_score||0):null;
-  const trendHtml=prev?`
-    <div style="margin-bottom:20px;padding:12px 16px;background:${trendDiff>=0?'#f0fdf4':'#fff7ed'};border:1px solid ${trendDiff>=0?'#86efac':'#fdba74'};border-radius:var(--r);">
-      <div style="font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px;">📈 Önceki Denetime Kıyasla</div>
-      <div style="display:flex;align-items:center;gap:12px;">
-        <div style="font-size:24px;font-weight:700;color:${trendDiff>=0?'#16a34a':'#ea580c'};">${trendDiff>=0?'+':''}${trendDiff} puan</div>
-        <div style="font-size:12px;color:var(--text2);">${prev.date?.slice(0,10)||''} tarihli denetimde <b>${prev.total_score}</b> puan alınmıştı.<br>${trendDiff>0?'Olumlu bir ilerleme gözlemlenmektedir.':trendDiff<0?'Performans gerileme göstermiştir; sebeplerin araştırılması önerilir.':'Performans önceki dönemle aynı düzeyde seyretmektedir.'}</div>
-      </div>
-    </div>`:
-    `<div style="margin-bottom:20px;padding:10px 14px;background:#f8fafc;border:1px solid var(--border);border-radius:var(--r);font-size:12px;color:var(--text3);">Bu alan için önceki denetim kaydı bulunmamaktadır.</div>`;
+  const last5=[...sameAreaAudits.slice(-5),audit].sort((a,b)=>(a.date||'').localeCompare(b.date||''));
 
-  // Pillar analiz HTML
-  const pillarHtml=pillarData.map(p=>{
-    const desc=_getPillarText(p.id,p.pct,'desc');
-    return `<div style="margin-bottom:16px;padding:14px 16px;border:1px solid var(--border);border-radius:var(--r);border-left:4px solid ${p.color};">
-      <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
-        <div style="width:28px;height:28px;border-radius:6px;background:${p.color};display:flex;align-items:center;justify-content:center;color:#fff;font-size:10px;font-weight:700;">${p.id}</div>
-        <div style="flex:1;"><div style="font-size:13px;font-weight:600;">${p.name}</div></div>
-        <div style="font-size:18px;font-weight:700;font-family:var(--mono);color:${scoreColor(p.pct)};">${p.pct}%</div>
-        <span class="badge ${scoreBadge(p.pct)}" style="font-size:10px;">${scoreLabel(p.pct)}</span>
-      </div>
-      <div class="sbar" style="margin-bottom:10px;"><div class="sbar-fill ${p.pct>=85?'hi':p.pct>=50?'md':'lo'}" style="width:${p.pct}%;"></div></div>
-      <div style="font-size:12px;color:var(--text2);line-height:1.6;">${desc}</div>
-    </div>`;
-  }).join('');
+  // ── Fabrika içi kıyaslama
+  const fabrikaAudits=S.audits.filter(function(a){
+    const ar=S.areas.find(function(x){return x.id===a.area_id;});
+    const thisAr=S.areas.find(function(x){return x.id===audit.area_id;});
+    return ar&&thisAr&&ar.fabrika===thisAr.fabrika&&a.total_score!=null;
+  });
+  // Her alan için en son denetim puanı
+  const areaLatest={};
+  fabrikaAudits.forEach(function(a){
+    if(!areaLatest[a.area_id]||a.date>areaLatest[a.area_id].date) areaLatest[a.area_id]=a;
+  });
+  const latestScores=Object.values(areaLatest).map(function(a){return a.total_score||0;});
+  const fabrikaAvg=latestScores.length?Math.round(latestScores.reduce(function(t,s){return t+s;},0)/latestScores.length):null;
+  const fabrikaRank=latestScores.length?latestScores.filter(function(s){return s>score;}).length+1:null;
+  const fabrikaTotal=latestScores.length;
 
-  // Güçlü yönler
-  const strongHtml=goodPillars.length?`
-    <div style="margin-bottom:20px;">
-      <div style="font-size:12px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px;">💪 Güçlü Yönler</div>
-      ${goodPillars.map(p=>`<div style="display:flex;align-items:flex-start;gap:8px;margin-bottom:6px;font-size:12px;">
-        <span style="color:#16a34a;font-size:14px;margin-top:1px;">✓</span>
-        <span><b>${p.name.split('(')[0].trim()}</b> — ${p.pct}% ile ${p.pct>=85?'mükemmel':'iyi'} düzeyde performans sergilenmektedir.</span>
-      </div>`).join('')}
-    </div>`:'';
+  // ── Risk seviyesi
+  const riskLevel=score>=85?{label:'Düşük Risk',color:'#16a34a',bg:'#f0fdf4',border:'#86efac',icon:'🟢'}
+    :score>=70?{label:'Orta-Düşük Risk',color:'#2563eb',bg:'#eff6ff',border:'#bfdbfe',icon:'🔵'}
+    :score>=50?{label:'Orta-Yüksek Risk',color:'#d97706',bg:'#fffbeb',border:'#fde68a',icon:'🟡'}
+    :{label:'Yüksek Risk',color:'#dc2626',bg:'#fef2f2',border:'#fecaca',icon:'🔴'};
 
-  // Öncelikli aksiyonlar
+  // ── Özet istatistikler
+  const totalQuestions=PILLARS.reduce(function(t,p){return t+p.questions.length;},0);
+  var answeredCount=0, weakQCount=0;
+  PILLARS.forEach(function(p,pi){
+    const wqs=_getWeakQuestions(audit,pi,4);
+    const answersRaw=audit.answers_json||{};
+    const anss=answersRaw[pi]||answersRaw[String(pi)]||[];
+    p.questions.forEach(function(q,qi){
+      if(anss[qi]!==null&&anss[qi]!==undefined) answeredCount++;
+    });
+    weakQCount+=wqs.length;
+  });
+  var perfectQCount=answeredCount-weakQCount;
+
+  // ── BÖLÜM 1: Başlık kartı (HTML string olarak)
+  var headerHtml='<div style="text-align:center;padding:24px 20px 20px;background:linear-gradient(135deg,#f8fafc,#eef2f7);border-radius:var(--r);margin-bottom:20px;border:1px solid var(--border);">'
+    +'<div style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;">TOPLAM 5S PUANI</div>'
+    +'<div style="font-size:72px;font-weight:800;font-family:var(--mono);color:'+scoreColor(score)+';line-height:1;">'+score+'</div>'
+    +'<div style="font-size:11px;color:var(--text3);margin:2px 0 10px;">/ 100 puan</div>'
+    +'<span class="badge '+scoreBadge(score)+'" style="font-size:14px;padding:6px 18px;">'+scoreLabel(score)+'</span>'
+    +'<div style="display:inline-flex;align-items:center;gap:5px;margin-left:8px;padding:4px 10px;background:'+riskLevel.bg+';border:1px solid '+riskLevel.border+';border-radius:20px;font-size:11px;font-weight:600;color:'+riskLevel.color+';">'+riskLevel.icon+' '+riskLevel.label+'</div>'
+    // Pillar grid
+    +'<div style="display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-top:18px;">'
+    +pillarData.map(function(p){
+      return '<div style="text-align:center;padding:8px 4px;background:#fff;border:1px solid var(--border);border-radius:var(--r);">'
+        +'<div style="width:20px;height:20px;border-radius:5px;background:'+p.color+';margin:0 auto 5px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:8px;font-weight:700;">'+p.id+'</div>'
+        +'<div style="font-size:14px;font-weight:700;color:'+scoreColor(p.pct)+';">'+p.pct+'%</div>'
+        +'<div style="font-size:9px;color:var(--text3);margin-top:2px;">'+p.name.split('(')[0].split(' ')[0]+'</div>'
+        +'</div>';
+    }).join('')
+    +'</div>'
+    // Özet istatistikler
+    +'<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px;">'
+    +'<div style="padding:8px;background:#fff;border:1px solid var(--border);border-radius:var(--r);"><div style="font-size:16px;font-weight:700;color:#16a34a;">'+perfectQCount+'</div><div style="font-size:9px;color:var(--text3);">Tam Puan</div></div>'
+    +'<div style="padding:8px;background:#fff;border:1px solid var(--border);border-radius:var(--r);"><div style="font-size:16px;font-weight:700;color:#ef4444;">'+weakQCount+'</div><div style="font-size:9px;color:var(--text3);">İyileştirme</div></div>'
+    +'<div style="padding:8px;background:#fff;border:1px solid var(--border);border-radius:var(--r);"><div style="font-size:16px;font-weight:700;color:var(--text1);">'+answeredCount+'/'+totalQuestions+'</div><div style="font-size:9px;color:var(--text3);">Cevaplanan</div></div>'
+    +'</div>'
+    +'</div>';
+
+  // ── BÖLÜM 2: Yönetici özeti
+  var summaryHtml='<div style="margin-bottom:20px;padding:16px;background:#f8fafc;border-left:4px solid '+scoreColor(score)+';border-radius:0 var(--r) var(--r) 0;">'
+    +'<div style="font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;">📋 Yönetici Özeti</div>'
+    +'<div style="font-size:12px;color:var(--text1);line-height:1.7;">'+_execSummary(score,audit.area_name,weakest,strongest,weakQCount,trendDiff)+'</div>'
+    +'</div>';
+
+  // ── BÖLÜM 3: Trend + Kıyaslama yan yana
+  // Mini trend bar chart (son 5 denetim)
+  var trendBarsHtml='';
+  if(last5.length>1){
+    const maxS=Math.max.apply(null,last5.map(function(a){return a.total_score||0;}));
+    trendBarsHtml='<div style="display:flex;align-items:flex-end;gap:4px;height:48px;margin-bottom:6px;">'
+      +last5.map(function(a){
+        const s=a.total_score||0;
+        const h=maxS>0?Math.round((s/maxS)*48):4;
+        const isCurrent=a.id===audit.id;
+        return '<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;">'
+          +'<div style="font-size:8px;color:var(--text3);">'+s+'</div>'
+          +'<div style="width:100%;border-radius:3px 3px 0 0;background:'+(isCurrent?scoreColor(s):'#cbd5e1')+';height:'+h+'px;"></div>'
+          +'</div>';
+      }).join('')
+      +'</div>'
+      +'<div style="display:flex;gap:4px;">'
+      +last5.map(function(a){
+        const isCurrent=a.id===audit.id;
+        return '<div style="flex:1;font-size:8px;color:'+(isCurrent?'var(--text1)':'var(--text3)')+';text-align:center;font-weight:'+(isCurrent?'700':'400')+';">'+((a.date||'').slice(5,10))+'</div>';
+      }).join('')
+      +'</div>';
+  }
+
+  var trendCardHtml='<div style="padding:12px 14px;background:'+(trendDiff===null?'#f8fafc':trendDiff>=0?'#f0fdf4':'#fff7ed')+';border:1px solid '+(trendDiff===null?'var(--border)':trendDiff>=0?'#86efac':'#fdba74')+';border-radius:var(--r);">'
+    +'<div style="font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px;">📈 Tarihsel Trend</div>'
+    +(trendBarsHtml||'')
+    +(trendDiff!==null
+      ?'<div style="display:flex;align-items:center;gap:8px;margin-top:8px;padding-top:8px;border-top:1px solid rgba(0,0,0,.06);">'
+        +'<div style="font-size:20px;font-weight:800;color:'+(trendDiff>=0?'#16a34a':'#ea580c')+';font-family:var(--mono);">'+(trendDiff>=0?'+':'')+trendDiff+'</div>'
+        +'<div style="font-size:11px;color:var(--text2);">önceki denetime göre<br><b>'+(trendDiff>0?'İlerleme ✓':trendDiff<0?'Gerileme — sebep araştırılmalı':'Değişim yok')+'</b></div>'
+        +'</div>'
+      :'<div style="font-size:11px;color:var(--text3);margin-top:4px;">Bu alan için ilk denetim kaydıdır.</div>'
+    )
+    +'</div>';
+
+  var benchmarkHtml='<div style="padding:12px 14px;background:#f8fafc;border:1px solid var(--border);border-radius:var(--r);">'
+    +'<div style="font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px;">🏭 Fabrika İçi Kıyaslama</div>'
+    +(fabrikaAvg!==null
+      ?'<div style="margin-bottom:10px;">'
+        +'<div style="display:flex;justify-content:space-between;font-size:11px;color:var(--text2);margin-bottom:4px;"><span>Bu Alan</span><span style="font-weight:700;color:'+scoreColor(score)+';">'+score+'</span></div>'
+        +'<div style="height:8px;background:#e2e8f0;border-radius:4px;margin-bottom:6px;"><div style="height:8px;background:'+scoreColor(score)+';border-radius:4px;width:'+score+'%;"></div></div>'
+        +'<div style="display:flex;justify-content:space-between;font-size:11px;color:var(--text2);margin-bottom:4px;"><span>Fabrika Ort.</span><span style="font-weight:700;">'+fabrikaAvg+'</span></div>'
+        +'<div style="height:8px;background:#e2e8f0;border-radius:4px;"><div style="height:8px;background:#94a3b8;border-radius:4px;width:'+fabrikaAvg+'%;"></div></div>'
+        +'</div>'
+        +'<div style="font-size:11px;color:var(--text2);padding-top:8px;border-top:1px solid var(--border);">'
+        +'Sıralama: <b style="color:'+scoreColor(score)+';">'+fabrikaRank+'. / '+fabrikaTotal+' alan</b>'
+        +(score>=fabrikaAvg?' · Fabrika ortalamasının <b>üzerinde</b> ✓':' · Fabrika ortalamasının <b>altında</b>')
+        +'</div>'
+      :'<div style="font-size:11px;color:var(--text3);">Kıyaslama için yeterli veri yok.</div>'
+    )
+    +'</div>';
+
+  var trendCompareHtml='<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px;">'+trendCardHtml+benchmarkHtml+'</div>';
+
+  // ── BÖLÜM 4: Pillar Bazlı Detaylı Analiz
+  var pillarHtml='';
+  PILLARS.forEach(function(p,pi){
+    const pd=pillarData[pi];
+    const desc=_getPillarText(p.id,pd.pct,'desc');
+    const risk=_getPillarText(p.id,pd.pct,'risk');
+    const impact=_getPillarText(p.id,pd.pct,'impact');
+    const quick=_getPillarText(p.id,pd.pct,'quick');
+    const weakQs=_getWeakQuestions(audit,pi,4);
+
+    // Zayıf sorular listesi
+    var weakQHtml='';
+    if(weakQs.length){
+      weakQHtml='<div style="margin-top:10px;padding-top:10px;border-top:1px dashed var(--border);">'
+        +'<div style="font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;margin-bottom:6px;">Tespit edilen zayıf noktalar</div>';
+      weakQs.forEach(function(item){
+        const scColor=item.sc===0?'#ef4444':item.sc<=2?'#f97316':'#eab308';
+        weakQHtml+='<div style="display:flex;align-items:flex-start;gap:6px;margin-bottom:5px;font-size:11px;">'
+          +'<span style="background:'+scColor+';color:#fff;border-radius:3px;padding:1px 5px;font-weight:700;flex-shrink:0;font-size:10px;">'+item.sc+'/4</span>'
+          +'<span style="color:var(--text2);line-height:1.4;">S'+(item.qi+1)+'. '+item.q.text.slice(0,90)+(item.q.text.length>90?'…':'')
+          +' <b style="color:'+scColor+';">('+_answerLabel(item.q,item.ans)+')</b></span>'
+          +'</div>';
+      });
+      weakQHtml+='</div>';
+    }
+
+    // Risk ve etki
+    var riskImpactHtml='';
+    if(risk||impact){
+      riskImpactHtml='<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px;">';
+      if(risk) riskImpactHtml+='<div style="padding:8px;background:#fff7ed;border:1px solid #fed7aa;border-radius:var(--rs);font-size:11px;"><b style="color:#c2410c;">⚠ Risk</b><br><span style="color:var(--text2);">'+risk+'</span></div>';
+      if(impact) riskImpactHtml+='<div style="padding:8px;background:#eff6ff;border:1px solid #bfdbfe;border-radius:var(--rs);font-size:11px;"><b style="color:#1d4ed8;">📌 Etkilediği Alanlar</b><br><span style="color:var(--text2);">'+impact+'</span></div>';
+      riskImpactHtml+='</div>';
+    }
+
+    // Hızlı kazanım
+    var quickHtml=quick&&pd.pct<85
+      ?'<div style="margin-top:10px;padding:8px 10px;background:#f0fdf4;border:1px solid #86efac;border-radius:var(--rs);font-size:11px;"><b style="color:#15803d;">⚡ Hızlı Kazanım</b> — '+quick+'</div>'
+      :'';
+
+    pillarHtml+='<div style="margin-bottom:16px;padding:14px 16px;border:1px solid var(--border);border-radius:var(--r);border-left:4px solid '+p.color+';">'
+      +'<div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">'
+      +'<div style="width:28px;height:28px;border-radius:6px;background:'+p.color+';display:flex;align-items:center;justify-content:center;color:#fff;font-size:10px;font-weight:700;">'+p.id+'</div>'
+      +'<div style="flex:1;"><div style="font-size:13px;font-weight:600;">'+p.name+'</div><div style="font-size:10px;color:var(--text3);">'+p.desc+'</div></div>'
+      +'<div style="text-align:right;">'
+      +'<div style="font-size:20px;font-weight:700;font-family:var(--mono);color:'+scoreColor(pd.pct)+';">'+pd.pct+'%</div>'
+      +'<span class="badge '+scoreBadge(pd.pct)+'" style="font-size:9px;">'+scoreLabel(pd.pct)+'</span>'
+      +'</div>'
+      +'</div>'
+      +'<div class="sbar" style="margin-bottom:10px;"><div class="sbar-fill '+(pd.pct>=85?'hi':pd.pct>=50?'md':'lo')+'" style="width:'+pd.pct+'%;"></div></div>'
+      +'<div style="font-size:12px;color:var(--text2);line-height:1.7;">'+desc+'</div>'
+      +weakQHtml
+      +riskImpactHtml
+      +quickHtml
+      +'</div>';
+  });
+
+  // ── BÖLÜM 5: Güçlü / Zayıf pillarlar yan yana
+  var strongWeakHtml='<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px;">';
+  // Güçlü
+  strongWeakHtml+='<div style="padding:12px 14px;background:#f0fdf4;border:1px solid #86efac;border-radius:var(--r);">'
+    +'<div style="font-size:11px;font-weight:700;color:#15803d;text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;">💪 Güçlü Yönler</div>';
+  if(goodPillars.length){
+    goodPillars.forEach(function(p){
+      strongWeakHtml+='<div style="display:flex;align-items:center;gap:6px;margin-bottom:5px;">'
+        +'<div style="width:14px;height:14px;border-radius:3px;background:'+p.color+';flex-shrink:0;"></div>'
+        +'<span style="font-size:11px;"><b>'+p.name.split('(')[0].trim()+'</b> — '+p.pct+'%'
+        +(p.pct>=85?' ✓ Mükemmel':' İyi')+'</span>'
+        +'</div>';
+    });
+  } else {
+    strongWeakHtml+='<div style="font-size:11px;color:var(--text3);">Henüz 70% üzeri pillar yok.</div>';
+  }
+  strongWeakHtml+='</div>';
+  // Zayıf
+  strongWeakHtml+='<div style="padding:12px 14px;background:#fef2f2;border:1px solid #fecaca;border-radius:var(--r);">'
+    +'<div style="font-size:11px;font-weight:700;color:#b91c1c;text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;">⚠ Geliştirilmesi Gereken</div>';
+  if(badPillars.length){
+    badPillars.forEach(function(p){
+      const urgColor=p.pct<50?'#dc2626':'#f97316';
+      strongWeakHtml+='<div style="display:flex;align-items:center;gap:6px;margin-bottom:5px;">'
+        +'<div style="width:14px;height:14px;border-radius:3px;background:'+urgColor+';flex-shrink:0;"></div>'
+        +'<span style="font-size:11px;"><b>'+p.name.split('(')[0].trim()+'</b> — <span style="color:'+urgColor+';">'+p.pct+'%</span>'
+        +(p.pct<50?' 🔴 Kritik':' 🟠 Orta')+'</span>'
+        +'</div>';
+    });
+  } else {
+    strongWeakHtml+='<div style="font-size:11px;color:#16a34a;">Tüm pillarlar 70%+ seviyesinde! 🎉</div>';
+  }
+  strongWeakHtml+='</div></div>';
+
+  // ── BÖLÜM 6: İyileştirme Yol Haritası (sadece eksik pillar varsa)
+  var roadmapHtml='';
+  if(badPillars.length){
+    const urgentItems=[], week30Items=[], week90Items=[];
+    badPillars.forEach(function(p){
+      const pa=PILLAR_ANALYSIS[p.id];
+      if(pa){
+        if(pa.road_urgent) urgentItems.push('<b style="color:'+p.color+';">'+p.id+':</b> '+pa.road_urgent);
+        if(pa.road_30)     week30Items.push('<b style="color:'+p.color+';">'+p.id+':</b> '+pa.road_30);
+        if(pa.road_90)     week90Items.push('<b style="color:'+p.color+';">'+p.id+':</b> '+pa.road_90);
+      }
+    });
+    roadmapHtml='<div style="margin-bottom:20px;">'
+      +'<div style="font-size:12px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.5px;margin-bottom:12px;">🗺 İyileştirme Yol Haritası</div>'
+      +'<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;">';
+    // Acil
+    roadmapHtml+='<div style="padding:12px;background:#fef2f2;border:1px solid #fecaca;border-radius:var(--r);">'
+      +'<div style="font-size:10px;font-weight:700;color:#dc2626;text-transform:uppercase;margin-bottom:8px;">⚡ Acil (Bu Hafta)</div>'
+      +urgentItems.map(function(t){return '<div style="font-size:11px;color:var(--text1);margin-bottom:4px;line-height:1.4;">▸ '+t+'</div>';}).join('')
+      +'</div>';
+    // 30 gün
+    roadmapHtml+='<div style="padding:12px;background:#fff7ed;border:1px solid #fed7aa;border-radius:var(--r);">'
+      +'<div style="font-size:10px;font-weight:700;color:#c2410c;text-transform:uppercase;margin-bottom:8px;">📅 Kısa Vadeli (30 Gün)</div>'
+      +week30Items.map(function(t){return '<div style="font-size:11px;color:var(--text1);margin-bottom:4px;line-height:1.4;">▸ '+t+'</div>';}).join('')
+      +'</div>';
+    // 90 gün
+    roadmapHtml+='<div style="padding:12px;background:#f0fdf4;border:1px solid #86efac;border-radius:var(--r);">'
+      +'<div style="font-size:10px;font-weight:700;color:#15803d;text-transform:uppercase;margin-bottom:8px;">🎯 Uzun Vadeli (90 Gün)</div>'
+      +week90Items.map(function(t){return '<div style="font-size:11px;color:var(--text1);margin-bottom:4px;line-height:1.4;">▸ '+t+'</div>';}).join('')
+      +'</div>'
+      +'</div></div>';
+  }
+
+  // ── BÖLÜM 7: Öncelikli aksiyonlar (butonlu)
   const _auditAreaId=audit.area_id||'';
   const _auditAreaName=audit.area_name||'';
-  const actionItems=badPillars.map(p=>{
+  var actionItemsHtml='';
+  badPillars.forEach(function(p){
     const rec=_getPillarText(p.id,p.pct,'rec');
-    if(!rec) return '';
+    if(!rec) return;
     const prio=p.pct<50?'Kritik':'Yüksek';
     const titleText=p.id+' · '+p.name.split('(')[0].trim()+': '+rec;
     const safeTitle=titleText.replace(/'/g,'&#39;');
-    return `<div style="display:flex;align-items:flex-start;gap:10px;margin-bottom:10px;padding:10px 12px;background:#fff7ed;border:1px solid #fed7aa;border-radius:var(--rs);">
-      <div style="width:20px;height:20px;border-radius:50%;background:${p.pct<50?'#ef4444':'#f97316'};color:#fff;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;flex-shrink:0;margin-top:1px;">${p.pct<50?'!':'▲'}</div>
-      <div style="flex:1;font-size:12px;"><b style="color:${p.color};">${p.id} · ${p.name.split('(')[0].trim()}:</b> ${rec}</div>
-      <button onclick="openActionFromReport('${_auditAreaId}','${_auditAreaName}','${safeTitle}','${prio}')" style="flex-shrink:0;font-size:10px;padding:3px 8px;border-radius:4px;border:1px solid #f97316;background:#fff7ed;color:#c2410c;cursor:pointer;font-weight:600;white-space:nowrap;">➕ Aksiyon Ekle</button>
-    </div>`;
-  }).filter(Boolean);
+    actionItemsHtml+='<div style="display:flex;align-items:flex-start;gap:10px;margin-bottom:10px;padding:10px 12px;background:#fff7ed;border:1px solid #fed7aa;border-radius:var(--rs);">'
+      +'<div style="width:20px;height:20px;border-radius:50%;background:'+(p.pct<50?'#ef4444':'#f97316')+';color:#fff;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;flex-shrink:0;margin-top:1px;">'+(p.pct<50?'!':'▲')+'</div>'
+      +'<div style="flex:1;font-size:12px;line-height:1.5;"><b style="color:'+p.color+';">'+p.id+' · '+p.name.split('(')[0].trim()+':</b> '+rec+'</div>'
+      +'<button onclick="openActionFromReport(\''+_auditAreaId+'\',\''+_auditAreaName+'\',\''+safeTitle+'\',\''+prio+'\')" style="flex-shrink:0;font-size:10px;padding:4px 10px;border-radius:4px;border:1px solid #f97316;background:#fff7ed;color:#c2410c;cursor:pointer;font-weight:600;white-space:nowrap;">➕ Aksiyon Ekle</button>'
+      +'</div>';
+  });
+  var actionsHtml=actionItemsHtml
+    ?'<div style="margin-bottom:20px;"><div style="font-size:12px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px;">🎯 Öncelikli İyileştirme Aksiyonları</div>'+actionItemsHtml+'</div>'
+    :'';
 
-  const actionsHtml=actionItems.length?`
-    <div style="margin-bottom:20px;">
-      <div style="font-size:12px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px;">🎯 Öncelikli İyileştirme Aksiyonları</div>
-      ${actionItems.join('')}
-    </div>`:'';
-
-  // Sonuç
+  // ── BÖLÜM 8: Sonuç
   const conclusionMap={
-    lo:`Sonuç olarak, ${audit.area_name||'bu alan'} için kapsamlı bir 5S iyileştirme planı hazırlanması ve üst yönetim desteğiyle hayata geçirilmesi büyük önem taşımaktadır. Yukarıda belirlenen aksiyonların en kısa sürede uygulanması ve bir sonraki denetimde ilerlemenin ölçülmesi önerilmektedir.`,
-    mid:`${audit.area_name||'Bu alan'} için belirlenen aksiyon maddelerinin sorumlu kişilere atanması ve takip takviminin oluşturulması önerilmektedir. Tutarlı uygulamayla bir sonraki denetimde belirgin ilerleme sağlanabilir.`,
-    ok:`${audit.area_name||'Bu alanda'} iyi bir performans sürdürülmektedir. Zayıf kalan pillar(lar)daki iyileştirmelerle mükemmel seviyeye ulaşmak mümkündür. Ekibin mevcut motivasyonunu koruyarak aksiyonları sahiplenmesi kritik önem taşımaktadır.`,
-    hi:`${audit.area_name||'Bu alan'} 5S uygulamalarında örnek bir seviyededir. Bu başarının sürdürülmesi ve diğer alanlara ilham kaynağı olması için en iyi uygulamaların paylaşılması önerilmektedir.`,
+    lo:'Sonuç olarak, <b>'+(audit.area_name||'bu alan')+'</b> acil ve sistematik 5S müdahalesi gerektirmektedir. Yukarıda belirlenen aksiyonların önceliklendirilmesi, sorumlu atanması ve takip takviminin oluşturulması büyük önem taşımaktadır. Yönetim taahhüdü olmadan sürdürülebilir iyileşme sağlanamayacağı göz önünde bulundurulmalıdır. Bir sonraki denetimde kaydedilen ilerlemenin ölçülmesi önerilmektedir.',
+    mid:'<b>'+(audit.area_name||'Bu alan')+'</b> için belirlenen aksiyon maddelerinin sorumlu kişilere atanması ve ilerlemenin aylık olarak izlenmesi önerilmektedir. Mevcut güçlü pillarlar baz alınarak diğer alanlara iyi uygulama transferi yapılabilir. Tutarlı uygulamayla önümüzdeki denetimde belirgin ilerleme sağlanması mümkündür.',
+    ok:'<b>'+(audit.area_name||'Bu alanda')+'</b> iyi bir 5S performansı sergilenmektedir. Zayıf kalan pillarlardaki hedefe yönelik iyileştirmelerle mükemmel seviyeye ulaşmak mümkündür. Ekibin sahiplenme ve motivasyon düzeyinin korunması ve en iyi uygulamaların diğer alanlara yaygınlaştırılması önerilmektedir.',
+    hi:'<b>'+(audit.area_name||'Bu alan')+'</b> 5S uygulamalarında fabrika genelinde örnek bir seviyededir. Bu başarının belgelenerek diğer alanlara ilham kaynağı olması için iyi uygulama videosu veya çapraz ziyaret organizasyonu değerlendirilebilir. Mevcut standardın sürdürülmesi için düzenli denetim döngüsünün korunması yeterli olacaktır.',
   };
   const conclusionKey=score>=85?'hi':score>=70?'ok':score>=50?'mid':'lo';
+  var conclusionHtml='<div style="padding:14px 16px;background:#f0fdf4;border:1px solid #86efac;border-radius:var(--r);margin-bottom:16px;">'
+    +'<div style="font-size:11px;font-weight:700;color:#15803d;text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;">✅ Sonuç ve Genel Değerlendirme</div>'
+    +'<div style="font-size:12px;color:var(--text1);line-height:1.7;">'+conclusionMap[conclusionKey]+'</div>'
+    +'</div>';
 
   // Fotoğraf bölümü — template literal dışında hesapla (iç içe backtick riski yok)
   const _photosRaw=audit.photos_json||{};
@@ -935,58 +1201,26 @@ function buildOfflineReport(audit){
       +'</div>';
   }
 
-  const html=`<div style="font-size:13px;line-height:1.6;">
+  // ── Tüm bölümleri birleştir
+  var footerHtml='<div style="margin-top:16px;font-size:10px;color:var(--text3);text-align:center;border-top:1px solid var(--border);padding-top:10px;">'
+    +'Rapor Tarihi: '+new Date().toLocaleDateString('tr-TR',{day:'numeric',month:'long',year:'numeric'})
+    +' · Denetim No: '+(audit.form_code||'—')+' · Denetçi: '+(audit.auditor_name||'—')
+    +'</div>';
 
-    <!-- Başlık kartı -->
-    <div style="text-align:center;padding:20px;background:linear-gradient(135deg,#f8fafc,#f1f5f9);border-radius:var(--r);margin-bottom:20px;border:1px solid var(--border);">
-      <div style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;">TOPLAM 5S PUANI</div>
-      <div style="font-size:64px;font-weight:800;font-family:var(--mono);color:${scoreColor(score)};line-height:1;">${score}</div>
-      <div style="font-size:11px;color:var(--text3);margin:2px 0 10px;">/ 100</div>
-      <span class="badge ${scoreBadge(score)}" style="font-size:14px;padding:6px 18px;">${scoreLabel(score)}</span>
-      <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-top:16px;">
-        ${pillarData.map(p=>`<div style="text-align:center;padding:6px 4px;background:#fff;border:1px solid var(--border);border-radius:var(--rs);">
-          <div style="width:18px;height:18px;border-radius:4px;background:${p.color};margin:0 auto 4px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:8px;font-weight:700;">${p.id}</div>
-          <div style="font-size:12px;font-weight:700;color:${scoreColor(p.pct)};">${p.pct}%</div>
-        </div>`).join('')}
-      </div>
-    </div>
+  var fullHtml='<div style="font-size:13px;line-height:1.6;">'
+    +headerHtml
+    +summaryHtml
+    +trendCompareHtml
+    +'<div style="margin-bottom:20px;"><div style="font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.5px;margin-bottom:12px;">🔍 Pillar Bazlı Detaylı Analiz</div>'+pillarHtml+'</div>'
+    +strongWeakHtml
+    +roadmapHtml
+    +actionsHtml
+    +conclusionHtml
+    +reportPhotosHtml
+    +footerHtml
+    +'</div>';
 
-    <!-- Genel değerlendirme -->
-    <div style="margin-bottom:20px;padding:14px 16px;background:#f8fafc;border-left:4px solid ${scoreColor(score)};border-radius:0 var(--r) var(--r) 0;">
-      <div style="font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px;">📋 Genel Değerlendirme</div>
-      <div style="font-size:12px;color:var(--text1);">${_execSummary(score,audit.area_name,weakest,strongest)}</div>
-    </div>
-
-    <!-- Trend -->
-    ${trendHtml}
-
-    <!-- Pillar analizi -->
-    <div style="margin-bottom:20px;">
-      <div style="font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.5px;margin-bottom:12px;">🔍 Pillar Bazlı Analiz</div>
-      ${pillarHtml}
-    </div>
-
-    <!-- Güçlü yönler -->
-    ${strongHtml}
-
-    <!-- Aksiyonlar -->
-    ${actionsHtml}
-
-    <!-- Sonuç -->
-    <div style="padding:14px 16px;background:#f0fdf4;border:1px solid #86efac;border-radius:var(--r);">
-      <div style="font-size:11px;font-weight:700;color:#15803d;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px;">✅ Sonuç ve Öneriler</div>
-      <div style="font-size:12px;color:var(--text1);">${conclusionMap[conclusionKey]}</div>
-    </div>
-
-    <!-- Fotoğraflar -->
-    ${reportPhotosHtml}
-
-    <div style="margin-top:16px;font-size:10px;color:var(--text3);text-align:center;border-top:1px solid var(--border);padding-top:10px;">
-      Rapor Tarihi: ${new Date().toLocaleDateString('tr-TR',{day:'numeric',month:'long',year:'numeric'})} · Denetim No: ${audit.form_code||'—'} · Denetçi: ${audit.auditor_name||'—'}
-    </div>
-  </div>`;
-
-  document.getElementById('ai-content').innerHTML=html;
+  document.getElementById('ai-content').innerHTML=fullHtml;
   document.getElementById('ai-content').style.display='block';
   document.getElementById('pdf-btn').style.display='';
 }

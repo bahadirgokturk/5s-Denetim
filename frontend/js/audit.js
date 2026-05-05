@@ -999,29 +999,67 @@ function buildOfflineReport(audit){
 
   // ── BÖLÜM 4: Pillar Bazlı Detaylı Analiz
   var pillarHtml='';
+  var _rpPhotosRaw=audit.photos_json||{};  // fotoğraf erişimi için
   PILLARS.forEach(function(p,pi){
     const pd=pillarData[pi];
     const desc=_getPillarText(p.id,pd.pct,'desc');
     const risk=_getPillarText(p.id,pd.pct,'risk');
     const impact=_getPillarText(p.id,pd.pct,'impact');
     const quick=_getPillarText(p.id,pd.pct,'quick');
-    const weakQs=_getWeakQuestions(audit,pi,4);
 
-    // Zayıf sorular listesi
-    var weakQHtml='';
-    if(weakQs.length){
-      weakQHtml='<div style="margin-top:10px;padding-top:10px;border-top:1px dashed var(--border);">'
-        +'<div style="font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;margin-bottom:6px;">Tespit edilen zayıf noktalar</div>';
-      weakQs.forEach(function(item){
-        const scColor=item.sc===0?'#ef4444':item.sc<=2?'#f97316':'#eab308';
-        weakQHtml+='<div style="display:flex;align-items:flex-start;gap:6px;margin-bottom:5px;font-size:11px;">'
-          +'<span style="background:'+scColor+';color:#fff;border-radius:3px;padding:1px 5px;font-weight:700;flex-shrink:0;font-size:10px;">'+item.sc+'/4</span>'
-          +'<span style="color:var(--text2);line-height:1.4;">S'+(item.qi+1)+'. '+item.q.text.slice(0,90)+(item.q.text.length>90?'…':'')
-          +' <b style="color:'+scColor+';">('+_answerLabel(item.q,item.ans)+')</b></span>'
-          +'</div>';
-      });
-      weakQHtml+='</div>';
-    }
+    // Tüm soruları tara: zayıf olanlar + fotoğraflı olanlar gösterilir
+    var answersRaw=audit.answers_json||{};
+    var anss=answersRaw[pi]||answersRaw[String(pi)]||[];
+    var qRows='';
+    var hasAnyRow=false;
+
+    p.questions.forEach(function(q,qi){
+      var ans=anss[qi];
+      var sc=getAnswerScore(q,ans,pi,qi);
+      var imgs=(_rpPhotosRaw[pi]&&_rpPhotosRaw[pi][qi])||(_rpPhotosRaw[String(pi)]&&_rpPhotosRaw[String(pi)][String(qi)])||[];
+      var isWeak=(sc!==null&&sc<4);
+      var hasPhotos=imgs.length>0;
+
+      if(!isWeak&&!hasPhotos) return; // iyi puan + fotoğraf yok → gösterme
+
+      hasAnyRow=true;
+      var scColor=sc===null?'#94a3b8':sc===0?'#ef4444':sc<=2?'#f97316':sc===3?'#eab308':'#16a34a';
+      var scBg=sc===null?'#f1f5f9':sc===0?'#fef2f2':sc<=2?'#fff7ed':sc===3?'#fefce8':'#f0fdf4';
+
+      // Fotoğraf thumbnails — DOM ile oluştur
+      var thumbsHtml='';
+      if(hasPhotos){
+        imgs.forEach(function(src){
+          var el=document.createElement('div');
+          el.style.cssText='position:relative;flex-shrink:0;';
+          var img=document.createElement('img');
+          img.src=src;
+          img.style.cssText='width:72px;height:72px;object-fit:cover;border-radius:6px;border:2px solid '+p.color+';cursor:zoom-in;display:block;';
+          img.onclick=function(){ openPhotoFull(src); };
+          el.appendChild(img);
+          thumbsHtml+=el.outerHTML;
+        });
+        thumbsHtml='<div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:7px;">'+thumbsHtml+'</div>';
+      }
+
+      qRows+='<div style="padding:8px 10px;margin-bottom:6px;background:'+scBg+';border:1px solid '+(isWeak?(sc===0?'#fecaca':sc<=2?'#fed7aa':'#fef08a'):'var(--border)')+';border-radius:var(--rs);border-left:3px solid '+scColor+';">'
+        +'<div style="display:flex;align-items:flex-start;gap:7px;">'
+        +'<span style="background:'+scColor+';color:#fff;border-radius:3px;padding:1px 6px;font-weight:700;flex-shrink:0;font-size:10px;margin-top:1px;">'+(sc!==null?sc+'/4':'—')+'</span>'
+        +'<div style="flex:1;">'
+        +'<div style="font-size:11px;color:var(--text1);line-height:1.5;font-weight:'+(isWeak?'600':'400')+';">S'+(qi+1)+'. '+q.text+'</div>'
+        +(ans!==null&&ans!==undefined?'<div style="font-size:10px;color:'+scColor+';margin-top:2px;font-weight:600;">Cevap: '+_answerLabel(q,ans)+'</div>':'')
+        +thumbsHtml
+        +'</div>'
+        +'</div>'
+        +'</div>';
+    });
+
+    var weakQHtml=hasAnyRow
+      ?'<div style="margin-top:12px;padding-top:10px;border-top:1px dashed var(--border);">'
+        +'<div style="font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;margin-bottom:8px;">Soru Detayları</div>'
+        +qRows
+        +'</div>'
+      :'';
 
     // Risk ve etki
     var riskImpactHtml='';
@@ -1154,53 +1192,6 @@ function buildOfflineReport(audit){
     +'<div style="font-size:12px;color:var(--text1);line-height:1.7;">'+conclusionMap[conclusionKey]+'</div>'
     +'</div>';
 
-  // Fotoğraf bölümü — template literal dışında hesapla (iç içe backtick riski yok)
-  const _photosRaw=audit.photos_json||{};
-  const _photoSections=[];
-  PILLARS.forEach(function(pp,pi){
-    var pPhotos=[];
-    pp.questions.forEach(function(qq,qi){
-      var imgs=(_photosRaw[pi]&&_photosRaw[pi][qi])||(_photosRaw[String(pi)]&&_photosRaw[String(pi)][String(qi)])||[];
-      imgs.forEach(function(src){ pPhotos.push({src:src,qi:qi,color:pp.color,id:pp.id,name:pp.name}); });
-    });
-    if(pPhotos.length) _photoSections.push(pPhotos);
-  });
-  var reportPhotosHtml='';
-  if(_photoSections.length){
-    var _totalPh=_photoSections.reduce(function(t,s){return t+s.length;},0);
-    var _secHtml='';
-    _photoSections.forEach(function(pArr){
-      var _thumbs='';
-      pArr.forEach(function(ph){
-        var _img=document.createElement('img');
-        _img.src=ph.src;
-        _img.style.cssText='width:96px;height:96px;object-fit:cover;border-radius:8px;border:2px solid '+ph.color+';cursor:zoom-in;display:block;';
-        _img.onclick=function(){ openPhotoFull(ph.src); };
-        var _wrap=document.createElement('div');
-        _wrap.style.cssText='position:relative;flex-shrink:0;';
-        var _lbl=document.createElement('div');
-        _lbl.style.cssText='position:absolute;bottom:0;left:0;right:0;background:rgba(0,0,0,.6);color:#fff;font-size:9px;text-align:center;border-radius:0 0 6px 6px;padding:2px;';
-        _lbl.textContent='S'+(ph.qi+1);
-        _wrap.appendChild(_img);
-        _wrap.appendChild(_lbl);
-        _thumbs+=_wrap.outerHTML;
-      });
-      var _color=pArr[0].color, _id=pArr[0].id, _name=pArr[0].name;
-      _secHtml+='<div style="margin-bottom:14px;">'
-        +'<div style="display:flex;align-items:center;gap:6px;margin-bottom:8px;">'
-        +'<div style="width:20px;height:20px;border-radius:4px;background:'+_color+';display:flex;align-items:center;justify-content:center;color:#fff;font-size:9px;font-weight:700;">'+_id+'</div>'
-        +'<span style="font-size:12px;font-weight:600;">'+_name+'</span>'
-        +'<span style="font-size:11px;color:var(--text3);">('+pArr.length+' fotoğraf)</span>'
-        +'</div>'
-        +'<div style="display:flex;flex-wrap:wrap;gap:8px;">'+_thumbs+'</div>'
-        +'</div>';
-    });
-    reportPhotosHtml='<div style="margin-top:20px;">'
-      +'<div style="font-size:12px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.5px;margin-bottom:12px;">📷 Denetim Fotoğrafları ('+_totalPh+')</div>'
-      +_secHtml
-      +'</div>';
-  }
-
   // ── Tüm bölümleri birleştir
   var footerHtml='<div style="margin-top:16px;font-size:10px;color:var(--text3);text-align:center;border-top:1px solid var(--border);padding-top:10px;">'
     +'Rapor Tarihi: '+new Date().toLocaleDateString('tr-TR',{day:'numeric',month:'long',year:'numeric'})
@@ -1216,7 +1207,6 @@ function buildOfflineReport(audit){
     +roadmapHtml
     +actionsHtml
     +conclusionHtml
-    +reportPhotosHtml
     +footerHtml
     +'</div>';
 

@@ -11,6 +11,7 @@ const areasRoutes   = require('./routes/areas');
 const usersRoutes   = require('./routes/users');
 const actionsRoutes = require('./routes/actions');
 const dashRoutes    = require('./routes/dashboard');
+const formsRoutes   = require('./routes/forms');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -50,6 +51,7 @@ app.use('/api/areas',     areasRoutes);
 app.use('/api/users',     usersRoutes);
 app.use('/api/actions',   actionsRoutes);
 app.use('/api/dashboard', dashRoutes);
+app.use('/api/forms',     formsRoutes);
 
 // ── SPA fallback ─────────────────────────────────────────────────
 app.get('*', (req, res) => {

@@ -35,21 +35,15 @@ document.addEventListener('DOMContentLoaded', async ()=>{
   const userModal = document.getElementById('modal-user-add');
   if(userModal){
     const obs = new MutationObserver(()=>{
-      if(userModal.style.display==='none'||!userModal.style.display){
+      // Modal class bazlı açılıp kapanıyor ('open' class eklenir/kaldırılır)
+      if(!userModal.classList.contains('open')){
         const saveBtn = userModal.querySelector('.btn-primary');
         if(saveBtn && saveBtn.textContent.includes('Güncelle')){
-          saveBtn.onclick = addUser;
-          saveBtn.textContent = 'Kaydet';
-          const titleEl = userModal.querySelector('.modal-title');
-          if(titleEl) titleEl.textContent = 'Yeni Kullanıcı Ekle';
-          const pwLabel = userModal.querySelector('label');
-          if(pwLabel && pwLabel.textContent.includes('Yeni')){
-            // reset yapıldı: label düzenlenmeden bırak
-          }
+          _resetUserModalButtons();
         }
       }
     });
-    obs.observe(userModal, { attributes:true, attributeFilter:['style'] });
+    obs.observe(userModal, { attributes:true, attributeFilter:['class'] });
   }
 
   // ── QR otomatik başlatma ────────────────────────────────────

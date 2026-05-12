@@ -86,12 +86,14 @@ async function loadAllData(){
 
     // Denetçi listesi (admin + denetci rolü)
     if(CURRENT_USER?.role==='admin'){
-      const [users, plans] = await Promise.all([
+      const [users, plans, forms] = await Promise.all([
         apiFetch('/users'),
         apiFetch('/audits/plans/list'),
+        apiFetch('/forms'),
       ]);
       if(users) S.users = users;
       if(plans) S.atamalar = plans;
+      if(forms) S.formSablonlari = forms;
       S.auditors = S.users.filter(u=>u.role==='denetci').map(u=>u.name);
     } else if(CURRENT_USER?.role==='denetci'){
       const plans = await apiFetch('/audits/plans/list');

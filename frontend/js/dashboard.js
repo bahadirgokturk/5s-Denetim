@@ -131,7 +131,9 @@ function renderDenetciPlanTamamWidget(){
 function renderLeaderboardPreview(){
   const el=document.getElementById('leaderboard-preview'); if(!el) return;
   const areaMap={};
-  S.audits.forEach(a=>{ const k=a.area_name||a.area_id; if(!areaMap[k]) areaMap[k]=[]; areaMap[k].push(a.total_score||0); });
+  // Aktif zaman filtresini uygula (getFilteredAudits admin filtrelerini dikkate alır)
+  const filteredAudits = (typeof getFilteredAudits==='function') ? getFilteredAudits() : S.audits;
+  filteredAudits.forEach(a=>{ const k=a.area_name||a.area_id; if(!areaMap[k]) areaMap[k]=[]; areaMap[k].push(a.total_score||0); });
   const sorted=Object.entries(areaMap).map(([k,v])=>({ name:k, avg:Math.round(v.reduce((s,x)=>s+x,0)/v.length) })).sort((a,b)=>b.avg-a.avg).slice(0,3);
   const medals=['🥇','🥈','🥉'];
   el.innerHTML=sorted.map((a,i)=>`
@@ -573,11 +575,11 @@ function removeFmSoru(btn){
   if(row) row.remove();
 }
 
-function formSablonuKaydet(){
+async function formSablonuKaydet(){
   const adi = document.getElementById('fm-adi')?.value.trim();
   if(!adi){ showToast('Form adı zorunlu.'); return; }
 
-  const id = document.getElementById('fm-edit-id')?.value || 'form-'+Date.now();
+  const editId   = document.getElementById('fm-edit-id')?.value || '';
   const aciklama = document.getElementById('fm-aciklama')?.value.trim();
 
   // Dinamik soru listelerinden seçili ve dolu soruları topla
@@ -596,22 +598,35 @@ function formSablonuKaydet(){
 
   if(!pillarlar.length){ showToast('En az bir soru seçili olmalı.'); return; }
 
-  if(!S.formSablonlari) S.formSablonlari=[];
-  const existing = S.formSablonlari.findIndex(f=>f.id===id);
-  const sablon = { id, adi, aciklama, pillarlar };
-  if(existing>=0) S.formSablonlari[existing]=sablon;
-  else S.formSablonlari.push(sablon);
+  const body = { adi, aciklama, pillarlar };
+  let result;
+  if(editId){
+    result = await apiFetch('/forms/'+editId, { method:'PUT', body:JSON.stringify(body) });
+  } else {
+    result = await apiFetch('/forms', { method:'POST', body:JSON.stringify(body) });
+  }
 
-  closeModal('modal-form-yeni');
-  renderFormSablonlari();
-  showToast('✅ Form şablonu kaydedildi.');
+  if(result){
+    if(!S.formSablonlari) S.formSablonlari=[];
+    if(editId){
+      S.formSablonlari = S.formSablonlari.map(f=>f.id===editId?result:f);
+    } else {
+      S.formSablonlari.push(result);
+    }
+    closeModal('modal-form-yeni');
+    renderFormSablonlari();
+    showToast('✅ Form şablonu kaydedildi.');
+  }
 }
 
-function formSablonuSil(id){
+async function formSablonuSil(id){
   if(!confirm('Bu şablonu silmek istediğinizden emin misiniz?')) return;
-  S.formSablonlari=(S.formSablonlari||[]).filter(f=>f.id!==id);
-  renderFormSablonlari();
-  showToast('Form şablonu silindi.');
+  const ok = await apiFetch('/forms/'+id, { method:'DELETE' });
+  if(ok!==null){
+    S.formSablonlari=(S.formSablonlari||[]).filter(f=>f.id!==id);
+    renderFormSablonlari();
+    showToast('Form şablonu silindi.');
+  }
 }
 
 function formDuzenle(id){

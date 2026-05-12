@@ -75,7 +75,7 @@ function openEditUserModal(id){
   document.getElementById('nu-dept').value     = u.dept||'';
 
   // Şifre alanını isteğe bağlı yap
-  const pwLabel = document.querySelector('label[for="nu-password"]');
+  const pwLabel = document.getElementById('nu-password-label');
   if(pwLabel) pwLabel.textContent = 'Yeni Şifre (boş bırakılabilir)';
   document.getElementById('nu-password')?.setAttribute('placeholder','Değiştirmek istemiyorsanız boş bırakın');
 
@@ -120,25 +120,49 @@ function _resetUserModalButtons(){
     saveBtn.onclick = addUser;
     saveBtn.textContent = 'Kaydet';
   }
-  const pwLabel = document.querySelector('label[for="nu-password"]');
+  const pwLabel = document.getElementById('nu-password-label');
   if(pwLabel) pwLabel.textContent = 'Şifre *';
   document.getElementById('nu-password')?.setAttribute('placeholder','Şifre belirle');
 }
 
-async function resetUserPass(id){
-  const pw = prompt('Yeni şifreyi girin (en az 6 karakter):');
-  if(pw===null) return;
-  if(!pw||pw.length<6){ showToast('Şifre en az 6 karakter olmalıdır.'); return; }
-
+function resetUserPass(id){
   const u = S.users.find(u=>u.id===id);
   if(!u){ showToast('Kullanıcı bulunamadı.'); return; }
+  // Modal alanlarını doldur
+  const nameEl = document.getElementById('rp-user-name');
+  if(nameEl) nameEl.textContent = u.name + ' (@' + u.username + ')';
+  const idEl = document.getElementById('rp-user-id');
+  if(idEl) idEl.value = id;
+  const pw1 = document.getElementById('rp-password');
+  const pw2 = document.getElementById('rp-password2');
+  if(pw1) pw1.value = '';
+  if(pw2) pw2.value = '';
+  openModal('modal-reset-pass');
+}
 
-  // Backend şifreyi ana PUT rotasında günceller (password alanı varsa)
-  const result = await apiFetch(`/users/${id}`, {
-    method:'PUT',
-    body: JSON.stringify({ name:u.name, role:u.role, dept:u.dept, fabrika:u.fabrika, bolum:u.bolum, password:pw })
-  });
-  if(result) showToast('Şifre güncellendi.');
+async function saveResetPass(){
+  const id  = document.getElementById('rp-user-id')?.value;
+  const pw  = document.getElementById('rp-password')?.value;
+  const pw2 = document.getElementById('rp-password2')?.value;
+  if(!id){ showToast('Kullanıcı bulunamadı.'); return; }
+  if(!pw || pw.length<6){ showToast('Şifre en az 6 karakter olmalıdır.'); return; }
+  if(pw !== pw2){ showToast('Şifreler eşleşmiyor.'); return; }
+  const u = S.users.find(u=>u.id===id);
+  if(!u){ showToast('Kullanıcı bulunamadı.'); return; }
+  const btn = document.getElementById('rp-save-btn');
+  if(btn){ btn.disabled=true; btn.textContent='Kaydediliyor...'; }
+  try {
+    const result = await apiFetch(`/users/${id}`, {
+      method:'PUT',
+      body: JSON.stringify({ name:u.name, username:u.username, role:u.role, dept:u.dept, fabrika:u.fabrika, bolum:u.bolum, password:pw })
+    });
+    if(result){
+      closeModal('modal-reset-pass');
+      showToast('✅ Şifre güncellendi.');
+    }
+  } finally {
+    if(btn){ btn.disabled=false; btn.textContent='🔑 Güncelle'; }
+  }
 }
 
 async function delUser(id){

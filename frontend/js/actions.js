@@ -92,6 +92,7 @@ async function addAction(){
   const area = S.areas.find(a=>a.id===area_id);
   const body = {
     description: title + (desc ? '\n' + desc : ''),
+    audit_id:    _currentAuditId||null,
     area_id:     area_id||null,
     area_name:   area?.name||'',
     assigned_to: assigned||'',
@@ -120,6 +121,7 @@ async function addAction(){
 }
 
 let _editActionId = null;
+let _currentAuditId = null;
 
 function openEditActionModal(id){
   const ac = S.actions.find(a=>a.id===id);
@@ -228,6 +230,7 @@ async function delAction(id){
 // modal-action-add açılınca alan listesini doldur
 function initActionModal(){
   _editActionId = null;
+  _currentAuditId = null;
   const areaSel = document.getElementById('na-area');
   if(areaSel) _fillActionAreaSelect(areaSel);
   const mt = document.querySelector('#modal-action-add .modal-title');
@@ -235,9 +238,10 @@ function initActionModal(){
 }
 
 // Rapor içinden aksiyon ekle — modal-ai kapanır, aksiyon formu önceden dolu açılır
-function openActionFromReport(areaId, areaName, title, priority){
+function openActionFromReport(auditId, areaId, areaName, title, priority){
   closeModal('modal-ai');
   _editActionId = null;
+  _currentAuditId = auditId || null;
 
   // Başlık
   const titleEl = document.getElementById('na-title');

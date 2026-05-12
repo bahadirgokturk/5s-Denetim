@@ -36,7 +36,7 @@ router.get('/', async (req, res, next) => {
     const { status } = req.query;
     if (status) { sql += ` AND ac.status = $${params.length + 1}`; params.push(status); }
 
-    sql += ' ORDER BY ac.created_at DESC';
+    sql += ' ORDER BY ac.created_at DESC LIMIT 500';
     const { rows } = await db.query(sql, params);
     res.json(rows);
   } catch (err) { next(err); }

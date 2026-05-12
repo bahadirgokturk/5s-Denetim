@@ -61,7 +61,7 @@ router.post('/', requireAdmin, async (req, res, next) => {
 // PUT /api/users/:id — Kullanıcı güncelle (sadece admin)
 router.put('/:id', requireAdmin, async (req, res, next) => {
   try {
-    const { name, role, dept, fabrika, bolum, password } = req.body;
+    const { name, username, role, dept, fabrika, bolum, password } = req.body;
 
     // Şifre değiştirilmek isteniyorsa
     if (password) {
@@ -72,14 +72,23 @@ router.put('/:id', requireAdmin, async (req, res, next) => {
       );
     }
 
+    // username güncellenecekse lowercase ve trim
+    const uname = username ? username.toLowerCase().trim() : undefined;
+
     const { rows } = await db.query(
       `UPDATE users SET name=$1, role=$2, dept=$3, fabrika=$4, bolum=$5
+         ${uname ? ', username=$7' : ''}
        WHERE id=$6 RETURNING ${SAFE_COLS}`,
-      [name, role, dept || '', fabrika || '', bolum || '', req.params.id]
+      uname
+        ? [name, role, dept || '', fabrika || '', bolum || '', req.params.id, uname]
+        : [name, role, dept || '', fabrika || '', bolum || '', req.params.id]
     );
     if (!rows[0]) return res.status(404).json({ error: 'Kullanıcı bulunamadı' });
     res.json(rows[0]);
-  } catch (err) { next(err); }
+  } catch (err) {
+    if (err.code === '23505') return res.status(409).json({ error: 'Bu kullanıcı adı zaten kullanımda' });
+    next(err);
+  }
 });
 
 // DELETE /api/users/:id — Kullanıcı sil (sadece admin, kendini silemez)

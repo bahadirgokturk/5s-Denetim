@@ -107,6 +107,17 @@ CREATE TABLE IF NOT EXISTS audit_plans (
   updated_at       TIMESTAMPTZ DEFAULT NOW()
 );
 
+-- Form Şablonları
+CREATE TABLE IF NOT EXISTS form_templates (
+  id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  adi         VARCHAR(128) NOT NULL,
+  aciklama    TEXT DEFAULT '',
+  pillarlar   JSONB DEFAULT '[]',
+  created_by  UUID REFERENCES users(id) ON DELETE SET NULL,
+  created_at  TIMESTAMPTZ DEFAULT NOW(),
+  updated_at  TIMESTAMPTZ DEFAULT NOW()
+);
+
 -- ============================================================
 -- İNDEKSLER
 -- ============================================================

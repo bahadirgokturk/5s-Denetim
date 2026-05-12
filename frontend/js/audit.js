@@ -543,7 +543,10 @@ function updateSummary(){
 }
 
 // ── Denetim kaydet ────────────────────────────────────────────
+let _submitInProgress = false;
+
 async function submitAudit(withReport=false){
+  if(_submitInProgress) return;   // çift tıklama koruması
   const areaId   = document.getElementById('audit-area')?.value;
   // Dropdown metni "dept › name" formatındadır; temiz ismi S.areas'dan al
   const areaObj  = S.areas.find(a=>a.id===areaId);
@@ -570,8 +573,12 @@ async function submitAudit(withReport=false){
     status:'tamamlandi', form_code:formCode, location, team_leader:teamLead,
   };
 
-  const btn=document.querySelector('[onclick="submitAudit()"]');
-  if(btn){ btn.disabled=true; btn.innerHTML='<span class="spinner"></span>Kaydediliyor...'; }
+  _submitInProgress = true;
+  // Tüm kaydet butonlarını devre dışı bırak
+  const saveBtns = document.querySelectorAll('[onclick="submitAudit()"], [onclick="submitAndReport()"]');
+  saveBtns.forEach(b=>{ b.disabled=true; });
+  const btn = saveBtns[0];
+  if(btn) btn.innerHTML = '<span class="spinner"></span>Kaydediliyor...';
 
   try {
     let result;
@@ -601,7 +608,9 @@ async function submitAudit(withReport=false){
   } catch(err){
     showToast('⚠ '+err.message);
   } finally {
-    if(btn){ btn.disabled=false; btn.textContent='✓ Denetimi Kaydet'; }
+    _submitInProgress = false;
+    saveBtns.forEach(b=>{ b.disabled=false; });
+    if(btn) btn.textContent = '✓ Denetimi Kaydet';
   }
 }
 

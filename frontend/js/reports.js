@@ -105,7 +105,7 @@ function _renderPillarChart(audits){
   const pillarAvgs = PILLARS.map((p,pi)=>{
     const vals = audits.map(a=>{
       const pils = Array.isArray(a.pillars_json) ? a.pillars_json : (a.pillars_json ? Object.values(a.pillars_json) : []);
-      return pils[pi]?.score ?? pils[pi]?.pct ?? null;
+      return pils[pi]?.pct ?? pils[pi]?.score ?? null;
     }).filter(v=>v!=null);
     return vals.length ? Math.round(vals.reduce((s,v)=>s+Number(v),0)/vals.length) : 0;
   });
@@ -148,7 +148,7 @@ function exportCSV(){
       a.auditor_name||'',
       a.shift||'',
       a.total_score||0,
-      ...PILLARS.map((_,pi)=>pils[pi]?.score??'')
+      ...PILLARS.map((_,pi)=>pils[pi]?.pct??pils[pi]?.score??'')
     ]);
   });
 

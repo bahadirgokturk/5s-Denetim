@@ -50,7 +50,7 @@ const SEED_AREAS = [
   {id:'es-c-2', name:'Taşlama',             dept:'Üretim',    alt_dept:'Çelik Üretim',  fabrika:'Esbaş'},
   {id:'es-c-3', name:'Kaynak Alanı',        dept:'Üretim',    alt_dept:'Çelik Üretim',  fabrika:'Esbaş'},
   {id:'es-c-4', name:'CNC',                 dept:'Üretim',    alt_dept:'Çelik Üretim',  fabrika:'Esbaş'},
-  {id:'es-c-5', name:'Kalite Kontrol',      dept:'Üretim',    alt_dept:'Çelik Üretim',  fabrika:'Esbaş'},
+  {id:'es-c-5', name:'Kalite Kontrol',      dept:'Operasyon', alt_dept:'Kalite',        fabrika:'Esbaş'},
   {id:'is-g-1', name:'CFM-Dekrom',          dept:'Üretim',    alt_dept:'Genel Üretim',  fabrika:'İspak'},
   {id:'is-g-2', name:'Otomatik Hat',        dept:'Üretim',    alt_dept:'Genel Üretim',  fabrika:'İspak'},
   {id:'is-g-3', name:'Prova',               dept:'Üretim',    alt_dept:'Genel Üretim',  fabrika:'İspak'},
@@ -66,7 +66,7 @@ const SEED_AREAS = [
   {id:'ka-c-3', name:'Kaynak Alanı',        dept:'Üretim',    alt_dept:'Çelik Üretim',  fabrika:'Karaman'},
   {id:'ka-c-4', name:'CNC',                 dept:'Üretim',    alt_dept:'Çelik Üretim',  fabrika:'Karaman'},
   {id:'ka-c-5', name:'Freze',               dept:'Üretim',    alt_dept:'Çelik Üretim',  fabrika:'Karaman'},
-  {id:'ka-c-6', name:'Kalite Kontrol',      dept:'Üretim',    alt_dept:'Çelik Üretim',  fabrika:'Karaman'},
+  {id:'ka-c-6', name:'Kalite Kontrol',      dept:'Operasyon', alt_dept:'Kalite',        fabrika:'Karaman'},
 ];
 
 async function init() {

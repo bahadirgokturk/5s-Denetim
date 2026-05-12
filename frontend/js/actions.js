@@ -10,7 +10,7 @@ function renderActions(){
   let actions = [...S.actions];
 
   if(user?.role==='departman'||user?.role==='takimlider'){
-    actions = actions.filter(a=>a.area_fabrika===user.fabrika||(a.fabrika&&a.fabrika===user.fabrika));
+    actions = actions.filter(a=>a.area_fabrika===user.fabrika);
   }
 
   // Filtre
@@ -75,8 +75,11 @@ function _updateActionMetrics(actions){
   set('act-done',   done);
 }
 
+let _actionSaving = false;
+
 // Add action form — called from modal-action-add
 async function addAction(){
+  if(_actionSaving) return;
   const title     = document.getElementById('na-title')?.value.trim();
   const area_id   = document.getElementById('na-area')?.value;
   const assigned  = document.getElementById('na-owner')?.value.trim();
@@ -97,15 +100,22 @@ async function addAction(){
     priority,
   };
 
-  const result = await apiFetch('/actions', { method:'POST', body:JSON.stringify(body) });
-  if(result){
-    S.actions.unshift(result);
-    closeModal('modal-action-add');
-    renderActions();
-    updateBadges();
-    showToast('Aksiyon eklendi.');
-    // Formu temizle
-    ['na-title','na-owner','na-due','na-desc'].forEach(id=>{ const el=document.getElementById(id); if(el) el.value=''; });
+  _actionSaving = true;
+  const saveBtn = document.getElementById('action-save-btn');
+  if(saveBtn){ saveBtn.disabled=true; saveBtn.textContent='Kaydediliyor...'; }
+  try {
+    const result = await apiFetch('/actions', { method:'POST', body:JSON.stringify(body) });
+    if(result){
+      S.actions.unshift(result);
+      closeModal('modal-action-add');
+      renderActions();
+      updateBadges();
+      showToast('Aksiyon eklendi.');
+      ['na-title','na-owner','na-due','na-desc'].forEach(id=>{ const el=document.getElementById(id); if(el) el.value=''; });
+    }
+  } finally {
+    _actionSaving = false;
+    if(saveBtn){ saveBtn.disabled=false; saveBtn.textContent='Kaydet'; }
   }
 }
 
@@ -148,6 +158,7 @@ function _fillActionAreaSelect(sel, selectedId=''){
 }
 
 async function saveEditAction(){
+  if(_actionSaving) return;
   if(!_editActionId){ await addAction(); return; }
   const ac = S.actions.find(a=>a.id===_editActionId);
   if(!ac) return;
@@ -169,15 +180,23 @@ async function saveEditAction(){
     priority,
   };
 
-  const result = await apiFetch(`/actions/${_editActionId}`, { method:'PUT', body:JSON.stringify(body) });
-  if(result){
-    S.actions = S.actions.map(a=>a.id===_editActionId?result:a);
-    _editActionId = null;
-    closeModal('modal-action-add');
-    renderActions();
-    showToast('Aksiyon güncellendi.');
-    const mt = document.querySelector('#modal-action-add .modal-title');
-    if(mt) mt.textContent = 'Yeni Aksiyon';
+  _actionSaving = true;
+  const saveBtn = document.getElementById('action-save-btn');
+  if(saveBtn){ saveBtn.disabled=true; saveBtn.textContent='Kaydediliyor...'; }
+  try {
+    const result = await apiFetch(`/actions/${_editActionId}`, { method:'PUT', body:JSON.stringify(body) });
+    if(result){
+      S.actions = S.actions.map(a=>a.id===_editActionId?result:a);
+      _editActionId = null;
+      closeModal('modal-action-add');
+      renderActions();
+      showToast('Aksiyon güncellendi.');
+      const mt = document.querySelector('#modal-action-add .modal-title');
+      if(mt) mt.textContent = 'Yeni Aksiyon';
+    }
+  } finally {
+    _actionSaving = false;
+    if(saveBtn){ saveBtn.disabled=false; saveBtn.textContent='Kaydet'; }
   }
 }
 

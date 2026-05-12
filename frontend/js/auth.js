@@ -37,7 +37,8 @@ async function doLogout(){
   try { await apiFetch('/auth/logout', { method:'POST' }); } catch(e){}
   CURRENT_USER = null;
   S.audits=[]; S.areas=[]; S.actions=[]; S.users=[];
-  document.getElementById('login-screen').style.display='flex';
+  const ls = document.getElementById('login-screen');
+  ls.style.display='flex'; ls.style.opacity='1';
   document.getElementById('main-app').style.display='none';
   document.getElementById('login-username').value='';
   document.getElementById('login-password').value='';
@@ -110,13 +111,21 @@ async function loadAllData(){
 async function checkSession(){
   try {
     const data = await apiFetch('/auth/me');
-    if(!data) return false;
+    if(!data){
+      // Oturum yok — login ekranını göster
+      const ls = document.getElementById('login-screen');
+      if(ls) ls.style.opacity = '1';
+      return false;
+    }
     CURRENT_USER = data.user;
     await loadAllData();
     applyRole(data.user);
     handleQRRedirectAfterLogin();
     return true;
   } catch(e){
+    // Hata durumunda da login ekranını göster
+    const ls = document.getElementById('login-screen');
+    if(ls) ls.style.opacity = '1';
     return false;
   }
 }

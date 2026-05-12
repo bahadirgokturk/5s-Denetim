@@ -162,8 +162,8 @@ function renderRadarChart(audits){
       // pillars_json array veya object olabilir
       const pjs = Array.isArray(a.pillars_json) ? a.pillars_json : (a.pillars_json ? Object.values(a.pillars_json) : []);
       const pData = pjs[pi];
-      return pData?.score || pData?.pct || 0;
-    }).filter(v=>v>0);
+      return pData?.pct ?? pData?.score ?? null;
+    }).filter(v=>v!==null);
     return vals.length?Math.round(vals.reduce((s,x)=>s+x,0)/vals.length):0;
   });
   _radarChart=new Chart(canvas,{
@@ -214,7 +214,7 @@ function renderDenetciDashboard(){
   // Atanan denetimler
   const atanan=(S.atamalar||[]).filter(a=>a.auditor_id===CURRENT_USER.id&&a.status==='Bekliyor');
   const badge=document.getElementById('d-atanan-badge'); if(badge){ badge.textContent=atanan.length+' bekliyor'; badge.style.display=atanan.length?'':'none'; }
-  const dAtanan=document.getElementById('d-atanan'); if(dAtanan) dAtanan.textContent=monthAudits.length;
+  const dAtanan=document.getElementById('d-atanan'); if(dAtanan) dAtanan.textContent=atanan.length;
 
   const atananList=document.getElementById('atanan-list'); if(!atananList) return;
   atananList.innerHTML=atanan.length===0
@@ -508,6 +508,10 @@ function renderFormSablonlari(){
 }
 
 function openFormModal(form, pillarlar){
+  // Modal başlığını her seferinde doğru şekilde ayarla
+  const baslikEl = document.getElementById('form-modal-baslik');
+  if(baslikEl) baslikEl.textContent = form ? 'Form Şablonunu Düzenle' : 'Yeni Form Şablonu';
+
   // Pillar editörünü doldur — mevcut form varsa onun soruları, yoksa PILLARS default
   const editor = document.getElementById('fm-pillar-editor');
   if(editor){
@@ -613,8 +617,6 @@ function formSablonuSil(id){
 function formDuzenle(id){
   const sablon = (S.formSablonlari||[]).find(f=>f.id===id);
   if(!sablon) return;
-  const baslikEl = document.getElementById('form-modal-baslik');
-  if(baslikEl) baslikEl.textContent = 'Form Şablonunu Düzenle';
   openFormModal(sablon, sablon.pillarlar||[]);
 }
 

@@ -124,21 +124,34 @@ async function checkSession(){
 // ── QR yönlendirme ────────────────────────────────────────────
 function handleQRRedirectAfterLogin(){
   const params = new URLSearchParams(window.location.search);
-  const qrArea = params.get('area');
-  if(!qrArea) return;
-  const area = S.areas.find(a=>a.id===qrArea);
-  if(!area) return;
-  window._aktifAtama = { atamaId:null, alanId:area.id, alanAd:area.name };
-  history.replaceState({}, '', window.location.pathname);
-  navigate('new-audit');
+  const qrArea = params.get('area');  // eski format: ?area=id
+  const qrForm = params.get('form');  // yeni format: ?form=uretim
+
+  if(qrArea){
+    // Eski alan bazlı QR — geriye uyumluluk
+    const area = S.areas.find(a=>a.id===qrArea);
+    if(!area) return;
+    window._aktifAtama = { atamaId:null, alanId:area.id, alanAd:area.name };
+    history.replaceState({}, '', window.location.pathname);
+    navigate('new-audit');
+  } else if(qrForm){
+    // Yeni 4-tip QR sistemi
+    const gecerliTipler = ['uretim','operasyon','ofis','kalite'];
+    if(!gecerliTipler.includes(qrForm)) return;
+    window._aktifFormTip = qrForm;
+    history.replaceState({}, '', window.location.pathname);
+    navigate('new-audit');
+  }
 }
 
 function checkQRAutostart(){
   const params = new URLSearchParams(window.location.search);
   const qrArea = params.get('area');
-  if(qrArea && !CURRENT_USER){
+  const qrForm = params.get('form');
+  if((qrArea || qrForm) && !CURRENT_USER){
     const el=document.getElementById('login-username');
     if(el) el.focus();
-    showToast('📷 QR ile giriş — lütfen oturum açın');
+    const tipAdi = qrForm ? (FORM_TIP_LABEL[qrForm]||qrForm) : 'Alan';
+    showToast('📷 ' + tipAdi + ' QR ile giriş — lütfen oturum açın');
   }
 }

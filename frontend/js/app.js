@@ -78,6 +78,22 @@ const PILLARS = [
   }
 ];
 
+// ── Form tipleri (QR sistemi) ────────────────────────────────
+const FORM_TIP_LABEL = { uretim:'Üretim', operasyon:'Operasyon', ofis:'Ofis', kalite:'Kalite Kontrol' };
+const FORM_TIP_RENK  = { uretim:'#c0392b', operasyon:'#16a085', ofis:'#8e44ad', kalite:'#2980b9' };
+const FORM_TIP_ICON  = { uretim:'🏭', operasyon:'⚙️', ofis:'🏢', kalite:'🔍' };
+
+// Bir alanın form tipini döndür
+function getAreaFormTip(area){
+  if(!area) return 'diger';
+  const d = area.dept||'';
+  if(d==='Kalite Kontrol' || area.alt_dept==='Kalite') return 'kalite';
+  if(d==='Üretim')    return 'uretim';
+  if(d==='Operasyon') return 'operasyon';
+  if(d==='Ofis')      return 'ofis';
+  return 'diger';
+}
+
 // Fabrika yapısı
 const FABRIKA_YAPI = {
   'İzmir': { renk:'#c0392b', deptler: { 'Üretim':{ renk:'#2980b9', altDeptler:{'Tobacco':['1. Grup','2. Grup','3. Grup','Prova'],'Flexible':['Dekrom','CFM','Bakır Kaplama/Finish','Lazer/Etching','Gravür','Krom Kaplama/Finish'],'Destek':['Polish/Finish','Otomatik Hat','Prova']} },'Operasyon':{ renk:'#16a085', altDeptler:{'Bakım':['Mekanik Bakım','Elektrik Bakım'],'Planlama':['Giriş Depo','Sevkiyat','Hammadde Depo'],'Kalite':['Kalite Kontrol','Kalite Ofisi']} },'Ofis':{ renk:'#8e44ad', altDeptler:{'Ofis':['OPEX','Üretim Ofisi','Planlama','İnsan Kaynakları','Domestic Satış','Tobacco Satış','Export Satış','Muhasebe']} } } },

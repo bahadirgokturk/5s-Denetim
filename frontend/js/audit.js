@@ -151,8 +151,42 @@ function initForm(){
     const auditorInput=document.getElementById('audit-auditor');
     if(auditorInput&&CURRENT_USER) auditorInput.value=CURRENT_USER.name;
 
-    // QR ile açıldıysa alan kartı göster, dropdown gizle
-    if(window._aktifAtama){
+    // QR ile açıldıysa —
+    if(window._aktifFormTip){
+      // Yeni 4-tip QR sistemi: form tipine göre alanları filtrele
+      const tip    = window._aktifFormTip;
+      const tipAdi = FORM_TIP_LABEL[tip] || tip;
+      const tipRenk= FORM_TIP_RENK[tip]  || 'var(--brand)';
+      window._aktifFormTip = null;
+
+      // Alan dropdown'ını bu tipe göre yeniden oluştur
+      const filtreliAlanlar = S.areas.filter(a=>getAreaFormTip(a)===tip);
+      sel.innerHTML = '<option value="">— ' + tipAdi + ' alanı seçin —</option>';
+      const fabMap2={};
+      filtreliAlanlar.forEach(a=>{
+        const f=a.fabrika||'Genel'; if(!fabMap2[f]) fabMap2[f]={};
+        const ad=a.alt_dept||a.dept||'Genel'; if(!fabMap2[f][ad]) fabMap2[f][ad]=[];
+        fabMap2[f][ad].push(a);
+      });
+      Object.entries(fabMap2).forEach(([fab,adMap])=>{
+        const og=document.createElement('optgroup'); og.label='🏭 '+fab; sel.appendChild(og);
+        Object.entries(adMap).forEach(([ad,areas])=>{
+          areas.forEach(a=>{ const opt=document.createElement('option'); opt.value=a.id; opt.textContent=ad+' › '+a.name; og.appendChild(opt); });
+        });
+      });
+
+      // Üst bilgi banner'ı göster
+      const editBanner2 = document.getElementById('audit-edit-banner');
+      if(editBanner2){
+        editBanner2.style.display='flex';
+        editBanner2.innerHTML=`<span style="color:${tipRenk};">📷 ${tipAdi} Formu — Lütfen denetim alanını seçin</span>`;
+      }
+
+      _hideAreaQRCard();
+      showToast('📷 ' + tipAdi + ' formu açıldı — alanı seçin');
+
+    } else if(window._aktifAtama){
+      // Eski alan bazlı QR (geriye uyumluluk)
       const {alanId, alanAd} = window._aktifAtama;
       const area = S.areas.find(a=>a.id===alanId);
       _showAreaQRCard(area || {id:alanId, name:alanAd});

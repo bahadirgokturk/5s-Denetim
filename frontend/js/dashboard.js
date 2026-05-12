@@ -476,8 +476,8 @@ function exportKarsilastirmaPDF(){ window.print(); }
 function _getVarsayilanSablon(){
   return {
     id:'default',
-    adi:'Standart 5S Formu',
-    aciklama:'Tüm fabrikalar için genel 5S denetim formu',
+    adi:'Üretim Formu',
+    aciklama:'Üretim alanları için 5S denetim formu',
     readonly:true,
     pillarlar: PILLARS.map(p=>({ id:p.id, name:p.name, sorular:p.questions.map(q=>q.text) }))
   };
@@ -500,6 +500,7 @@ function renderFormSablonlari(){
         </div>
         <div style="display:flex;gap:8px;">
           <button class="btn btn-outline btn-sm" onclick="formOnizle('${f.id}')">👁 Önizle</button>
+          ${!f.readonly?`<button class="btn btn-outline btn-sm" onclick="formDuzenle('${f.id}')">✏️ Düzenle</button>`:''}
           ${!f.readonly?`<button class="btn btn-sm" style="color:var(--red);border:1px solid var(--red);background:var(--red-light);" onclick="formSablonuSil('${f.id}')">🗑️ Sil</button>`:''}
         </div>
       </div>
@@ -507,23 +508,31 @@ function renderFormSablonlari(){
 }
 
 function openFormModal(form, pillarlar){
-  // Pillar editörünü PILLARS'tan doldur
+  // Pillar editörünü doldur — mevcut form varsa onun soruları, yoksa PILLARS default
   const editor = document.getElementById('fm-pillar-editor');
   if(editor){
-    editor.innerHTML = PILLARS.map((p,pi)=>`
-      <div class="card" style="margin-bottom:12px;">
-        <div style="font-size:13px;font-weight:600;margin-bottom:10px;color:${p.color||'var(--brand)'};">${p.name}</div>
-        ${p.questions.map((q,qi)=>`
-          <div style="display:flex;align-items:flex-start;gap:8px;margin-bottom:8px;padding:8px;background:var(--surface2);border-radius:var(--rs);">
-            <input type="checkbox" id="fm-q-${pi}-${qi}" checked style="margin-top:3px;flex-shrink:0;">
-            <label for="fm-q-${pi}-${qi}" style="font-size:12px;line-height:1.4;cursor:pointer;">${q.text}</label>
+    editor.innerHTML = PILLARS.map((p,pi)=>{
+      // Varolan form şablonundan sorular çek, yoksa PILLARS default
+      const mevcutSorular = (pillarlar||[]).find(x=>x.id===p.id)?.sorular || p.questions.map(q=>q.text);
+      return `
+        <div class="card" style="margin-bottom:12px;">
+          <div style="font-size:13px;font-weight:600;margin-bottom:10px;color:${p.color||'var(--brand)'};">${p.name}</div>
+          <div id="fm-q-list-${pi}">
+            ${mevcutSorular.map((soruMetni,qi)=>`
+              <div class="fm-soru-row" style="display:flex;align-items:flex-start;gap:8px;margin-bottom:8px;padding:8px;background:var(--surface2);border-radius:var(--rs);">
+                <input type="checkbox" class="fm-q-chk" checked style="margin-top:8px;flex-shrink:0;">
+                <textarea class="fm-q-txt" style="flex:1;font-size:12px;border:1px solid var(--border);border-radius:4px;padding:6px 8px;resize:vertical;min-height:44px;line-height:1.4;font-family:inherit;">${soruMetni}</textarea>
+                <button onclick="removeFmSoru(this)" title="Soruyu kaldır" style="flex-shrink:0;border:none;background:none;color:var(--text3);cursor:pointer;font-size:18px;padding:4px;line-height:1;">×</button>
+              </div>
+            `).join('')}
           </div>
-        `).join('')}
-      </div>
-    `).join('');
+          <button class="btn btn-outline btn-sm" style="width:100%;margin-top:6px;font-size:11px;" onclick="addFmSoru(${pi})">＋ Soru Ekle</button>
+        </div>
+      `;
+    }).join('');
   }
 
-  // Form alanlarını temizle
+  // Form alanlarını doldur
   document.getElementById('fm-adi').value = form?.adi||'';
   document.getElementById('fm-aciklama').value = form?.aciklama||'';
   document.getElementById('fm-edit-id').value = form?.id||'';
@@ -538,6 +547,28 @@ function openFormModal(form, pillarlar){
   openModal('modal-form-yeni');
 }
 
+// Yeni boş soru satırı ekle
+function addFmSoru(pi){
+  const list = document.getElementById('fm-q-list-'+pi);
+  if(!list) return;
+  const div = document.createElement('div');
+  div.className = 'fm-soru-row';
+  div.style.cssText = 'display:flex;align-items:flex-start;gap:8px;margin-bottom:8px;padding:8px;background:var(--surface2);border-radius:var(--rs);';
+  div.innerHTML = `
+    <input type="checkbox" class="fm-q-chk" checked style="margin-top:8px;flex-shrink:0;">
+    <textarea class="fm-q-txt" style="flex:1;font-size:12px;border:1px solid var(--border);border-radius:4px;padding:6px 8px;resize:vertical;min-height:44px;line-height:1.4;font-family:inherit;" placeholder="Soru metnini buraya yazın..."></textarea>
+    <button onclick="removeFmSoru(this)" title="Soruyu kaldır" style="flex-shrink:0;border:none;background:none;color:var(--text3);cursor:pointer;font-size:18px;padding:4px;line-height:1;">×</button>
+  `;
+  list.appendChild(div);
+  div.querySelector('textarea').focus();
+}
+
+// Soru satırını kaldır
+function removeFmSoru(btn){
+  const row = btn.closest('.fm-soru-row');
+  if(row) row.remove();
+}
+
 function formSablonuKaydet(){
   const adi = document.getElementById('fm-adi')?.value.trim();
   if(!adi){ showToast('Form adı zorunlu.'); return; }
@@ -545,14 +576,21 @@ function formSablonuKaydet(){
   const id = document.getElementById('fm-edit-id')?.value || 'form-'+Date.now();
   const aciklama = document.getElementById('fm-aciklama')?.value.trim();
 
-  // Seçili soruları topla
-  const pillarlar = PILLARS.map((p,pi)=>({
-    id: p.id,
-    name: p.name,
-    sorular: p.questions
-      .filter((_,qi)=>document.getElementById(`fm-q-${pi}-${qi}`)?.checked)
-      .map(q=>q.text)
-  })).filter(p=>p.sorular.length>0);
+  // Dinamik soru listelerinden seçili ve dolu soruları topla
+  const pillarlar = PILLARS.map((p,pi)=>{
+    const list = document.getElementById('fm-q-list-'+pi);
+    if(!list) return null;
+    const sorular = [];
+    list.querySelectorAll('.fm-soru-row').forEach(function(row){
+      const chk = row.querySelector('.fm-q-chk');
+      const txt = row.querySelector('.fm-q-txt');
+      const metin = txt ? txt.value.trim() : '';
+      if(chk && chk.checked && metin) sorular.push(metin);
+    });
+    return sorular.length>0 ? { id:p.id, name:p.name, sorular } : null;
+  }).filter(Boolean);
+
+  if(!pillarlar.length){ showToast('En az bir soru seçili olmalı.'); return; }
 
   if(!S.formSablonlari) S.formSablonlari=[];
   const existing = S.formSablonlari.findIndex(f=>f.id===id);
@@ -570,6 +608,14 @@ function formSablonuSil(id){
   S.formSablonlari=(S.formSablonlari||[]).filter(f=>f.id!==id);
   renderFormSablonlari();
   showToast('Form şablonu silindi.');
+}
+
+function formDuzenle(id){
+  const sablon = (S.formSablonlari||[]).find(f=>f.id===id);
+  if(!sablon) return;
+  const baslikEl = document.getElementById('form-modal-baslik');
+  if(baslikEl) baslikEl.textContent = 'Form Şablonunu Düzenle';
+  openFormModal(sablon, sablon.pillarlar||[]);
 }
 
 function formOnizle(id){

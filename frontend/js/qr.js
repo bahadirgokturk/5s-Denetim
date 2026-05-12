@@ -4,6 +4,17 @@
 
 let _qrInstances = {};
 
+// Bir alanın kategori tipini döndür (Üretim / Operasyon / Ofis / Kalite Kontrol)
+function _getAreaTip(area){
+  if(!area) return 'diger';
+  if(area.dept==='Kalite Kontrol') return 'Kalite Kontrol';
+  if(area.alt_dept==='Kalite' || (area.name&&area.name.toLowerCase().includes('kalite kontrol'))) return 'Kalite Kontrol';
+  if(area.dept==='Üretim') return 'Üretim';
+  if(area.dept==='Operasyon') return 'Operasyon';
+  if(area.dept==='Ofis') return 'Ofis';
+  return 'diger';
+}
+
 function renderQRPage(){
   const wrap = document.getElementById('qr-grid');
   if(!wrap) return;
@@ -11,33 +22,38 @@ function renderQRPage(){
   // Temizle
   _qrInstances = {};
 
-  // Backend zaten fabrika+dept filtreli veri gönderiyor
   const areas = [...S.areas];
 
-  // Fabrika filtresi
-  const fabrikaSet = [...new Set(areas.map(a=>a.fabrika).filter(Boolean))];
+  // Kategori tipi filtresi (Üretim / Operasyon / Ofis / Kalite Kontrol)
   const filterBar = document.getElementById('qr-filter-bar');
-  if(filterBar && !filterBar._built){
-    filterBar._built = true;
+  if(filterBar){
+    const tipler = ['Üretim','Operasyon','Ofis','Kalite Kontrol'];
     filterBar.innerHTML = `
-      <button class="filter-btn active" onclick="qrFabFilter('all',this)">Tümü</button>
-      ${fabrikaSet.map(f=>`<button class="filter-btn" onclick="qrFabFilter('${f}',this)">${f}</button>`).join('')}
+      <button class="filter-btn active" onclick="qrTypeFilter('all',this)">Tümü</button>
+      ${tipler.map(t=>`<button class="filter-btn" onclick="qrTypeFilter('${t}',this)">${t}</button>`).join('')}
     `;
   }
 
   const baseUrl = window.location.origin + window.location.pathname;
 
-  wrap.innerHTML = areas.map(area=>`
-    <div class="qr-card" id="qr-card-${area.id}">
+  const tipRenk = {'Üretim':'#c0392b','Operasyon':'#16a085','Ofis':'#8e44ad','Kalite Kontrol':'#2980b9'};
+
+  wrap.innerHTML = areas.map(area=>{
+    const tip = _getAreaTip(area);
+    const renk = tipRenk[tip] || '#888';
+    const tipEtiketi = tip !== 'diger' ? `<span style="font-size:10px;font-weight:600;color:#fff;background:${renk};border-radius:10px;padding:2px 8px;">${tip}</span>` : '';
+    return `
+    <div class="qr-card" id="qr-card-${area.id}" data-tip="${tip}">
       <div class="qr-area-name">${area.name}</div>
-      <div class="qr-area-sub">${area.fabrika||''} ${area.bolum?'· '+area.bolum:''}</div>
+      <div class="qr-area-sub">${area.fabrika||''} ${area.dept?'· '+area.dept:''}</div>
+      <div style="margin:4px 0 6px;">${tipEtiketi}</div>
       <div class="qr-code-wrap" id="qr-${area.id}"></div>
       <div class="qr-url">${baseUrl}?area=${area.id}</div>
       <div class="qr-card-actions">
         <button class="btn btn-sm btn-secondary" onclick="downloadQR('${area.id}','${area.name.replace(/'/g,'')}')">⬇️ İndir</button>
       </div>
     </div>
-  `).join('');
+  `}).join('');
 
   // QR'ları render et — kısa gecikmeyle DOM'un yerleşmesi için
   requestAnimationFrame(()=>{
@@ -58,15 +74,13 @@ function renderQRPage(){
   });
 }
 
-function qrFabFilter(fab, btn){
+function qrTypeFilter(tip, btn){
   document.querySelectorAll('#qr-filter-bar .filter-btn').forEach(b=>b.classList.remove('active'));
   if(btn) btn.classList.add('active');
 
   document.querySelectorAll('.qr-card').forEach(card=>{
-    if(fab==='all'){ card.style.display=''; return; }
-    const areaId = card.id.replace('qr-card-','');
-    const area = S.areas.find(a=>a.id===areaId);
-    card.style.display = (area?.fabrika===fab) ? '' : 'none';
+    if(tip==='all'){ card.style.display=''; return; }
+    card.style.display = (card.dataset.tip===tip) ? '' : 'none';
   });
 }
 
@@ -115,7 +129,7 @@ function printAllQR(){
       ${areas.map(a=>`
         <div class="card">
           <div class="name">${a.name}</div>
-          <div class="sub">${a.fabrika||''} ${a.bolum?'· '+a.bolum:''}</div>
+          <div class="sub">${a.fabrika||''} ${a.dept?'· '+a.dept:''}</div>
           <div id="qp-${a.id}"></div>
           <div class="url">${baseUrl}?area=${a.id}</div>
         </div>

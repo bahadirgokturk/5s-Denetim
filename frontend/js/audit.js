@@ -275,7 +275,7 @@ function _renderBolgeListesi(){
 
 function _renderFormSablonDropdown(){
   const sel=document.getElementById('admin-ata-form'); if(!sel) return;
-  sel.innerHTML='<option value="default">📋 Varsayılan 5S Formu</option>';
+  sel.innerHTML='<option value="default">📋 Üretim Formu</option>';
   (S.formSablonlari||[]).forEach(f=>{ sel.innerHTML+=`<option value="${f.id}">📝 ${f.adi}</option>`; });
 }
 

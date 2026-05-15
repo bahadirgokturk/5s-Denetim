@@ -27,10 +27,15 @@ function renderAdminDashboard(){
   const avgScore = filtered.length ? Math.round(filtered.reduce((s,a)=>s+(a.total_score||0),0)/filtered.length) : 0;
   const openActions = S.actions.filter(a=>a.status==='Açık').length;
 
+  // S-Seviye (0S–5S)
+  const avgSL = filtered.length
+    ? Math.round(filtered.reduce((s,a)=>s+calculateSLevel(a),0)/filtered.length*100)/100
+    : 0;
+
   const mTotal = document.getElementById('m-total');
-  if(mTotal) mTotal.textContent = avgScore || '—';
+  if(mTotal){ mTotal.textContent = filtered.length ? formatSLevel(avgSL) : '—'; mTotal.style.color=sLevelColor(avgSL); }
   const bar = document.getElementById('m-5s-bar');
-  if(bar) bar.style.width = (avgScore)+'%';
+  if(bar) bar.style.width = (avgSL/5*100)+'%';
   const mSub = document.getElementById('m-total-sub');
   const TIME_LABELS={'year':'Bu Yıl','lastmonth':'Geçen Ay','month':'Bu Ay'};
   if(mSub) mSub.textContent = `${filtered.length} denetim — ${TIME_LABELS[S.timeFilter]||S.timeFilter||''}`;
@@ -133,14 +138,14 @@ function renderLeaderboardPreview(){
   const areaMap={};
   // Aktif zaman filtresini uygula (getFilteredAudits admin filtrelerini dikkate alır)
   const filteredAudits = (typeof getFilteredAudits==='function') ? getFilteredAudits() : S.audits;
-  filteredAudits.forEach(a=>{ const k=a.area_name||a.area_id; if(!areaMap[k]) areaMap[k]=[]; areaMap[k].push(a.total_score||0); });
-  const sorted=Object.entries(areaMap).map(([k,v])=>({ name:k, avg:Math.round(v.reduce((s,x)=>s+x,0)/v.length) })).sort((a,b)=>b.avg-a.avg).slice(0,3);
+  filteredAudits.forEach(a=>{ const k=a.area_name||a.area_id; if(!areaMap[k]) areaMap[k]=[]; areaMap[k].push(calculateSLevel(a)); });
+  const sorted=Object.entries(areaMap).map(([k,v])=>({ name:k, sl:Math.round(v.reduce((s,x)=>s+x,0)/v.length*100)/100 })).sort((a,b)=>b.sl-a.sl).slice(0,3);
   const medals=['🥇','🥈','🥉'];
   el.innerHTML=sorted.map((a,i)=>`
     <div style="display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--border);">
       <div style="font-size:18px;">${medals[i]}</div>
       <div style="flex:1;"><div style="font-size:13px;font-weight:600;">${a.name}</div></div>
-      <div style="font-family:var(--mono);font-weight:700;color:${scoreColor(a.avg)};">${a.avg}</div>
+      <div style="font-family:var(--mono);font-weight:700;color:${sLevelColor(a.sl)};">${formatSLevel(a.sl)}</div>
     </div>`).join('')||'<div style="color:var(--text3);font-size:12px;padding:8px 0;">Henüz denetim yok</div>';
 }
 
@@ -184,14 +189,25 @@ function renderBolumBarChart(audits){
   audits.forEach(a=>{
     const aObj=S.areas.find(ar=>ar.id===a.area_id);
     const k=aObj?.name || (a.area_name||a.area_id||'').split('›').pop().trim();
-    if(!areaMap[k]) areaMap[k]=[]; areaMap[k].push(a.total_score||0);
+    if(!areaMap[k]) areaMap[k]=[]; areaMap[k].push(calculateSLevel(a));
   });
   const labels=Object.keys(areaMap).slice(0,8);
-  const data=labels.map(k=>Math.round(areaMap[k].reduce((s,x)=>s+x,0)/areaMap[k].length));
+  const data=labels.map(k=>Math.round(areaMap[k].reduce((s,x)=>s+x,0)/areaMap[k].length*100)/100);
   _bolumBarChart=new Chart(canvas,{
     type:'bar',
-    data:{ labels, datasets:[{ data, backgroundColor:data.map(s=>s>=85?'rgba(46,125,79,.7)':s>=70?'rgba(13,34,64,.7)':s>=50?'rgba(212,130,10,.7)':'rgba(230,51,18,.7)'), borderRadius:4 }] },
-    options:{ responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}}, scales:{ y:{beginAtZero:true,max:100,ticks:{font:{size:9}}}, x:{ticks:{font:{size:9}}} } }
+    data:{ labels, datasets:[{ data, backgroundColor:data.map(sl=>sl>=4?'rgba(46,125,79,.7)':sl>=3?'rgba(13,34,64,.7)':sl>=2?'rgba(212,130,10,.7)':'rgba(230,51,18,.7)'), borderRadius:4 }] },
+    options:{
+      responsive:true, maintainAspectRatio:false,
+      plugins:{
+        legend:{display:false},
+        datalabels:{ display:false }, // Chart.js 3'te datalabels eklenti gerektiriyor, bu yüzden tooltip'e bırakıyoruz
+        tooltip:{ callbacks:{ label:ctx=>formatSLevel(ctx.parsed.y) } }
+      },
+      scales:{
+        y:{ beginAtZero:true, max:5, ticks:{ font:{size:9}, callback:v=>v+'S' } },
+        x:{ ticks:{ font:{size:9} } }
+      }
+    }
   });
 }
 
@@ -390,14 +406,21 @@ function renderLeaderboard(){
   if(filter==='month'){ const d=new Date(); d.setDate(1); auds=auds.filter(a=>new Date(a.date)>=d); }
   if(filter==='week'){ const d=new Date(); d.setDate(d.getDate()-7); auds=auds.filter(a=>new Date(a.date)>=d); }
   const map={};
-  auds.forEach(a=>{ const k=a.area_name||a.area_id; if(!map[k]) map[k]=[]; map[k].push(a.total_score||0); });
-  const sorted=Object.entries(map).map(([k,v])=>({ name:k, avg:Math.round(v.reduce((s,x)=>s+x,0)/v.length), cnt:v.length })).sort((a,b)=>b.avg-a.avg);
+  auds.forEach(a=>{ const k=a.area_name||a.area_id; if(!map[k]) map[k]=[]; map[k].push(calculateSLevel(a)); });
+  const sorted=Object.entries(map).map(([k,v])=>({
+    name:k,
+    sl:Math.round(v.reduce((s,x)=>s+x,0)/v.length*100)/100,
+    cnt:v.length
+  })).sort((a,b)=>b.sl-a.sl);
   const medals=['🥇','🥈','🥉'];
   el.innerHTML=sorted.map((a,i)=>`
     <div style="display:flex;align-items:center;gap:10px;padding:11px 0;border-bottom:1px solid var(--border);">
       <div style="font-size:20px;min-width:30px;text-align:center;">${medals[i]||'#'+(i+1)}</div>
       <div style="flex:1;"><div style="font-size:13px;font-weight:600;">${a.name}</div><div style="font-size:11px;color:var(--text3);">${a.cnt} denetim</div></div>
-      <div class="sbar-wrap" style="width:120px;"><div class="sbar"><div class="sbar-fill ${a.avg>=85?'hi':a.avg>=50?'md':'lo'}" style="width:${a.avg}%;"></div></div><span class="sbar-val">${a.avg}</span></div>
+      <div class="sbar-wrap" style="width:130px;">
+        <div class="sbar"><div class="sbar-fill ${a.sl>=4?'hi':a.sl>=2?'md':'lo'}" style="width:${a.sl/5*100}%;"></div></div>
+        <span class="sbar-val" style="color:${sLevelColor(a.sl)};font-weight:700;">${formatSLevel(a.sl)}</span>
+      </div>
     </div>`).join('')||'<div style="text-align:center;padding:20px;color:var(--text3);">Denetim verisi yok</div>';
 }
 

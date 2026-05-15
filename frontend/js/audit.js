@@ -663,8 +663,14 @@ function renderHistory(){
         <td>${a.area_name||'—'}</td>
         <td>${a.auditor_name||'—'}</td>
         <td>${a.shift||'—'}</td>
-        <td><div class="sbar-wrap"><div class="sbar"><div class="sbar-fill ${(a.total_score||0)>=85?'hi':(a.total_score||0)>=50?'md':'lo'}" style="width:${a.total_score||0}%;"></div></div><span class="sbar-val">${a.total_score||0}</span></div></td>
-        <td><span class="badge ${scoreBadge(a.total_score||0)}">${scoreLabel(a.total_score||0)}</span></td>
+        <td>
+          <div style="display:flex;align-items:center;gap:6px;">
+            <span style="font-family:var(--mono);font-weight:700;font-size:14px;color:${sLevelColor(calculateSLevel(a))};">${formatSLevel(calculateSLevel(a))}</span>
+            <span style="font-size:10px;color:var(--text3);">(${a.total_score||0})</span>
+          </div>
+          <div class="sbar" style="margin-top:3px;"><div class="sbar-fill ${calculateSLevel(a)>=4?'hi':calculateSLevel(a)>=2?'md':'lo'}" style="width:${calculateSLevel(a)/5*100}%;"></div></div>
+        </td>
+        <td><span class="badge ${sLevelBadge(calculateSLevel(a))}">${sLevelLabel(calculateSLevel(a))}</span></td>
         <td style="display:flex;gap:4px;flex-wrap:wrap;">
           <button class="btn btn-outline btn-sm" onclick="showDetail('${a.id}')">Detay</button>
           ${CURRENT_USER?.role==='admin'||CURRENT_USER?.role==='denetci'
@@ -733,12 +739,15 @@ function showDetail(id){
     ? PILLARS.reduce((m,p,i)=>{ m[p.id]=pjsRaw[i]||{}; return m; }, {})
     : pjsRaw;
   const pjs = pjsByKey;
+  const sl = calculateSLevel(a);
   const pillarHtml=PILLARS.map(p=>{
     const d=pjs[p.id]||{}; const pct=d.pct||0;
+    const passed=pillarPassed(pct);
     return `<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
       <div style="width:24px;height:24px;border-radius:5px;background:${p.color};display:flex;align-items:center;justify-content:center;color:#fff;font-size:9px;font-weight:700;">${p.id}</div>
       <div style="flex:1;font-size:12px;">${p.name}</div>
-      <div class="sbar-wrap" style="width:120px;"><div class="sbar"><div class="sbar-fill ${pct>=85?'hi':pct>=50?'md':'lo'}" style="width:${pct}%;"></div></div><span class="sbar-val">${pct}%</span></div>
+      <span style="font-size:10px;font-weight:700;${passed?'color:#16a34a;':'color:#ef4444;'};flex-shrink:0;">${passed?'✓':'✗'}</span>
+      <div class="sbar-wrap" style="width:100px;"><div class="sbar"><div class="sbar-fill ${pct>=90?'hi':pct>=50?'md':'lo'}" style="width:${pct}%;"></div></div><span class="sbar-val">${pct}%</span></div>
     </div>`;
   }).join('');
 
@@ -764,9 +773,17 @@ function showDetail(id){
     </div>` : '';
 
   document.getElementById('det-content').innerHTML=`
-    <div style="text-align:center;margin-bottom:14px;">
-      <div style="font-size:52px;font-weight:700;font-family:var(--mono);color:${scoreColor(a.total_score||0)};">${a.total_score||0}</div>
-      <div class="badge ${scoreBadge(a.total_score||0)}" style="font-size:13px;margin-top:4px;">${scoreLabel(a.total_score||0)}</div>
+    <div style="text-align:center;margin-bottom:16px;padding:16px;background:linear-gradient(135deg,#f8fafc,#eef2f7);border-radius:var(--r);border:1px solid var(--border);">
+      <div style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;">5S SEVİYESİ</div>
+      <div style="font-size:56px;font-weight:800;font-family:var(--mono);color:${sLevelColor(sl)};line-height:1;">${formatSLevel(sl)}</div>
+      <div style="font-size:11px;color:var(--text3);margin:2px 0 8px;">Toplam Puan: ${a.total_score||0}/100</div>
+      <span class="badge ${sLevelBadge(sl)}" style="font-size:13px;margin-top:4px;">${sLevelLabel(sl)}</span>
+      <div style="margin-top:12px;">
+        <div style="height:8px;background:#e2e8f0;border-radius:4px;overflow:hidden;">
+          <div style="height:100%;width:${sl/5*100}%;background:${sLevelColor(sl)};border-radius:4px;transition:width .4s;"></div>
+        </div>
+        <div style="display:flex;justify-content:space-between;font-size:9px;color:var(--text3);margin-top:3px;"><span>0S</span><span>1S</span><span>2S</span><span>3S</span><span>4S</span><span>5S</span></div>
+      </div>
     </div>
     ${pillarHtml}
     ${photoHtml}`;
@@ -954,20 +971,31 @@ function buildOfflineReport(audit){
   });
   var perfectQCount=answeredCount-weakQCount;
 
+  // ── S-Level hesapla
+  var sLevel=calculateSLevel(audit);
+
   // ── BÖLÜM 1: Başlık kartı (HTML string olarak)
   var headerHtml='<div style="text-align:center;padding:24px 20px 20px;background:linear-gradient(135deg,#f8fafc,#eef2f7);border-radius:var(--r);margin-bottom:20px;border:1px solid var(--border);">'
-    +'<div style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;">TOPLAM 5S PUANI</div>'
-    +'<div style="font-size:72px;font-weight:800;font-family:var(--mono);color:'+scoreColor(score)+';line-height:1;">'+score+'</div>'
-    +'<div style="font-size:11px;color:var(--text3);margin:2px 0 10px;">/ 100 puan</div>'
-    +'<span class="badge '+scoreBadge(score)+'" style="font-size:14px;padding:6px 18px;">'+scoreLabel(score)+'</span>'
+    +'<div style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;">5S SEVİYESİ</div>'
+    +'<div style="font-size:72px;font-weight:800;font-family:var(--mono);color:'+sLevelColor(sLevel)+';line-height:1;">'+formatSLevel(sLevel)+'</div>'
+    +'<div style="font-size:11px;color:var(--text3);margin:2px 0 10px;">Toplam Puan: '+score+' / 100</div>'
+    +'<span class="badge '+sLevelBadge(sLevel)+'" style="font-size:14px;padding:6px 18px;">'+sLevelLabel(sLevel)+'</span>'
     +'<div style="display:inline-flex;align-items:center;gap:5px;margin-left:8px;padding:4px 10px;background:'+riskLevel.bg+';border:1px solid '+riskLevel.border+';border-radius:20px;font-size:11px;font-weight:600;color:'+riskLevel.color+';">'+riskLevel.icon+' '+riskLevel.label+'</div>'
-    // Pillar grid
-    +'<div style="display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-top:18px;">'
-    +pillarData.map(function(p){
-      return '<div style="text-align:center;padding:8px 4px;background:#fff;border:1px solid var(--border);border-radius:var(--r);">'
+    // 0S-5S bar
+    +'<div style="margin:14px 0 8px;">'
+    +'<div style="height:10px;background:#e2e8f0;border-radius:5px;overflow:hidden;">'
+    +'<div style="height:100%;width:'+Math.round(sLevel/5*100)+'%;background:'+sLevelColor(sLevel)+';border-radius:5px;"></div>'
+    +'</div>'
+    +'<div style="display:flex;justify-content:space-between;font-size:9px;color:var(--text3);margin-top:3px;"><span>0S</span><span>1S</span><span>2S</span><span>3S</span><span>4S</span><span>5S</span></div>'
+    +'</div>'
+    // Pillar grid — S durumu göster
+    +'<div style="display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-top:12px;">'
+    +pillarData.map(function(p,i){
+      var passed=pillarPassed(p.pct);
+      return '<div style="text-align:center;padding:8px 4px;background:#fff;border:2px solid '+(passed?'#86efac':'#fecaca')+';border-radius:var(--r);">'
         +'<div style="width:20px;height:20px;border-radius:5px;background:'+p.color+';margin:0 auto 5px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:8px;font-weight:700;">'+p.id+'</div>'
-        +'<div style="font-size:14px;font-weight:700;color:'+scoreColor(p.pct)+';">'+p.pct+'%</div>'
-        +'<div style="font-size:9px;color:var(--text3);margin-top:2px;">'+p.name.split('(')[0].split(' ')[0]+'</div>'
+        +'<div style="font-size:14px;font-weight:700;color:'+sLevelColor(p.pct/100*5)+';">'+p.pct+'%</div>'
+        +'<div style="font-size:10px;font-weight:700;margin-top:2px;'+(passed?'color:#16a34a;':'color:#ef4444;')+'">'+(passed?'✓ Geçti':'✗ Takıldı')+'</div>'
         +'</div>';
     }).join('')
     +'</div>'
@@ -1392,9 +1420,10 @@ function denetlenenRaporu(auditId){
 
     <!-- Başlık -->
     <div style="padding:16px;background:linear-gradient(135deg,#f8fafc,#f1f5f9);border-radius:var(--r);margin-bottom:16px;border:1px solid var(--border);text-align:center;">
-      <div style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;">GENEL PUAN</div>
-      <div style="font-size:56px;font-weight:800;font-family:var(--mono);color:${scoreColor(score)};line-height:1;">${score}</div>
-      <span class="badge ${scoreBadge(score)}" style="font-size:13px;padding:5px 16px;margin-top:6px;display:inline-block;">${scoreLabel(score)}</span>
+      <div style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;">5S SEVİYESİ</div>
+      <div style="font-size:56px;font-weight:800;font-family:var(--mono);color:${sLevelColor(calculateSLevel(audit))};line-height:1;">${formatSLevel(calculateSLevel(audit))}</div>
+      <div style="font-size:11px;color:var(--text3);margin:2px 0 6px;">Toplam Puan: ${score}/100</div>
+      <span class="badge ${sLevelBadge(calculateSLevel(audit))}" style="font-size:13px;padding:5px 16px;margin-top:6px;display:inline-block;">${sLevelLabel(calculateSLevel(audit))}</span>
     </div>
 
     <!-- Bilgi kartı -->

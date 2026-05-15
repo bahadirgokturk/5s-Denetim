@@ -92,7 +92,7 @@ function printSingleQR(tip, adi){
       .url{font-size:9px;color:#999;margin-top:8px;word-break:break-all;max-width:220px;text-align:center;}
       @media print{body{margin:0;}}
     </style>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"><\/script>
+    <script src="/js/qrcode.min.js"><\/script>
   </head><body>
     <div class="icon">${t.icon}</div>
     <div class="adi">${t.adi}</div>
@@ -128,7 +128,7 @@ function printAllQR(){
       .url{font-size:9px;color:#999;margin-top:6px;word-break:break-all;}
       @media print{body{padding:0;}.card{border:1px solid #ccc;}}
     </style>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"><\/script>
+    <script src="/js/qrcode.min.js"><\/script>
   </head><body>
     <h2 style="text-align:center;margin-bottom:20px;">5S Denetim — Form QR Kodları</h2>
     <div class="grid">

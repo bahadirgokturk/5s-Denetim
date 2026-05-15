@@ -279,3 +279,13 @@ body.role-takimlider .hide-takimlider{display:none!important;}
 .api-loading{opacity:.6;pointer-events:none;}
 .spinner{display:inline-block;width:14px;height:14px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .6s linear infinite;margin-right:5px;}
 @keyframes spin{to{transform:rotate(360deg)}}
+
+/* ── QR Kart Stilleri ─────────────────────────────────────── */
+.qr-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:20px 16px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:6px;box-shadow:0 1px 4px rgba(0,0,0,.06);transition:box-shadow .15s;}
+.qr-card:hover{box-shadow:0 4px 16px rgba(0,0,0,.10);}
+.qr-area-name{font-weight:700;font-size:15px;}
+.qr-area-sub{font-size:11px;color:var(--text3);margin-bottom:4px;}
+.qr-code-wrap{padding:8px;background:#fff;border-radius:8px;border:1px solid var(--border);display:inline-block;}
+.qr-code-wrap img,.qr-code-wrap canvas{display:block;border-radius:4px;}
+.qr-url{font-size:9px;color:var(--text3);word-break:break-all;max-width:200px;margin-top:4px;}
+.qr-card-actions{margin-top:8px;}

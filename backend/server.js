@@ -30,7 +30,10 @@ const allowedOrigins = [
 ];
 app.use(cors({
   origin: (origin, cb) => {
-    if (!origin || allowedOrigins.includes(origin)) return cb(null, true);
+    // Aynı ağdaki herhangi bir IP'ye izin ver (10.x, 192.168.x, 172.x)
+    if (!origin) return cb(null, true);
+    if (allowedOrigins.includes(origin)) return cb(null, true);
+    if (/^http:\/\/(10\.|192\.168\.|172\.(1[6-9]|2[0-9]|3[01])\.)/.test(origin)) return cb(null, true);
     cb(new Error('CORS: izin verilmeyen kaynak — ' + origin));
   },
   credentials: true,
@@ -52,6 +55,27 @@ app.use('/api/users',     usersRoutes);
 app.use('/api/actions',   actionsRoutes);
 app.use('/api/dashboard', dashRoutes);
 app.use('/api/forms',     formsRoutes);
+
+// ── Sunucu ağ IP bilgisi (QR kodlar için, auth gerektirmez) ──────
+app.get('/api/server-info', (req, res) => {
+  const os = require('os');
+  const nets = os.networkInterfaces();
+  let networkIp = null;
+  for (const iface of Object.values(nets)) {
+    for (const net of iface) {
+      if (net.family === 'IPv4' && !net.internal) {
+        networkIp = net.address;
+        break;
+      }
+    }
+    if (networkIp) break;
+  }
+  res.json({
+    networkUrl: networkIp ? `http://${networkIp}:${PORT}` : null,
+    ip: networkIp,
+    port: PORT,
+  });
+});
 
 // ── SPA fallback ─────────────────────────────────────────────────
 app.get('*', (req, res) => {

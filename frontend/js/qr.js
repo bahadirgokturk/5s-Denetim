@@ -3,6 +3,7 @@
 // ============================================================
 
 let _qrInstances = {};
+let _qrBaseUrl   = '';  // Kullanıcı tarafından ayarlanabilir
 
 // 4 form tipine ait sabit QR listesi
 const QR_TIPLER = [
@@ -12,17 +13,46 @@ const QR_TIPLER = [
   { tip:'kalite',    adi:'Kalite Kontrol', icon:'🔍', renk:'#2980b9', desc:'Kalite kontrol ve muayene alanları' },
 ];
 
-function renderQRPage(){
+async function renderQRPage(){
   const wrap = document.getElementById('qr-grid');
   if(!wrap) return;
-
   _qrInstances = {};
 
-  // Filtre çubuğunu gizle / temizle (artık 4 sabit kart var)
+  // Filtre çubuğu → ağ URL ayar paneli
   const filterBar = document.getElementById('qr-filter-bar');
-  if(filterBar) filterBar.innerHTML = '';
 
-  const baseUrl = window.location.origin + window.location.pathname;
+  // Sunucu ağ IP'sini al
+  let networkUrl = localStorage.getItem('qr_base_url') || '';
+  if(!networkUrl){
+    try {
+      const info = await fetch('/api/server-info').then(r=>r.json());
+      networkUrl = info.networkUrl || window.location.origin;
+    } catch(e){
+      networkUrl = window.location.origin;
+    }
+    localStorage.setItem('qr_base_url', networkUrl);
+  }
+  _qrBaseUrl = networkUrl;
+
+  if(filterBar){
+    filterBar.innerHTML = `
+      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:12px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);margin-bottom:4px;">
+        <span style="font-size:12px;font-weight:600;color:var(--text2);flex-shrink:0;">📡 Ağ Adresi:</span>
+        <input id="qr-base-input" type="text" value="${_qrBaseUrl}"
+          style="flex:1;min-width:220px;font-size:12px;padding:6px 10px;border:1px solid var(--border);border-radius:6px;font-family:var(--mono);"
+          placeholder="http://192.168.x.x:3001">
+        <button class="btn btn-primary btn-sm" onclick="applyQRBaseUrl()" style="flex-shrink:0;">🔄 Yenile</button>
+        <span style="font-size:10px;color:var(--text3);">Telefonun aynı Wi-Fi'a bağlı olması gerekir</span>
+      </div>`;
+  }
+
+  _renderQRCards();
+}
+
+function _renderQRCards(){
+  const wrap = document.getElementById('qr-grid');
+  if(!wrap) return;
+  const baseUrl = _qrBaseUrl || window.location.origin;
 
   wrap.innerHTML = QR_TIPLER.map(t=>`
     <div class="qr-card" id="qr-card-${t.tip}" style="border-top:4px solid ${t.renk};">
@@ -52,9 +82,20 @@ function renderQRPage(){
           colorLight: '#ffffff',
           correctLevel: QRCode.CorrectLevel.M
         });
-      } catch(e){ el.textContent = 'QR hatası'; }
+      } catch(e){ el.textContent = 'QR hatası: '+e.message; }
     });
   });
+}
+
+function applyQRBaseUrl(){
+  const input = document.getElementById('qr-base-input');
+  if(!input) return;
+  let val = input.value.trim().replace(/\/$/, ''); // trailing slash kaldır
+  if(!val){ showToast('Geçerli bir URL girin.'); return; }
+  _qrBaseUrl = val;
+  localStorage.setItem('qr_base_url', val);
+  _renderQRCards();
+  showToast('✅ QR adres güncellendi: ' + val);
 }
 
 function downloadQR(tip, adi){
@@ -78,7 +119,7 @@ function downloadQR(tip, adi){
 }
 
 function printSingleQR(tip, adi){
-  const baseUrl = window.location.origin + window.location.pathname;
+  const baseUrl = (_qrBaseUrl || window.location.origin);
   const t = QR_TIPLER.find(x=>x.tip===tip);
   if(!t) return;
   const win = window.open('', '_blank', 'width=400,height=500');
@@ -114,7 +155,7 @@ function printSingleQR(tip, adi){
 }
 
 function printAllQR(){
-  const baseUrl = window.location.origin + window.location.pathname;
+  const baseUrl = (_qrBaseUrl || window.location.origin);
   const win = window.open('', '_blank', 'width=900,height=700');
   win.document.write(`<!DOCTYPE html><html><head>
     <title>5S QR Kodları</title>
